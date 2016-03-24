@@ -805,9 +805,9 @@ static unsigned int imx_get_mctrl(struct uart_port *port)
 	if (!(usr1 & USR2_DCDIN))
 		tmp |= TIOCM_CAR;
 
-	/* in DCE mode RIIN is always 0 */
-	if (readl(sport->port.membase + USR2) & USR2_RIIN)
-		tmp |= TIOCM_RI;
+	if (sport->dte_mode)
+		if (!(readl(sport->port.membase + USR2) & USR2_RIIN))
+			tmp |= TIOCM_RI;
 
 	return tmp;
 }
