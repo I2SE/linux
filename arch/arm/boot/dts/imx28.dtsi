@@ -709,6 +709,16 @@
 					fsl,pull-up = <MXS_PULL_DISABLE>;
 				};
 
+				pwm1_pins_a: pwm1@0 {
+					reg = <0>;
+					fsl,pinmux-ids = <
+						MX28_PAD_PWM1__PWM_1
+					>;
+					fsl,drive-strength = <MXS_DRIVE_4mA>;
+					fsl,voltage = <MXS_VOLTAGE_HIGH>;
+					fsl,pull-up = <MXS_PULL_DISABLE>;
+				};
+
 				pwm2_pins_a: pwm2@0 {
 					reg = <0>;
 					fsl,pinmux-ids = <
