@@ -3352,7 +3352,12 @@ static void fec_reset_phy(struct platform_device *pdev)
 		msec = 1;
 
 	gpio_set_value(fep->phy_reset, 0);
-	msleep(msec);
+
+	if (msec > 20)
+		msleep(msec);
+	else
+		usleep_range(msec * 1000, msec * 1000 + 1000);
+
 	gpio_set_value(fep->phy_reset, 1);
 }
 #else /* CONFIG_OF */
