@@ -172,6 +172,9 @@ static void __init update_fec_mac_prop(enum mac_oui oui)
 
 	for (i = 0; i < 2; i++) {
 		np = of_find_compatible_node(from, NULL, "fsl,imx28-fec");
+		if (!of_device_is_available(np) && (i == 1))
+			np = of_find_compatible_node(NULL, NULL, "qca,qca7000");
+
 		if (!np)
 			return;
 
