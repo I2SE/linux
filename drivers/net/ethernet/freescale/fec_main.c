@@ -69,6 +69,7 @@
 
 static void set_multicast_list(struct net_device *ndev);
 static void fec_enet_itr_coal_init(struct net_device *ndev);
+static void fec_reset_phy(struct platform_device *pdev);
 
 #define DRIVER_NAME	"fec"
 
@@ -1888,6 +1889,8 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
 			ret = clk_prepare_enable(fep->clk_enet_out);
 			if (ret)
 				goto failed_clk_enet_out;
+
+			fec_reset_phy(fep->pdev);
 		}
 		if (fep->clk_ptp) {
 			mutex_lock(&fep->ptp_clk_mutex);
@@ -3335,9 +3338,10 @@ static int fec_enet_init(struct net_device *ndev)
 #ifdef CONFIG_OF
 static void fec_reset_phy(struct platform_device *pdev)
 {
-	int err, phy_reset;
-	int msec = 1;
 	struct device_node *np = pdev->dev.of_node;
+	struct net_device *ndev = platform_get_drvdata(pdev);
+	struct fec_enet_private *fep = netdev_priv(ndev);
+	int err, msec = 1;
 
 	if (!np)
 		return;
@@ -3347,18 +3351,9 @@ static void fec_reset_phy(struct platform_device *pdev)
 	if (!err && msec > 1000)
 		msec = 1;
 
-	phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
-	if (!gpio_is_valid(phy_reset))
-		return;
-
-	err = devm_gpio_request_one(&pdev->dev, phy_reset,
-				    GPIOF_OUT_INIT_LOW, "phy-reset");
-	if (err) {
-		dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", err);
-		return;
-	}
+	gpio_set_value(fep->phy_reset, 0);
 	msleep(msec);
-	gpio_set_value(phy_reset, 1);
+	gpio_set_value(fep->phy_reset, 1);
 }
 #else /* CONFIG_OF */
 static void fec_reset_phy(struct platform_device *pdev)
@@ -3575,6 +3570,17 @@ fec_probe(struct platform_device *pdev)
 		}
 	} else {
 		fep->reg_phy = NULL;
+	}
+
+	if (np) {
+		fep->phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
+
+		if (gpio_is_valid(fep->phy_reset)) {
+			ret = devm_gpio_request_one(&pdev->dev, fep->phy_reset,
+						    GPIOF_OUT_INIT_LOW, "phy-reset");
+			if (ret)
+				dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", ret);
+		}
 	}
 
 	fec_reset_phy(pdev);
