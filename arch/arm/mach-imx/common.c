@@ -54,6 +54,9 @@ void __init imx6_enet_mac_init(const char *enet_compat, const char *ocotp_compat
 
 	for (i = 0; i < 2; i++) {
 		enet_np = of_find_compatible_node(from, NULL, enet_compat);
+		if (!of_device_is_available(enet_np) && (i == 1))
+			enet_np = of_find_compatible_node(NULL, NULL, "qca,qca7000");
+
 		if (!enet_np)
 			return;
 
