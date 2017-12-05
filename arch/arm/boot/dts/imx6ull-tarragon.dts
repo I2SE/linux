@@ -60,6 +60,13 @@
 		};
 	};
 
+	emmc_pwrseq: emmc-pwrseq {
+		compatible = "mmc-pwrseq-emmc";
+		pinctrl-0 = <&pinctrl_emmc_rst>;
+		pinctrl-names = "default";
+		reset-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
+	};
+
 	regulators {
 		compatible = "simple-bus";
 		#address-cells = <1>;
@@ -81,7 +88,7 @@
 			regulator-max-microvolt = <3300000>;
 		};
         
-        reg_dcdc_3v3: regulator@2 {
+		reg_dcdc_3v3: regulator@2 {
 			compatible = "regulator-fixed";
 			reg = <0>;
 			regulator-name = "dcdc-3v3";
@@ -125,9 +132,12 @@
 
 &fec1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_enet1>;
+	pinctrl-0 = <&pinctrl_enet1>, <&pinctrl_enet1_phy_rst>;
+	phy-supply = <&reg_dcdc_3v3>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy0>;
+	phy-reset-gpios = <&gpio5 6 GPIO_ACTIVE_LOW>;
+	phy-reset-duration = <25>;
 	status = "okay";
 
 	mdio {
@@ -138,7 +148,7 @@
 			compatible = "ethernet-phy-ieee802.3-c22";
 			reg = <0>;
 			pinctrl-names = "default";
-			pinctrl-0 = <&pinctrl_mac0_phy_int>;
+			pinctrl-0 = <&pinctrl_enet1_phy_int>;
 			interrupt-parent = <&gpio2>;
 			interrupts = <7 IRQ_TYPE_EDGE_FALLING>;
 			max-speed = <100>;
@@ -336,7 +346,7 @@
 			>;
 	        };
             
-		pinctrl_mac0_phy_int: pinctrl_mac0_phy_intGrp {
+		pinctrl_enet1_phy_int: pinctrl_enet1_phy_intGrp {
 			fsl,pins = <
 				MX6UL_PAD_ENET1_RX_ER__ENET1_RX_ER	0x1b0b0
 			>;
@@ -502,10 +512,15 @@
 			>;
 		};
 
+		pinctrl_emmc_rst: pinctrl_emmc_rstGrp {
+			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO09__USDHC2_RESET_B	0x17059
+			>;
+		};
+
 		pinctrl_emmc_gpios: pinctrl_emmc_gpiosGrp {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT	0x17059 /* to PF3001 */
-				MX6UL_PAD_GPIO1_IO09__USDHC2_RESET_B	0x17059
 			>;
 		};
         
@@ -532,11 +547,11 @@
 		        MX6ULL_PAD_SNVS_TAMPER8__GPIO5_IO08        0x000110A0
 		    >;
 		};
-		pinctrl_enet1Snvs: pinctrl_enet1SnvsGrp {
+		pinctrl_enet1_phy_rst: pinctrl_enet1_phy_rstGrp {
 		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06        0x000110A0 /* PHY RST */
+		        MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06        0x000110A0
 		    >;
-		};
+	        };
 		pinctrl_qca7500Snvs: pinctrl_qca7500SnvsGrp {
 		    fsl,pins = <
 		        MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07        0x000110A0
