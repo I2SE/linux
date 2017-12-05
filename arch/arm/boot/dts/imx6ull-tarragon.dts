@@ -43,7 +43,7 @@
 
 		led1 {			/* Boot process */
 			label = "evse:green:led1";
-			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio4 6 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "timer";
 		};
 
@@ -55,7 +55,7 @@
 
 		led3 {			/* Heartbeat */
 			label = "evse:red:led3";
-			gpios = <&gpio4 6 GPIO_ACTIVE_HIGH>;
+			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
 			linux,default-trigger = "heartbeat";
 		};
 	};
@@ -67,41 +67,25 @@
 		reset-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
 	};
 
-	regulators {
-		compatible = "simple-bus";
-		#address-cells = <1>;
-		#size-cells = <0>;
+	reg_can_5v: regulator-can-5v {
+		compatible = "regulator-fixed";
+		regulator-name = "can-5v";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+	};
 
-		reg_can_5v: regulator@0 {
-			compatible = "regulator-fixed";
-			reg = <0>;
-			regulator-name = "can-5v";
-			regulator-min-microvolt = <5000000>;
-			regulator-max-microvolt = <5000000>;
-		};
-
-		reg_vdda_adc_3p3: regulator@1 {
-			compatible = "regulator-fixed";
-			reg = <0>;
-			regulator-name = "vdda-adc-3p3";
-			regulator-min-microvolt = <3300000>;
-			regulator-max-microvolt = <3300000>;
-		};
-        
-		reg_dcdc_3v3: regulator@2 {
-			compatible = "regulator-fixed";
-			reg = <0>;
-			regulator-name = "dcdc-3v3";
-			regulator-min-microvolt = <3300000>;
-			regulator-max-microvolt = <3300000>;
-		};
+	reg_dcdc_3v3: regulator-dcdc-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "dcdc-3v3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
 	};
 };
 
 &adc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_adc_motor &pinctrl_adc_cp &pinctrl_adc_pp>;
-	vref-supply = <&reg_vdda_adc_3p3>;
+	vref-supply = <&vgen1_reg>;
 	num-channels = <6>;
 	status = "okay";
 };
@@ -115,12 +99,14 @@
 	 */
 	operating-points = <
 		/* kHz	uV */
+		792000	1225000
 		528000	1175000
 		396000	1175000
 		198000	1175000
 	>;
 	fsl,soc-operating-points = <
 		/* KHz	uV */
+		792000	1175000
 		528000	1175000
 		396000	1175000
 		198000	1175000
@@ -194,7 +180,7 @@
 		compatible = "fsl,pfuze3001";
 		reg = <0x08>;
 
-		regulators { // FIXME
+		regulators {
 			sw1_reg: sw1 {
 				regulator-min-microvolt = <700000>;
 				regulator-max-microvolt = <3300000>;
@@ -397,11 +383,8 @@
 
 		pinctrl_rs485_1: pinctrl_rs485_1Grp {
 			fsl,pins = <
-				// MX6UL_PAD_UART1_RTS_B__UART1_RTS_B	0x1b0b1
 				MX6UL_PAD_UART1_RTS_B__UART1_DCE_RTS	0x1b0b1
-				// MX6UL_PAD_UART1_RX_DATA__UART1_RX	0x1b0b1
 				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX	0x1b0b1
-				// MX6UL_PAD_UART1_TX_DATA__UART1_TX	0x1b0b1
 				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX	0x1b0b1
 			>;
        		};
@@ -445,8 +428,8 @@
 
 		pinctrl_uart4: pinctrl_uart4Grp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_CLK__UART4_DCE_TX		0x000010B0
-				MX6UL_PAD_LCD_ENABLE__UART4_DCE_RX	0x000010B0
+				MX6UL_PAD_LCD_CLK__UART4_DCE_TX		0x1b0b1
+				MX6UL_PAD_LCD_ENABLE__UART4_DCE_RX	0x1b0b1
 			>;
 		};
 
@@ -607,6 +590,18 @@
 	};
 };
 
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_rs485_1>;
+	status = "okay";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_rs485_2>;
+	status = "okay";
+};
+
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
@@ -634,7 +629,8 @@
 	mmc-ddr-1_8v;
 	mmc-hs200-1_8v;
 	non-removable;
-	vmmc-supply = <&reg_dcdc_3v3>;
-	vqmmc-supply = <&vgen1_reg>;
+	vmmc-supply = <&sw2_reg>;
+	vqmmc-supply = <&vgen6_reg>;
+	mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
