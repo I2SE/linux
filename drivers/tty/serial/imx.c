@@ -401,6 +401,7 @@ static void imx_stop_tx(struct uart_port *port)
 			temp &= ~UCR2_CTS;
 		else
 			temp |= UCR2_CTS;
+		temp |= UCR2_RXEN;
 		writel(temp, port->membase + UCR2);
 
 		temp = readl(port->membase + UCR4);
@@ -602,6 +603,10 @@ static void imx_start_tx(struct uart_port *port)
 			temp &= ~UCR2_CTS;
 		else
 			temp |= UCR2_CTS;
+
+		if (!(port->rs485.flags & SER_RS485_RX_DURING_TX))
+			temp &= ~UCR2_RXEN;
+
 		writel(temp, port->membase + UCR2);
 
 		temp = readl(port->membase + UCR4);
@@ -1580,19 +1585,17 @@ static int imx_rs485_config(struct uart_port *port,
 			    struct serial_rs485 *rs485conf)
 {
 	struct imx_port *sport = (struct imx_port *)port;
+	unsigned long temp;
 
 	/* unimplemented */
 	rs485conf->delay_rts_before_send = 0;
 	rs485conf->delay_rts_after_send = 0;
-	rs485conf->flags |= SER_RS485_RX_DURING_TX;
 
 	/* RTS is required to control the transmitter */
 	if (!sport->have_rtscts)
 		rs485conf->flags &= ~SER_RS485_ENABLED;
 
 	if (rs485conf->flags & SER_RS485_ENABLED) {
-		unsigned long temp;
-
 		/* disable transmitter */
 		temp = readl(sport->port.membase + UCR2);
 		temp &= ~UCR2_CTSC;
@@ -1600,6 +1603,14 @@ static int imx_rs485_config(struct uart_port *port,
 			temp &= ~UCR2_CTS;
 		else
 			temp |= UCR2_CTS;
+		writel(temp, sport->port.membase + UCR2);
+	}
+
+	/* Make sure Rx is enabled in case Tx is active with Rx disabled */
+	if (!(rs485conf->flags & SER_RS485_ENABLED) ||
+	    rs485conf->flags & SER_RS485_RX_DURING_TX) {
+		temp = readl(sport->port.membase + UCR2);
+		temp |= UCR2_RXEN;
 		writel(temp, sport->port.membase + UCR2);
 	}
 
