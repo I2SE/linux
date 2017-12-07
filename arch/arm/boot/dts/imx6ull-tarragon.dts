@@ -593,12 +593,14 @@
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_1>;
+	linux,rs485-enabled-at-boot-time
 	status = "okay";
 };
 
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_2>;
+	linux,rs485-enabled-at-boot-time;
 	status = "okay";
 };
 
