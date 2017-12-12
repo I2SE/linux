@@ -260,7 +260,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_debug_leds>;
+	pinctrl-0 = <&pinctrl_hog_pins>;
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
 			fsl,pins = <
