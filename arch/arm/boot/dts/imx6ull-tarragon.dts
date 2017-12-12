@@ -580,6 +580,8 @@
 	#size-cells = <0>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_qca7000_spi &pinctrl_qca7000_int>;
+	fsl,spi-num-chipselects = <1>;
+	// cs-gpios = <&gpio1 29 0>;
 	status = "okay";
 
 	qca7000: qca7000@0 {
