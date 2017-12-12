@@ -171,6 +171,9 @@ static void imx6ull_lower_cpu_rate(bool enter)
 {
 	int ret;
 
+	if (IS_ERR(arm_reg) || IS_ERR(soc_reg))
+		return;
+
 	if (enter) {
 		org_arm_rate = clk_get_rate(arm_clk);
 		origin_arm_volt = regulator_get_voltage(arm_reg);
