@@ -72,6 +72,8 @@
 		regulator-name = "can-5v";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
+		regulator-boot-on;
+		regulator-always-on;
 	};
 
 	reg_dcdc_3v3: regulator-dcdc-3v3 {
@@ -79,6 +81,8 @@
 		regulator-name = "dcdc-3v3";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		regulator-always-on;
 	};
 };
 
