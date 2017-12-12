@@ -3351,6 +3351,9 @@ static void fec_reset_phy(struct platform_device *pdev)
 	if (!err && msec > 1000)
 		msec = 1;
 
+	if (!gpio_is_valid(fep->phy_reset))
+		return;
+
 	gpio_set_value(fep->phy_reset, 0);
 
 	if (msec > 20)
