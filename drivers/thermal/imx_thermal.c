@@ -931,8 +931,11 @@ static int imx_thermal_resume(struct device *dev)
 {
 	struct imx_thermal_data *data = dev_get_drvdata(dev);
 	struct regmap *map = data->tempmon;
+	int ret;
 
-	clk_prepare_enable(data->thermal_clk);
+	ret = clk_prepare_enable(data->thermal_clk);
+	if (ret)
+		return ret;
 	/* Enabled thermal sensor after resume */
 	regmap_write(map, data->socdata->sensor_ctrl + REG_CLR,
 		     data->socdata->power_down_mask);
