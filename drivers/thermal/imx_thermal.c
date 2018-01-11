@@ -721,6 +721,11 @@ static int imx_thermal_probe(struct platform_device *pdev)
 	int measure_freq;
 	int ret, revision;
 
+	if (!of_id) {
+		dev_err(&pdev->dev, "no device match found\n");
+		return -ENODEV;
+	}
+
 	data = devm_kzalloc(&pdev->dev, sizeof(*data), GFP_KERNEL);
 	if (!data)
 		return -ENOMEM;
