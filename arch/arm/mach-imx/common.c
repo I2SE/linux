@@ -41,6 +41,7 @@ void restore_ttbr1(unsigned long ttbr1)
 
 #define OCOTP_MAC_OFF	(cpu_is_imx7d() ? 0x640 : 0x620)
 #define OCOTP_MACn(n)	(OCOTP_MAC_OFF + (n) * 0x10)
+#define OCOTP_GP3n_(n)	(0x880 + (n) * 0x10)
 void __init imx6_enet_mac_init(const char *enet_compat, const char *ocotp_compat)
 {
 	struct device_node *ocotp_np, *enet_np, *from = NULL;
@@ -55,7 +56,7 @@ void __init imx6_enet_mac_init(const char *enet_compat, const char *ocotp_compat
 	for (i = 0; i < 2; i++) {
 		enet_np = of_find_compatible_node(from, NULL, enet_compat);
 		if (!enet_np)
-			return;
+			break;
 
 		from = enet_np;
 
@@ -120,6 +121,64 @@ put_ocotp_node:
 put_enet_node:
 	of_node_put(enet_np);
 	}
+
+	enet_np = of_find_compatible_node(NULL, NULL, "qca,qca7000");
+	if (!enet_np)
+		return;
+
+	if (of_get_mac_address(enet_np))
+		goto put_enet_node_qca;
+
+	ocotp_np = of_find_compatible_node(NULL, NULL, ocotp_compat);
+	if (!ocotp_np) {
+		pr_warn("failed to find ocotp node\n");
+		goto put_enet_node_qca;
+	}
+
+	base = of_iomap(ocotp_np, 0);
+	if (!base) {
+		pr_warn("failed to map ocotp\n");
+		goto put_ocotp_node_qca;
+	}
+
+	macaddr_high = readl_relaxed(base + OCOTP_GP3n_(0));
+	if (!macaddr_high)
+		goto put_ocotp_node_qca;
+
+	newmac = kzalloc(sizeof(*newmac) + 6, GFP_KERNEL);
+	if (!newmac)
+		goto put_ocotp_node_qca;
+
+	newmac->value = newmac + 1;
+	newmac->length = 6;
+	newmac->name = kstrdup("local-mac-address", GFP_KERNEL);
+	if (!newmac->name) {
+		kfree(newmac);
+		goto put_ocotp_node_qca;
+	}
+
+	macaddr = newmac->value;
+	macaddr[5] = macaddr_high & 0xff;
+	macaddr[4] = (macaddr_high >> 8) & 0xff;
+	macaddr[3] = (macaddr_high >> 16) & 0xff;
+
+	switch ((macaddr_high >> 24) & 0xff) {
+	case 0: /* I2SE OUI */
+		macaddr[2] = 0x87;
+		macaddr[1] = 0x01;
+		macaddr[0] = 0x00;
+		break;
+	default:
+		pr_warn("unknown OUI for QCA7000\n");
+		break;
+	}
+
+	of_update_property(enet_np, newmac);
+
+put_ocotp_node_qca:
+	of_node_put(ocotp_np);
+put_enet_node_qca:
+	of_node_put(enet_np);
 }
 
 #ifndef CONFIG_HAVE_IMX_GPC
