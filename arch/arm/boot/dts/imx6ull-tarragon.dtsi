@@ -488,7 +488,7 @@
 	// cs-gpios = <&gpio1 29 0>;
 	status = "okay";
 
-	qca7000: qca7000@0 {
+	qca7000: ethernet@0 {
 		reg = <0x0>;
 		compatible = "qca,qca7000";
 		interrupt-parent = <&gpio2>;
