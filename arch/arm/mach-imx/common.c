@@ -163,7 +163,7 @@ put_enet_node:
 	macaddr[3] = (macaddr_high >> 16) & 0xff;
 
 	switch ((macaddr_high >> 24) & 0xff) {
-	case 0: /* I2SE OUI */
+	case 0x87: /* I2SE OUI */
 		macaddr[2] = 0x87;
 		macaddr[1] = 0x01;
 		macaddr[0] = 0x00;
