@@ -404,7 +404,7 @@ static int imx6_otp_write_bits(int addr, u32 data, u32 magic)
 	__raw_writel(data, otp_base + HW_OCOTP_DATA);
 	otp_wait_busy(0);
 
-	mdelay(2); /* Write Postamble */
+	udelay(2); /* Write Postamble */
 
 	return 0;
 }
@@ -451,7 +451,7 @@ static int imx7_otp_write_bits(int addr, u32 data, u32 magic)
 	__raw_writel(data, otp_base + HW_OCOTP_DATA);
 	otp_wait_busy(0);
 
-	mdelay(2); /* Write Postamble */
+	udelay(2); /* Write Postamble */
 
 	return 0;
 
