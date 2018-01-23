@@ -530,11 +530,12 @@
 	pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
 	pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
 	bus-width = <8>;
-	mmc-ddr-1_8v;
-	mmc-hs200-1_8v;
+	// mmc-ddr-1_8v;
+	// mmc-hs200-1_8v;
+	broken-cd;
 	non-removable;
-	vmmc-supply = <&sw2_reg>;
-	vqmmc-supply = <&vgen6_reg>;
-	mmc-pwrseq = <&emmc_pwrseq>;
+	// vmmc-supply = <&sw2_reg>;
+	// vqmmc-supply = <&vgen6_reg>;
+	// mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
