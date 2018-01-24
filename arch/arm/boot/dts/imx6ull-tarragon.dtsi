@@ -334,6 +334,12 @@
 			>;
 		};
 
+		pinctrl_qca7000_rst: pinctrl_qca7000_rstGrp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA12__GPIO3_IO17	0x10b0
+			>;
+		};
+
 		pinctrl_uart4: pinctrl_uart4Grp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_CLK__UART4_DCE_TX		0x1b0b1
