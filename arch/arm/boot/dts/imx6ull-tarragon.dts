@@ -114,3 +114,19 @@
 	vbus-supply = <&reg_usb_vbus>;
 	status = "okay";
 };
+
+&usdhc2 {
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
+	pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
+	pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
+	bus-width = <8>;
+	// mmc-ddr-1_8v;
+	// mmc-hs200-1_8v;
+	broken-cd;
+	non-removable;
+	// vmmc-supply = <&sw2_reg>;
+	// vqmmc-supply = <&vgen6_reg>;
+	// mmc-pwrseq = <&emmc_pwrseq>;
+	status = "okay";
+};

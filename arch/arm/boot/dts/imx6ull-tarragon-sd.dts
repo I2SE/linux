@@ -1,6 +1,30 @@
 #include "imx6ull-tarragon.dtsi"
 
 / {
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_debug_leds>;
+
+		led1 {			/* Boot process */
+			label = "evse:green:led1";
+			gpios = <&gpio4 6 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "timer";
+		};
+
+		led2 {			/* CAN traffic */
+			label = "evse:yellow:led2";
+			gpios = <&gpio4 7 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "can0-rx";
+		};
+
+		led3 {			/* Heartbeat */
+			label = "evse:red:led3";
+			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
+
 	sw1_reg: sw1 {
 		compatible = "regulator-fixed";
 		regulator-min-microvolt = <700000>;
@@ -33,22 +57,15 @@
 };
 
 &usbotg1 {
-	dr_mode = "peripheral";
+	dr_mode = "otg";
+	vbus-supply = <&reg_usb_vbus>;
 	status = "okay";
 };
 
 &usdhc2 {
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
-	pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
-	pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
-	bus-width = <8>;
-	// mmc-ddr-1_8v;
-	// mmc-hs200-1_8v;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sd>;
+	bus-width = <4>;
 	broken-cd;
-	non-removable;
-	// vmmc-supply = <&sw2_reg>;
-	// vqmmc-supply = <&vgen6_reg>;
-	// mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
