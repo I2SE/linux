@@ -1,17 +1,20 @@
 #include "imx6ull-tarragon.dtsi"
 
 / {
+	/* Values take from PF3001 datasheet
+	 * OTP configuration: A7
+	 */
 	sw1_reg: sw1 {
 		compatible = "regulator-fixed";
-		regulator-min-microvolt = <700000>;
-		regulator-max-microvolt = <3300000>;
+		regulator-min-microvolt = <1400000>;
+		regulator-max-microvolt = <1400000>;
 		regulator-boot-on;
 		regulator-always-on;
 	};
 
 	sw2_reg: sw2 {
 		compatible = "regulator-fixed";
-		regulator-min-microvolt = <1500000>;
+		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		regulator-boot-on;
 		regulator-always-on;
@@ -19,7 +22,7 @@
 
 	vgen1_reg: vldo1 {
 		compatible = "regulator-fixed";
-		regulator-min-microvolt = <1800000>;
+		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		regulator-always-on;
 	};
@@ -27,7 +30,7 @@
 	vgen6_reg: vldo4 {
 		compatible = "regulator-fixed";
 		regulator-min-microvolt = <1800000>;
-		regulator-max-microvolt = <3300000>;
+		regulator-max-microvolt = <1800000>;
 		regulator-always-on;
 	};
 };
