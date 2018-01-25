@@ -942,17 +942,21 @@ static int mmc_select_bus_width(struct mmc_card *card)
 		 * compare ext_csd previously read in 1 bit mode
 		 * against ext_csd at new bus width
 		 */
-		if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST))
+		if (!(host->caps & MMC_CAP_BUS_WIDTH_TEST)) {
 			err = mmc_compare_ext_csds(card, bus_width);
-		else
+			if (err)
+				pr_warn("%s: mmc_compare_ext_csds(%d) failed: %d\n",
+					mmc_hostname(host), ext_csd_bits[idx], err);
+		} else {
 			err = mmc_bus_test(card, bus_width);
+			if (err)
+				pr_warn("%s: mmc_bus_test(%d) failed: %d\n",
+					mmc_hostname(host), ext_csd_bits[idx], err);
+		}
 
 		if (!err) {
 			err = bus_width;
 			break;
-		} else {
-			pr_warn("%s: switch to bus width %d failed\n",
-				mmc_hostname(host), ext_csd_bits[idx]);
 		}
 	}
 
