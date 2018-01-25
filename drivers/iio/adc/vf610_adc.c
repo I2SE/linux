@@ -136,7 +136,7 @@ struct vf610_adc {
 	void __iomem *regs;
 	struct clk *clk;
 
-	u32 vref_uv;
+	int vref_uv;
 	u32 value;
 	struct regulator *vref;
 	struct vf610_adc_feature adc_feature;
@@ -643,14 +643,26 @@ static int vf610_adc_probe(struct platform_device *pdev)
 	}
 
 	info->vref = devm_regulator_get(&pdev->dev, "vref");
-	if (IS_ERR(info->vref))
-		return PTR_ERR(info->vref);
+	if (IS_ERR(info->vref)) {
+		ret = PTR_ERR(info->vref);
+		if (ret != -EPROBE_DEFER)
+			dev_err(&pdev->dev,
+				"failed to get vref regulator: %d\n", ret);
+		return ret;
+	}
 
 	ret = regulator_enable(info->vref);
-	if (ret)
+	if (ret) {
+		dev_err(&pdev->dev,
+			"failed to enable vref regulator: %d\n", ret);
 		return ret;
+	}
 
 	info->vref_uv = regulator_get_voltage(info->vref);
+	if (info->vref_uv < 0) {
+		dev_err(&pdev->dev, "invalid vref voltage\n");
+		goto error_adc_clk_enable;
+	}
 
 	platform_set_drvdata(pdev, indio_dev);
 
