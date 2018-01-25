@@ -66,8 +66,8 @@
 		regulator-name = "usb-vbus";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
-		// gpio = <&gpio1 4 GPIO_ACTIVE_HIGH>;
-		// enable-active-high;
+		gpio = <&gpio1 4 GPIO_ACTIVE_HIGH>;
+		enable-active-high;
 	};
 };
 
@@ -224,10 +224,15 @@
 			>;
 		};
 
+		pinctrl_usb_pwr: pinctrl_usb_pwrGrp {
+			fsl,pins = <
+				// MX6UL_PAD_GPIO1_IO04__USB_OTG1_PWR	0x10b0
+				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x10b0
+			>;
+		};
 
 		pinctrl_usb: pinctrl_usbGrp {
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO04__USB_OTG1_PWR	0x10b0
 				MX6UL_PAD_SD1_CLK__USB_OTG1_OC		0x10b0
 				MX6UL_PAD_SD1_DATA0__ANATOP_OTG1_ID	0x10b0
 			>;
