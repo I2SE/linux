@@ -75,7 +75,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_adc_motor &pinctrl_adc_cp &pinctrl_adc_pp>;
 	vref-supply = <&vgen1_reg>;
-	num-channels = <6>;
+	num-channels = <5>;
 	status = "okay";
 };
 

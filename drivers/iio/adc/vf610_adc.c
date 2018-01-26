@@ -168,8 +168,8 @@ static const struct iio_chan_spec vf610_adc_iio_channels[] = {
 	VF610_ADC_CHAN(1, IIO_VOLTAGE),
 	VF610_ADC_CHAN(2, IIO_VOLTAGE),
 	VF610_ADC_CHAN(3, IIO_VOLTAGE),
-	VF610_ADC_CHAN(4, IIO_VOLTAGE),
 	VF610_ADC_CHAN(5, IIO_VOLTAGE),
+	VF610_ADC_CHAN(4, IIO_VOLTAGE),
 	VF610_ADC_CHAN(6, IIO_VOLTAGE),
 	VF610_ADC_CHAN(7, IIO_VOLTAGE),
 	VF610_ADC_CHAN(8, IIO_VOLTAGE),
@@ -607,6 +607,8 @@ static int vf610_adc_probe(struct platform_device *pdev)
 	int ret;
 	u32 channels;
 
+	pr_info("VF610 ADC probe start\n");
+
 	indio_dev = devm_iio_device_alloc(&pdev->dev, sizeof(struct vf610_adc));
 	if (!indio_dev) {
 		dev_err(&pdev->dev, "Failed allocating iio device\n");
@@ -696,6 +698,8 @@ static int vf610_adc_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Couldn't register the device.\n");
 		goto error_iio_device_register;
 	}
+
+	pr_info("VF610 ADC probe success\n");
 
 	return 0;
 
