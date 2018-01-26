@@ -370,6 +370,12 @@
 			>;
 		};
 
+		pinctrl_cp_inv_cfg: pinctrl_cp_inv_cfgGrp {
+			fsl,pins = <
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13	0x10b0
+			>;
+		};
+
 	        pinctrl_rotary_switch: pinctrl_rotary_switchGrp {
 			fsl,pins = <
 				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0x110b0
