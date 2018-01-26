@@ -107,7 +107,7 @@
 
 &fec1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_enet1>, <&pinctrl_enet1_phy_rst>;
+	pinctrl-0 = <&pinctrl_enet1>, <&pinctrl_enet1_phy_rst>, <&pinctrl_enet_mdio>;
 	phy-supply = <&reg_dcdc_3v3>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy0>;
@@ -129,10 +129,10 @@
 			max-speed = <100>;
 		};
 
-		ethphy1: ethernet-phy@24 {
-			compatible = "ethernet-phy-ieee802.3-c22";
-			reg = <24>;
-		};
+		//ethphy1: ethernet-phy@24 {
+		//	compatible = "ethernet-phy-ieee802.3-c22";
+		//	reg = <24>;
+		//};
 	};
 };
 
@@ -140,8 +140,8 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_qca7500>;
 	phy-mode = "rmii";
-	phy-handle = <&ethphy1>;
-	status = "okay";
+	//phy-handle = <&ethphy1>;
+	//status = "okay";
 };
 
 &flexcan2 {
@@ -241,40 +241,39 @@
 		pinctrl_enet_mdio: pinctrl_enet_mdioGrp {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO06__ENET1_MDIO	0x10b0
-				MX6UL_PAD_GPIO1_IO07__ENET1_MDC	0x10b0
+				MX6UL_PAD_GPIO1_IO07__ENET1_MDC		0x10b0
 			>;
-	        };
-            
+		};
+
 		pinctrl_enet1_phy_int: pinctrl_enet1_phy_intGrp {
 			fsl,pins = <
-				MX6UL_PAD_ENET1_RX_ER__ENET1_RX_ER	0x1b0b0
+				MX6UL_PAD_ENET1_RX_ER__GPIO2_IO07	0x10b0
 			>;
-	        };
+		};
 
 		pinctrl_enet1: pinctrl_enet1Grp {
 			fsl,pins = <
 				MX6UL_PAD_ENET1_RX_DATA0__ENET1_RDATA00	0x1b0b0
 				MX6UL_PAD_ENET1_RX_DATA1__ENET1_RDATA01	0x1b0b0
 				MX6UL_PAD_ENET1_RX_EN__ENET1_RX_EN	0x1b0b0
-				MX6UL_PAD_ENET1_TX_CLK__ENET1_TX_CLK	0x4001b031
+				MX6UL_PAD_ENET1_TX_CLK__ENET1_REF_CLK1	0x4001b031
 				MX6UL_PAD_ENET1_TX_DATA0__ENET1_TDATA00	0x1b0b0
 				MX6UL_PAD_ENET1_TX_DATA1__ENET1_TDATA01	0x1b0b0
 				MX6UL_PAD_ENET1_TX_EN__ENET1_TX_EN	0x1b0b0
 			>;
-        	};
+		};
 
-        	pinctrl_qca7500: pinctrl_qca7500Grp {
+		pinctrl_qca7500: pinctrl_qca7500Grp {
 			fsl,pins = <
 				MX6UL_PAD_ENET2_RX_DATA0__ENET2_RDATA00	0x1b0b0
 				MX6UL_PAD_ENET2_RX_DATA1__ENET2_RDATA01	0x1b0b0
 				MX6UL_PAD_ENET2_RX_EN__ENET2_RX_EN	0x1b0b0
-				MX6UL_PAD_ENET2_TX_CLK__ENET2_TX_CLK	0x4001b031
+				MX6UL_PAD_ENET2_TX_CLK__ENET2_REF_CLK2	0x4001b031
 				MX6UL_PAD_ENET2_TX_DATA0__ENET2_TDATA00	0x1b0b0
 				MX6UL_PAD_ENET2_TX_DATA1__ENET2_TDATA01	0x1b0b0
 				MX6UL_PAD_ENET2_TX_EN__ENET2_TX_EN	0x1b0b0
-				MX6UL_PAD_UART3_CTS_B__ENET2_RX_CLK	0x1b0b0
 			>;
-        	};
+		};
 
 		pinctrl_pwm_dig_in_ref: pinctrl_pwm_dig_in_refGrp {
 			fsl,pins = <
