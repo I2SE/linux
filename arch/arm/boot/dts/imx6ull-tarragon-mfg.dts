@@ -6,6 +6,7 @@
 	 */
 	sw1_reg: sw1 {
 		compatible = "regulator-fixed";
+		regulator-name = "SW1";
 		regulator-min-microvolt = <1400000>;
 		regulator-max-microvolt = <1400000>;
 		regulator-boot-on;
@@ -14,6 +15,7 @@
 
 	sw2_reg: sw2 {
 		compatible = "regulator-fixed";
+		regulator-name = "SW2";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		regulator-boot-on;
@@ -22,6 +24,7 @@
 
 	vgen1_reg: vldo1 {
 		compatible = "regulator-fixed";
+		regulator-name = "VLDO1";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		regulator-always-on;
@@ -29,6 +32,7 @@
 
 	vgen6_reg: vldo4 {
 		compatible = "regulator-fixed";
+		regulator-name = "VLDO4";
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
 		regulator-always-on;
