@@ -108,9 +108,9 @@
 		};
 	};
 
-	ds2484@20 {
+	ds2484@18 {
 		compatible = "dallas,ds2482"; // FIXME
-		reg = <0x20>;
+		reg = <0x18>;
 	};
 
 	atecc508@60 {
