@@ -257,7 +257,7 @@ config HW_RANDOM_MXC_RNGA
 
 config HW_RANDOM_IMX_RNG
         tristate "Freescale RNG B/C Random Number Generator"
-        depends on HW_RANDOM && ARCH_MXC && HAVE_IMX_RNG
+        depends on HW_RANDOM && ARCH_MXC
         ---help---
           This driver provides kernel-side support for the Random Number
           Generator (RNGBB and RNGC) hardware found on Freescale i.MX processors.
