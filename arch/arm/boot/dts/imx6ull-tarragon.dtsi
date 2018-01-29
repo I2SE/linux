@@ -351,14 +351,6 @@
 			>;
 		};
 
-		pinctrl_bt_cfg: pinctrl_bt_cfgGrp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_HSYNC__ECSPI2_SS1	0x000010B0
-				MX6UL_PAD_LCD_RESET__ECSPI2_SS3	0x000010B0
-				MX6UL_PAD_LCD_VSYNC__ECSPI2_SS2	0x000010B0
-			>;
-        	};
-
 		pinctrl_push_pull_cfg: pinctrl_push_pull_cfgGrp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_DATA15__GPIO3_IO20	0x10b0
