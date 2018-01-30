@@ -325,16 +325,16 @@
 
 		pinctrl_qca7000_spi: pinctrl_qca7000_spiGrp {
 			fsl,pins = <
-				MX6UL_PAD_UART4_RX_DATA__ECSPI2_SS0	0x70a1
-				MX6UL_PAD_UART4_TX_DATA__ECSPI2_SCLK	0x70a1
-				MX6UL_PAD_UART5_RX_DATA__ECSPI2_MISO	0x70a1
-				MX6UL_PAD_UART5_TX_DATA__ECSPI2_MOSI	0x70a1
+				MX6UL_PAD_UART4_RX_DATA__GPIO1_IO29	0x10b0
+				MX6UL_PAD_UART4_TX_DATA__ECSPI2_SCLK	0x10b0
+				MX6UL_PAD_UART5_RX_DATA__ECSPI2_MISO	0x10b0
+				MX6UL_PAD_UART5_TX_DATA__ECSPI2_MOSI	0x10b0
 			>;
-        	};
+		};
 
 		pinctrl_qca7000_int: pinctrl_qca7000_intGrp {
 			fsl,pins = <
-				MX6UL_PAD_SD1_DATA1__GPIO2_IO19	0x10b0
+				MX6UL_PAD_SD1_DATA1__GPIO2_IO19		0x10b0
 			>;
 		};
 
@@ -514,7 +514,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_qca7000_spi &pinctrl_qca7000_int>;
 	fsl,spi-num-chipselects = <1>;
-	// cs-gpios = <&gpio1 29 0>;
+	cs-gpios = <&gpio1 29 0>;
 	status = "okay";
 
 	qca7000: ethernet@0 {
