@@ -524,7 +524,7 @@
 		interrupts = <19 IRQ_TYPE_EDGE_RISING>;
 		spi-cpha;
 		spi-cpol;
-		spi-max-frequency = <1000000>; // FIXME
+		spi-max-frequency = <16000000>;
 		intr-gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>;
 	};
 };
