@@ -344,6 +344,12 @@
 			>;
 		};
 
+		pinctrl_qca7000_bld: pinctrl_qca7000_bldGrp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA13__GPIO3_IO18	0x10b0
+			>;
+		};
+
 		pinctrl_uart4: pinctrl_uart4Grp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_CLK__UART4_DCE_TX		0x1b0b1
@@ -512,7 +518,7 @@
 	#address-cells = <1>;
 	#size-cells = <0>;
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_qca7000_spi &pinctrl_qca7000_int>;
+	pinctrl-0 = <&pinctrl_qca7000_spi>;
 	fsl,spi-num-chipselects = <1>;
 	cs-gpios = <&gpio1 29 0>;
 	status = "okay";
@@ -520,6 +526,8 @@
 	qca7000: ethernet@0 {
 		reg = <0x0>;
 		compatible = "qca,qca7000";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_qca7000_int>, <&pinctrl_qca7000_rst>, <&pinctrl_qca7000_bld>;
 		interrupt-parent = <&gpio2>;
 		interrupts = <19 IRQ_TYPE_EDGE_RISING>;
 		spi-cpha;
