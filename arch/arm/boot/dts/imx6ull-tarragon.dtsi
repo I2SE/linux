@@ -169,6 +169,7 @@
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog_pins>;
+
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
 			fsl,pins = <
@@ -359,14 +360,6 @@
 			>;
 		};
 
-	        pinctrl_rotary_switch: pinctrl_rotary_switchGrp {
-			fsl,pins = <
-				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0x110b0
-				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23	0x110b0
-				MX6UL_PAD_UART3_TX_DATA__GPIO1_IO24	0x110b0
-			>;
-	        };
-
 		pinctrl_usdhc2_8bit: pinctrl_usdhc2_8bitGrp {
 			fsl,pins = <
 				MX6UL_PAD_CSI_VSYNC__USDHC2_CLK	0x10069
@@ -449,6 +442,11 @@
 
 				/* CP invert: 47k pull-up (reset default) */
 				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x70a0
+
+				/* rotary switch - bit 1-3: 100k pull-up */
+				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0xb0b0
+				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23	0xb0b0
+				MX6UL_PAD_UART3_TX_DATA__GPIO1_IO24	0xb0b0
 			>;
 		};
 	};
@@ -456,8 +454,9 @@
 
 &iomuxc_snvs {
 	pinctrl-names = "default_snvs";
-        pinctrl-0 = <&init_GPIO_pinsSnvs>;
-        tarragon {
+	pinctrl-0 = <&init_GPIO_pinsSnvs>, <&pinctrl_rotary_switch_snvs>;
+
+	tarragon {
 		init_GPIO_pinsSnvs: init_GPIO_pinsSnvsGrp {
 		    fsl,pins = <
 		        MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10          0x000130A0
@@ -484,12 +483,14 @@
 		        MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04        0x000110A0
 		    >;
 		};
-		pinctrl_rotary_switchSnvs: pinctrl_rotary_switchSnvsGrp {
-		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER0__GPIO5_IO00        0x000110A0
-		    >;
+
+		pinctrl_rotary_switch_snvs: pinctrl_rotary_switchSnvsGrp {
+			fsl,pins = <
+				/* rotary switch - bit 0: 100k pull-up */
+				MX6ULL_PAD_SNVS_TAMPER0__GPIO5_IO00	0xb0b0
+			>;
 		};
-        };
+	};
 };
 
 &pwm5 {
