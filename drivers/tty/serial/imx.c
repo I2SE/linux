@@ -797,12 +797,13 @@ static unsigned int imx_get_mctrl(struct uart_port *port)
 	struct imx_port *sport = (struct imx_port *)port;
 	unsigned int tmp = TIOCM_DSR;
 	unsigned usr1 = readl(sport->port.membase + USR1);
+	unsigned usr2 = readl(sport->port.membase + USR2);
 
 	if (usr1 & USR1_RTSS)
 		tmp |= TIOCM_CTS;
 
 	/* in DCE mode DCDIN is always 0 */
-	if (!(usr1 & USR2_DCDIN))
+	if (!(usr2 & USR2_DCDIN))
 		tmp |= TIOCM_CAR;
 
 	if (sport->dte_mode)
