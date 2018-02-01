@@ -359,12 +359,6 @@
 			>;
 		};
 
-		pinctrl_cp_inv_cfg: pinctrl_cp_inv_cfgGrp {
-			fsl,pins = <
-				MX6UL_PAD_JTAG_TDI__GPIO1_IO13	0x10b0
-			>;
-		};
-
 	        pinctrl_rotary_switch: pinctrl_rotary_switchGrp {
 			fsl,pins = <
 				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0x110b0
@@ -452,6 +446,9 @@
 				/* relay 1/2 feedback: disable keeper */
 				MX6UL_PAD_ENET2_RX_ER__GPIO2_IO15	0x00b0
 				MX6UL_PAD_SD1_CMD__GPIO2_IO16		0x00b0
+
+				/* CP invert: 47k pull-up (reset default) */
+				MX6UL_PAD_JTAG_TDI__GPIO1_IO13		0x70a0
 			>;
 		};
 	};
