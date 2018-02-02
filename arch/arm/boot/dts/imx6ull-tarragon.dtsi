@@ -537,6 +537,7 @@
 &uart1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_1>;
+	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
 	status = "okay";
 };
@@ -544,6 +545,7 @@
 &uart3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_2>;
+	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
 	status = "okay";
 };
