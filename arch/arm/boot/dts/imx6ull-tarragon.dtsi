@@ -347,8 +347,8 @@
 
 		pinctrl_uart4: pinctrl_uart4Grp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_CLK__UART4_DCE_TX		0x1b0b1
-				MX6UL_PAD_LCD_ENABLE__UART4_DCE_RX	0x1b0b1
+				MX6UL_PAD_LCD_CLK__UART4_DTE_RX		0x1b0b1
+				MX6UL_PAD_LCD_ENABLE__UART4_DTE_TX	0x1b0b1
 			>;
 		};
 
@@ -556,6 +556,7 @@
 &uart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
+	fsl,dte-mode;
 	status = "okay";
 };
 
