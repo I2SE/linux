@@ -2032,6 +2032,7 @@ static int serial_imx_probe(struct platform_device *pdev)
 	int ret = 0;
 	struct resource *res;
 	int txirq, rxirq, rtsirq;
+	u32 reg;
 
 	sport = devm_kzalloc(&pdev->dev, sizeof(*sport), GFP_KERNEL);
 	if (!sport)
@@ -2073,7 +2074,9 @@ static int serial_imx_probe(struct platform_device *pdev)
 		 * and DCD (when they are outputs) or enables the respective
 		 * irqs. So set this bit early, i.e. before requesting irqs.
 		 */
-		writel(UFCR_DCEDTE, sport->port.membase + UFCR);
+		reg = readl(sport->port.membase + UFCR);
+		if (!(reg & UFCR_DCEDTE))
+			writel(reg | UFCR_DCEDTE, sport->port.membase + UFCR);
 
 		/*
 		 * Disable UCR3_RI and UCR3_DCD irqs. They are also not
@@ -2084,7 +2087,15 @@ static int serial_imx_probe(struct platform_device *pdev)
 		       sport->port.membase + UCR3);
 
 	} else {
-		writel(0, sport->port.membase + UFCR);
+		unsigned long ucr3 = UCR3_DSR;
+
+		reg = readl(sport->port.membase + UFCR);
+		if (reg & UFCR_DCEDTE)
+			writel(reg & ~UFCR_DCEDTE, sport->port.membase + UFCR);
+
+		if (!is_imx1_uart(sport))
+			ucr3 |= IMX21_UCR3_RXDMUXSEL | UCR3_ADNIMP;
+		writel(ucr3, sport->port.membase + UCR3);
 	}
 
 	sport->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
