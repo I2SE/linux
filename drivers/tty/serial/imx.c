@@ -682,7 +682,8 @@ static irqreturn_t imx_rxint(int irq, void *dev_id)
 		if (sport->port.ignore_status_mask & URXD_DUMMY_READ)
 			goto out;
 
-		tty_insert_flip_char(port, rx, flg);
+		if (tty_insert_flip_char(port, rx, flg) == 0)
+			sport->port.icount.buf_overrun++;
 	}
 
 out:
@@ -910,8 +911,11 @@ static void dma_rx_push_data(struct imx_port *sport, struct tty_struct *tty,
 
 	for (i = start; i < end; i++) {
 		if (sport->rx_buf.buf_info[i].filled) {
-			tty_insert_flip_string(port, sport->rx_buf.buf + (i
-					* RX_BUF_SIZE), sport->rx_buf.buf_info[i].rx_bytes);
+			int bytes = tty_insert_flip_string(port, sport->rx_buf.buf +
+					(i * RX_BUF_SIZE), sport->rx_buf.buf_info[i].rx_bytes);
+			if (bytes != sport->rx_buf.buf_info[i].rx_bytes)
+				sport->port.icount.buf_overrun++;
+
 			tty_flip_buffer_push(port);
 			sport->rx_buf.buf_info[i].filled = false;
 			sport->rx_buf.last_completed_idx++;
