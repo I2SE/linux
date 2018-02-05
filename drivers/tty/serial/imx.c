@@ -112,6 +112,7 @@
 #define UCR3_RXDSEN	(1<<6)	/* Receive status interrupt enable */
 #define UCR3_AIRINTEN	(1<<5)	/* Async IR wake interrupt enable */
 #define UCR3_AWAKEN	(1<<4)	/* Async wake interrupt enable */
+#define UCR3_DTRDEN	(1<<3)	/* Data Terminal Ready Delta Enable. */
 #define IMX21_UCR3_RXDMUXSEL	(1<<2)	/* RXD Muxed Input Select */
 #define UCR3_INVT	(1<<1)	/* Inverted Infrared transmission */
 #define UCR3_BPEN	(1<<0)	/* Preset registers enable */
@@ -140,7 +141,7 @@
 #define USR1_FRAMERR	(1<<10) /* Frame error interrupt flag */
 #define USR1_RRDY	(1<<9)	 /* Receiver ready interrupt/dma flag */
 #define USR1_AGTIM	(1<<8)   /* Ageing timer interrfupt flag */
-#define USR1_TIMEOUT	(1<<7)	 /* Receive timeout interrupt status */
+#define USR1_DTRD	(1<<7)	 /* DTR Delta */
 #define USR1_RXDS	 (1<<6)	 /* Receiver idle interrupt flag */
 #define USR1_AIRINT	 (1<<5)	 /* Async IR wake interrupt flag */
 #define USR1_AWAKE	 (1<<4)	 /* Aysnc wake interrupt flag */
@@ -690,6 +691,57 @@ out:
 	return IRQ_HANDLED;
 }
 
+/*
+ * We have a modem side uart, so the meanings of RTS and CTS are inverted.
+ */
+static unsigned int imx_get_mctrl(struct uart_port *port)
+{
+	struct imx_port *sport = (struct imx_port *)port;
+	unsigned int tmp = TIOCM_DSR;
+	unsigned usr1 = readl(sport->port.membase + USR1);
+	unsigned usr2 = readl(sport->port.membase + USR2);
+
+	if (usr1 & USR1_RTSS)
+		tmp |= TIOCM_CTS;
+
+	/* in DCE mode DCDIN is always 0 */
+	if (!(usr2 & USR2_DCDIN))
+		tmp |= TIOCM_CAR;
+
+	if (sport->dte_mode)
+		if (!(readl(sport->port.membase + USR2) & USR2_RIIN))
+			tmp |= TIOCM_RI;
+
+	return tmp;
+}
+
+/*
+ * Handle any change of modem status signal since we were last called.
+ */
+static void imx_mctrl_check(struct imx_port *sport)
+{
+	unsigned int status, changed;
+
+	status = imx_get_mctrl(&sport->port);
+	changed = status ^ sport->old_status;
+
+	if (changed == 0)
+		return;
+
+	sport->old_status = status;
+
+	if (changed & TIOCM_RI)
+		sport->port.icount.rng++;
+	if (changed & TIOCM_DSR)
+		sport->port.icount.dsr++;
+	if (changed & TIOCM_CAR)
+		uart_handle_dcd_change(&sport->port, status & TIOCM_CAR);
+	if (changed & TIOCM_CTS)
+		uart_handle_cts_change(&sport->port, status & TIOCM_CTS);
+
+	wake_up_interruptible(&sport->port.state->port.delta_msr_wait);
+}
+
 static irqreturn_t imx_int(int irq, void *dev_id)
 {
 	struct imx_port *sport = dev_id;
@@ -713,6 +765,19 @@ static irqreturn_t imx_int(int irq, void *dev_id)
 	    (sts2 & USR2_TXDC &&
 	     readl(sport->port.membase + UCR4) & UCR4_TCEN)) {
 		imx_txint(irq, dev_id);
+		ret = IRQ_HANDLED;
+	}
+
+	if (sts & USR1_DTRD) {
+		unsigned long flags;
+
+		if (sts & USR1_DTRD)
+			writel(USR1_DTRD, sport->port.membase + USR1);
+
+		spin_lock_irqsave(&sport->port.lock, flags);
+		imx_mctrl_check(sport);
+		spin_unlock_irqrestore(&sport->port.lock, flags);
+
 		ret = IRQ_HANDLED;
 	}
 
@@ -751,30 +816,6 @@ static unsigned int imx_tx_empty(struct uart_port *port)
 		ret = 0;
 
 	return ret;
-}
-
-/*
- * We have a modem side uart, so the meanings of RTS and CTS are inverted.
- */
-static unsigned int imx_get_mctrl(struct uart_port *port)
-{
-	struct imx_port *sport = (struct imx_port *)port;
-	unsigned int tmp = TIOCM_DSR;
-	unsigned usr1 = readl(sport->port.membase + USR1);
-	unsigned usr2 = readl(sport->port.membase + USR2);
-
-	if (usr1 & USR1_RTSS)
-		tmp |= TIOCM_CTS;
-
-	/* in DCE mode DCDIN is always 0 */
-	if (!(usr2 & USR2_DCDIN))
-		tmp |= TIOCM_CAR;
-
-	if (sport->dte_mode)
-		if (!(readl(sport->port.membase + USR2) & USR2_RIIN))
-			tmp |= TIOCM_RI;
-
-	return tmp;
 }
 
 static void imx_set_mctrl(struct uart_port *port, unsigned int mctrl)
@@ -840,33 +881,6 @@ static int imx_setup_ufcr(struct imx_port *sport, unsigned int mode)
 	val |= TXTL << UFCR_TXTL_SHF | rx_fifo_trig;
 	writel(val, sport->port.membase + UFCR);
 	return 0;
-}
-
-/*
- * Handle any change of modem status signal since we were last called.
- */
-static void imx_mctrl_check(struct imx_port *sport)
-{
-	unsigned int status, changed;
-
-	status = imx_get_mctrl(&sport->port);
-	changed = status ^ sport->old_status;
-
-	if (changed == 0)
-		return;
-
-	sport->old_status = status;
-
-	if (changed & TIOCM_RI)
-		sport->port.icount.rng++;
-	if (changed & TIOCM_DSR)
-		sport->port.icount.dsr++;
-	if (changed & TIOCM_CAR)
-		uart_handle_dcd_change(&sport->port, status & TIOCM_CAR);
-	if (changed & TIOCM_CTS)
-		uart_handle_cts_change(&sport->port, status & TIOCM_CTS);
-
-	wake_up_interruptible(&sport->port.state->port.delta_msr_wait);
 }
 
 /*
@@ -1184,7 +1198,7 @@ static int imx_startup(struct uart_port *port)
 	/*
 	 * Finally, clear and enable interrupts
 	 */
-	writel(USR1_RTSD, sport->port.membase + USR1);
+	writel(USR1_RTSD | USR1_DTRD, sport->port.membase + USR1);
 	writel(USR2_ORE, sport->port.membase + USR2);
 
 	temp = readl(sport->port.membase + UCR1);
@@ -1224,7 +1238,7 @@ static int imx_startup(struct uart_port *port)
 		 * now, too.
 		 */
 		temp |= IMX21_UCR3_RXDMUXSEL | UCR3_ADNIMP |
-			UCR3_RI | UCR3_DCD;
+			UCR3_DTRDEN | UCR3_RI | UCR3_DCD;
 
 		if (sport->dte_mode)
 			temp &= ~(UCR3_RI | UCR3_DCD);
