@@ -2032,7 +2032,7 @@ static int serial_imx_probe(struct platform_device *pdev)
 	int ret = 0;
 	struct resource *res;
 	int txirq, rxirq, rtsirq;
-	u32 reg;
+	unsigned int reg;
 
 	sport = devm_kzalloc(&pdev->dev, sizeof(*sport), GFP_KERNEL);
 	if (!sport)
@@ -2067,6 +2067,30 @@ static int serial_imx_probe(struct platform_device *pdev)
 	sport->timer.function = imx_timeout;
 	sport->timer.data     = (unsigned long)sport;
 
+	sport->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
+	if (IS_ERR(sport->clk_ipg)) {
+		ret = PTR_ERR(sport->clk_ipg);
+		dev_err(&pdev->dev, "failed to get ipg clk: %d\n", ret);
+		return ret;
+	}
+
+	sport->clk_per = devm_clk_get(&pdev->dev, "per");
+	if (IS_ERR(sport->clk_per)) {
+		ret = PTR_ERR(sport->clk_per);
+		dev_err(&pdev->dev, "failed to get per clk: %d\n", ret);
+		return ret;
+	}
+
+	sport->port.uartclk = clk_get_rate(sport->clk_per);
+	if (sport->port.uartclk > IMX_MODULE_MAX_CLK_RATE) {
+		ret = clk_set_rate(sport->clk_per, IMX_MODULE_MAX_CLK_RATE);
+		if (ret < 0) {
+			dev_err(&pdev->dev, "clk_set_rate() failed\n");
+			return ret;
+		}
+	}
+	sport->port.uartclk = clk_get_rate(sport->clk_per);
+
 	if (!is_imx1_uart(sport) && sport->dte_mode) {
 		/*
 		 * The DCEDTE bit changes the direction of DSR, DCD, DTR and RI
@@ -2097,30 +2121,6 @@ static int serial_imx_probe(struct platform_device *pdev)
 			ucr3 |= IMX21_UCR3_RXDMUXSEL | UCR3_ADNIMP;
 		writel(ucr3, sport->port.membase + UCR3);
 	}
-
-	sport->clk_ipg = devm_clk_get(&pdev->dev, "ipg");
-	if (IS_ERR(sport->clk_ipg)) {
-		ret = PTR_ERR(sport->clk_ipg);
-		dev_err(&pdev->dev, "failed to get ipg clk: %d\n", ret);
-		return ret;
-	}
-
-	sport->clk_per = devm_clk_get(&pdev->dev, "per");
-	if (IS_ERR(sport->clk_per)) {
-		ret = PTR_ERR(sport->clk_per);
-		dev_err(&pdev->dev, "failed to get per clk: %d\n", ret);
-		return ret;
-	}
-
-	sport->port.uartclk = clk_get_rate(sport->clk_per);
-	if (sport->port.uartclk > IMX_MODULE_MAX_CLK_RATE) {
-		ret = clk_set_rate(sport->clk_per, IMX_MODULE_MAX_CLK_RATE);
-		if (ret < 0) {
-			dev_err(&pdev->dev, "clk_set_rate() failed\n");
-			return ret;
-		}
-	}
-	sport->port.uartclk = clk_get_rate(sport->clk_per);
 
 	/*
 	 * Allocate the IRQ(s) i.MX1 has three interrupts whereas later
