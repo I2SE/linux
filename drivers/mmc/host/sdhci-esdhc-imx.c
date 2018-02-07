@@ -863,14 +863,15 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = pltfm_host->priv;
 	struct pinctrl_state *pinctrl;
-
-	dev_dbg(mmc_dev(host->mmc), "change pinctrl state for uhs %d\n", uhs);
+	int ret;
 
 	if (IS_ERR(imx_data->pinctrl) ||
 		IS_ERR(imx_data->pins_default) ||
 		IS_ERR(imx_data->pins_100mhz) ||
 		IS_ERR(imx_data->pins_200mhz))
 		return -EINVAL;
+
+	dev_dbg(mmc_dev(host->mmc), "change pinctrl state for uhs %d\n", uhs);
 
 	switch (uhs) {
 	case MMC_TIMING_UHS_SDR50:
@@ -887,7 +888,13 @@ static int esdhc_change_pinstate(struct sdhci_host *host,
 		pinctrl = imx_data->pins_default;
 	}
 
-	return pinctrl_select_state(imx_data->pinctrl, pinctrl);
+	ret = pinctrl_select_state(imx_data->pinctrl, pinctrl);
+	if (ret)
+		dev_err(mmc_dev(host->mmc),
+			"Failed to change pinstate for timing %u: %d\n",
+			uhs, ret);
+
+	return ret;
 }
 
 /*
