@@ -1108,7 +1108,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
 				IS_ERR(imx_data->pins_200mhz)) {
 			dev_warn(mmc_dev(host->mmc),
 				"could not get ultra high speed state, work on normal mode\n");
-			host->quirks2 |= SDHCI_QUIRK2_BROKEN_HS200;
+			/*
+			 * fall back to not support uhs by specify no 1.8v quirk
+			 */
+			host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
 		}
 	} else {
 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
