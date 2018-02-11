@@ -210,12 +210,6 @@
 			>;
 		};
 
-		pinctrl_gpio_fan: pinctrl_gpio_fanGrp {
-			fsl,pins = <
-				MX6UL_PAD_LCD_DATA00__GPIO3_IO05	0x40017059
-			>;
-		};
-
 		pinctrl_usb_pwr: pinctrl_usb_pwrGrp {
 			fsl,pins = <
 				// MX6UL_PAD_GPIO1_IO04__USB_OTG1_PWR	0x10b0
@@ -425,14 +419,9 @@
 			>;
 		};
 
-		pinctrl_emmc_gpios: pinctrl_emmc_gpiosGrp {
-			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT	0x17059 /* to PF3001 */
-			>;
-		};
-
 		pinctrl_hog_pins: pinctrl_hog_pinsGrp {
 			fsl,pins = <
+				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT	0x17059 /* to PF3001 */
 				MX6UL_PAD_NAND_CLE__GPIO4_IO15		0x17059 /* AUD_INT from PF3001 */
 
 				/* relay 1/2 control */
@@ -450,6 +439,9 @@
 				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22	0xb0b0
 				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23	0xb0b0
 				MX6UL_PAD_UART3_TX_DATA__GPIO1_IO24	0xb0b0
+
+				/* fan enable */
+				MX6UL_PAD_LCD_DATA00__GPIO3_IO05	0x40017059
 			>;
 		};
 	};
