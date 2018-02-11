@@ -107,7 +107,7 @@
 
 &fec1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_enet1>, <&pinctrl_enet1_phy_rst>, <&pinctrl_enet_mdio>;
+	pinctrl-0 = <&pinctrl_enet1 &pinctrl_enet1_phy_rst &pinctrl_enet_mdio>;
 	phy-supply = <&reg_dcdc_3v3>;
 	phy-mode = "rmii";
 	phy-handle = <&ethphy0>;
@@ -138,7 +138,7 @@
 
 &fec2 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_qca7500>;
+	pinctrl-0 = <&pinctrl_qca7500 &pinctrl_qca7500Snvs>;
 	phy-mode = "rmii";
 	//phy-handle = <&ethphy1>;
 	//status = "okay";
@@ -168,7 +168,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog_pins>;
+	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_push_pull_cfg>;
 
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
@@ -449,7 +449,9 @@
 
 &iomuxc_snvs {
 	pinctrl-names = "default_snvs";
-	pinctrl-0 = <&init_GPIO_pinsSnvs>, <&pinctrl_rotary_switch_snvs>;
+	pinctrl-0 = <&init_GPIO_pinsSnvs
+		     &pinctrl_gpio_motorSnvs
+		     &pinctrl_rotary_switch_snvs>;
 
 	tarragon {
 		init_GPIO_pinsSnvs: init_GPIO_pinsSnvsGrp {
@@ -519,7 +521,7 @@
 		reg = <0x0>;
 		compatible = "qca,qca7000";
 		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_qca7000_int>, <&pinctrl_qca7000_rst>, <&pinctrl_qca7000_bld>;
+		pinctrl-0 = <&pinctrl_qca7000_int &pinctrl_qca7000_rst &pinctrl_qca7000_bld>;
 		interrupt-parent = <&gpio2>;
 		interrupts = <19 IRQ_TYPE_EDGE_RISING>;
 		spi-cpha;
@@ -531,7 +533,7 @@
 
 &uart1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_rs485_1>;
+	pinctrl-0 = <&pinctrl_rs485_1 &pinctrl_rs485_1_isoSnvs>;
 	fsl,uart-has-rtscts;
 	linux,rs485-enabled-at-boot-time;
 	status = "okay";
@@ -550,6 +552,11 @@
 	pinctrl-0 = <&pinctrl_uart4>;
 	fsl,dte-mode;
 	status = "okay";
+};
+
+&usbotg1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb &pinctrl_usb_pwr>;
 };
 
 &usbphy1 {
