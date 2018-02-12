@@ -472,7 +472,7 @@
 	        };
 		pinctrl_qca7500Snvs: pinctrl_qca7500SnvsGrp {
 		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07        0x000110A0
+		        MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07        0x0001F0A0
 		    >;
 		};
 		pinctrl_rs485_1_isoSnvs: pinctrl_rs485_1_isoSnvsGrp {
