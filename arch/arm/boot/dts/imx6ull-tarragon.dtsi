@@ -346,6 +346,17 @@
 			>;
 		};
 
+		pinctrl_dig_in: pinctrl_dig_inGrp {
+			fsl,pins = <
+				MX6UL_PAD_NAND_WE_B__GPIO4_IO01		0x0
+				MX6UL_PAD_NAND_DATA02__GPIO4_IO04	0x0
+				MX6UL_PAD_NAND_RE_B__GPIO4_IO00		0x0
+				MX6UL_PAD_NAND_DATA01__GPIO4_IO03	0x0
+				MX6UL_PAD_NAND_DATA03__GPIO4_IO05	0x0
+				MX6UL_PAD_NAND_DATA00__GPIO4_IO02	0x0
+			>;
+		};
+
 		pinctrl_push_pull_cfg: pinctrl_push_pull_cfgGrp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_DATA15__GPIO3_IO20	0x400000b0
