@@ -168,7 +168,7 @@
 
 &iomuxc {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_push_pull_cfg>;
+	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_board_var &pinctrl_push_pull_cfg>;
 
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
@@ -354,6 +354,15 @@
 				MX6UL_PAD_NAND_DATA01__GPIO4_IO03	0x0
 				MX6UL_PAD_NAND_DATA03__GPIO4_IO05	0x0
 				MX6UL_PAD_NAND_DATA00__GPIO4_IO02	0x0
+			>;
+		};
+
+		pinctrl_board_var: pinctrl_board_varGrp {
+			fsl,pins = <
+				MX6UL_PAD_NAND_WP_B__GPIO4_IO11		0x0
+				MX6UL_PAD_NAND_ALE__GPIO4_IO10		0x0
+				MX6UL_PAD_NAND_DATA07__GPIO4_IO09	0x0
+				MX6UL_PAD_NAND_DATA06__GPIO4_IO08	0x0
 			>;
 		};
 
