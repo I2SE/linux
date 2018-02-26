@@ -130,5 +130,6 @@
 	pinctrl-0 = <&pinctrl_sd>;
 	bus-width = <4>;
 	broken-cd;
+	max-frequency = <10000000>;
 	status = "okay";
 };
