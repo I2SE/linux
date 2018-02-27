@@ -314,6 +314,11 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	u32 nr, j, i = 0;
 	u32 vpu_axi_rate = 0;
 
+	/* FIXME Hack to make prototypes run */
+	arm_reg = ERR_PTR(-ENOENT);
+	soc_reg = ERR_PTR(-ENOENT);
+	return 0;
+
 	cpu_dev = get_cpu_device(0);
 	if (!cpu_dev) {
 		pr_err("failed to get cpu0 device\n");
