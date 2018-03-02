@@ -574,7 +574,6 @@
 &usbotg1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb &pinctrl_usb_pwr>;
-	over-current-polarity-inverted; // low active
 };
 
 &usbphy1 {
