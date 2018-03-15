@@ -59,6 +59,7 @@
 #define MX6_BM_NON_BURST_SETTING	BIT(1)
 #define MX6_BM_OVER_CUR_DIS		BIT(7)
 #define MX6_BM_OVER_CUR_POLARITY	BIT(8)
+#define MX6_BM_POWER_POLARITY		BIT(9)
 #define MX6_BM_WAKEUP_ENABLE		BIT(10)
 #define MX6_BM_UTMI_ON_CLOCK		BIT(13)
 #define MX6_BM_ID_WAKEUP		BIT(16)
@@ -390,6 +391,12 @@ static int usbmisc_imx6q_init(struct imx_usbmisc_data *data)
 	spin_lock_irqsave(&usbmisc->lock, flags);
 
 	reg = readl(usbmisc->base + data->index * 4);
+	if (data->pwr_polarity) {
+		reg |= MX6_BM_POWER_POLARITY;
+	} else {
+		reg &= ~MX6_BM_POWER_POLARITY;
+	}
+
 	if (data->disable_oc) {
 		reg |= MX6_BM_OVER_CUR_DIS;
 	} else if (data->oc_polarity) {
