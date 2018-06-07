@@ -812,20 +812,18 @@ static int imx_thermal_probe(struct platform_device *pdev)
 	if (IS_ERR(data->cpufreq)) {
 		ret = PTR_ERR(data->cpufreq);
 		if (ret != -EPROBE_DEFER)
-			dev_err(&pdev->dev,
-				"failed to register cpufreq cooling device: %d\n",
-				ret);
-		return ret;
+			dev_warn(&pdev->dev,
+				 "failed to register cpufreq cooling device: %d\n",
+				 ret);
 	}
 
 	data->devfreq = devfreq_cooling_register();
 	if (IS_ERR(data->devfreq)) {
 		ret = PTR_ERR(data->devfreq);
 		if (ret != -EPROBE_DEFER)
-			dev_err(&pdev->dev,
-				"failed to register cpufreq cooling device: %d\n",
-				ret);
-		goto err_cpufreq;
+			dev_warn(&pdev->dev,
+				 "failed to register cpufreq cooling device: %d\n",
+				 ret);
 	}
 
 	data->thermal_clk = devm_clk_get(&pdev->dev, NULL);
@@ -908,8 +906,6 @@ err_clk:
 	clk_disable_unprepare(data->thermal_clk);
 err_devfreq:
 	devfreq_cooling_unregister(data->devfreq);
-err_cpufreq:
-	cpufreq_cooling_unregister(data->cpufreq);
 
 	return ret;
 }
@@ -930,8 +926,10 @@ static int imx_thermal_remove(struct platform_device *pdev)
 		unregister_busfreq_notifier(&thermal_notifier);
 
 	thermal_zone_device_unregister(data->tz);
-	cpufreq_cooling_unregister(data->cpufreq);
-	devfreq_cooling_unregister(data->devfreq);
+	if (!IS_ERR(data->cpufreq))
+		cpufreq_cooling_unregister(data->cpufreq);
+	if (!IS_ERR(data->devfreq))
+		devfreq_cooling_unregister(data->devfreq);
 
 	return 0;
 }
