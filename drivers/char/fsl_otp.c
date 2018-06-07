@@ -25,6 +25,7 @@
 
 #define HW_OCOTP_CTRL			0x00000000
 #define HW_OCOTP_CTRL_SET		0x00000004
+#define HW_OCOTP_CTRL_CLR		0x00000008
 #define BP_OCOTP_CTRL_WR_UNLOCK		16
 #define BM_OCOTP_CTRL_WR_UNLOCK		0xFFFF0000
 #define BM_OCOTP_CTRL_RELOAD_SHADOWS	0x00000400
@@ -349,6 +350,17 @@ static void imx7ulp_set_otp_timing(void)
 	/* No need to setup timing for ULP */
 }
 
+static void fsl_otp_clr_err_if_set(void)
+{
+	u32 c;
+
+	c = __raw_readl(otp_base + HW_OCOTP_CTRL);
+	if (!(c & BM_OCOTP_CTRL_ERROR))
+		return;
+
+	writel(BM_OCOTP_CTRL_ERROR, otp_base + HW_OCOTP_CTRL_CLR);
+}
+
 static struct fsl_otp_devtype_data imx6q_data = {
 	.devtype = FSL_OTP_MX6Q,
 	.bank_desc = (const char **)imx6q_otp_desc,
@@ -412,8 +424,11 @@ static int otp_wait_busy(u32 flags)
 		cpu_relax();
 	}
 
-	if (count < 0)
+	if (count < 0) {
+		if (c & BM_OCOTP_CTRL_ERROR)
+			return -EPERM;
 		return -ETIMEDOUT;
+	}
 
 	return 0;
 }
@@ -450,6 +465,8 @@ static ssize_t fsl_otp_show(struct kobject *kobj, struct kobj_attribute *attr,
 	}
 
 	value = __raw_readl(otp_base + HW_OCOTP_CUST_N(phy_index));
+	if (value == 0xBADABADA)
+		fsl_otp_clr_err_if_set();
 
 	if (fsl_otp->devtype == FSL_OTP_MX7ULP) {
 		__raw_writel(1, otp_base + HW_OCOTP_PDN_ULP);
@@ -464,6 +481,7 @@ out:
 static int imx6_otp_write_bits(int addr, u32 data, u32 magic)
 {
 	u32 c; /* for control register */
+	int ret;
 
 	/* init the control register */
 	c = __raw_readl(otp_base + HW_OCOTP_CTRL);
@@ -474,11 +492,13 @@ static int imx6_otp_write_bits(int addr, u32 data, u32 magic)
 
 	/* init the data register */
 	__raw_writel(data, otp_base + HW_OCOTP_DATA);
-	otp_wait_busy(0);
+	ret = otp_wait_busy(0);
+	if (ret == -EPERM)
+		fsl_otp_clr_err_if_set();
 
 	udelay(2); /* Write Postamble */
 
-	return 0;
+	return ret;
 }
 
 static int imx7ulp_otp_write_bits(int addr, u32 data, u32 magic)
@@ -600,11 +620,11 @@ static ssize_t fsl_otp_store(struct kobject *kobj, struct kobj_attribute *attr,
 		goto out;
 
 	if (fsl_otp->devtype == FSL_OTP_MX7D)
-		imx7_otp_write_bits(index, value, 0x3e77);
+		ret = imx7_otp_write_bits(index, value, 0x3e77);
 	else if (fsl_otp->devtype == FSL_OTP_MX7ULP)
-		imx7ulp_otp_write_bits(index, value, 0x3e77);
+		ret = imx7ulp_otp_write_bits(index, value, 0x3e77);
 	else
-		imx6_otp_write_bits(index, value, 0x3e77);
+		ret = imx6_otp_write_bits(index, value, 0x3e77);
 
 	if (fsl_otp->devtype == FSL_OTP_MX7ULP) {
 		value = __raw_readl(otp_base + HW_OCOTP_OUT_STATUS_ULP);
