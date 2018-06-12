@@ -47,10 +47,6 @@
 	fan0: pwm-fan {
 		compatible = "pwm-fan";
 		pwms = <&pwm7 0 50000 PWM_POLARITY_INVERTED>;
-		cooling-min-state = <0>;
-		cooling-max-state = <3>;
-		#cooling-cells = <2>;
-		cooling-levels = <0 102 170 230>;
 	};
 
 	reg_can_5v: regulator-can-5v {
