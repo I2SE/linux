@@ -461,7 +461,8 @@
 	pinctrl-names = "default_snvs";
 	pinctrl-0 = <&init_GPIO_pinsSnvs
 		     &pinctrl_gpio_motorSnvs
-		     &pinctrl_rotary_switch_snvs>;
+		     &pinctrl_rotary_switch_snvs
+		     &pinctrl_fan_senseSnvs>;
 
 	tarragon {
 		init_GPIO_pinsSnvs: init_GPIO_pinsSnvsGrp {
@@ -488,6 +489,11 @@
 		pinctrl_rs485_1_isoSnvs: pinctrl_rs485_1_isoSnvsGrp {
 		    fsl,pins = <
 		        MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04        0x000110A0
+		    >;
+		};
+		pinctrl_fan_senseSnvs: pinctrl_fan_senseSnvsGrp {
+		    fsl,pins = <
+			MX6ULL_PAD_SNVS_TAMPER1__GPIO5_IO01        0x0
 		    >;
 		};
 
