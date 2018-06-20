@@ -9,6 +9,7 @@
 /dts-v1/;
 
 #include <dt-bindings/input/input.h>
+#include <dt-bindings/pwm/pwm.h>
 #include "imx6ull.dtsi"
 
 / {
@@ -41,6 +42,14 @@
 		pinctrl-0 = <&pinctrl_emmc_rst>;
 		pinctrl-names = "default";
 		reset-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
+	};
+
+	fan0: pwm-fan {
+		compatible = "pwm-fan";
+		pwms = <&pwm7 0 40000 PWM_POLARITY_INVERTED>;
+		enable-gpios = <&gpio3 5 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
 	};
 
 	reg_can_5v: regulator-can-5v {
