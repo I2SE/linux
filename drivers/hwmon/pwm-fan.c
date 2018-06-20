@@ -21,6 +21,7 @@
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/of.h>
+#include <linux/of_gpio.h>
 #include <linux/platform_device.h>
 #include <linux/pwm.h>
 #include <linux/sysfs.h>
@@ -31,6 +32,7 @@
 struct pwm_fan_ctx {
 	struct mutex lock;
 	struct pwm_device *pwm;
+	int en_gpio;
 	unsigned int pwm_value;
 	unsigned int pwm_fan_state;
 	unsigned int pwm_fan_max_state;
@@ -262,6 +264,18 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	/* Enable FAN */
+	ctx->en_gpio = of_get_named_gpio(pdev->dev.of_node, "enable-gpios", 0);
+	if (gpio_is_valid(ctx->en_gpio)) {
+		ret = devm_gpio_request_one(&pdev->dev, ctx->en_gpio,
+			GPIOF_DIR_OUT | GPIOF_INIT_HIGH, "FAN EN");
+		if (ret) {
+			dev_warn(&pdev->dev, "Can't request EN GPIO: %d\n",
+				 ret);
+			return ret;
+		}
+	}
+
 	hwmon = devm_hwmon_device_register_with_groups(&pdev->dev, "pwmfan",
 						       ctx, pwm_fan_groups);
 	if (IS_ERR(hwmon)) {
@@ -299,6 +313,9 @@ static int pwm_fan_remove(struct platform_device *pdev)
 	thermal_cooling_device_unregister(ctx->cdev);
 	if (ctx->pwm_value)
 		pwm_disable(ctx->pwm);
+
+	gpio_set_value(ctx->en_gpio, 0);
+
 	return 0;
 }
 
@@ -309,6 +326,9 @@ static int pwm_fan_suspend(struct device *dev)
 
 	if (ctx->pwm_value)
 		pwm_disable(ctx->pwm);
+
+	gpio_set_value(ctx->en_gpio, 0);
+
 	return 0;
 }
 
@@ -327,7 +347,14 @@ static int pwm_fan_resume(struct device *dev)
 	ret = pwm_config(ctx->pwm, duty, pargs.period);
 	if (ret)
 		return ret;
-	return pwm_enable(ctx->pwm);
+
+	ret = pwm_enable(ctx->pwm);
+	if (ret)
+		return ret;
+
+	gpio_set_value(ctx->en_gpio, 1);
+
+	return 0;
 }
 #endif
 
