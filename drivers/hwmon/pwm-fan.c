@@ -18,6 +18,7 @@
 
 #include <linux/hwmon.h>
 #include <linux/hwmon-sysfs.h>
+#include <linux/interrupt.h>
 #include <linux/module.h>
 #include <linux/mutex.h>
 #include <linux/of.h>
@@ -26,19 +27,49 @@
 #include <linux/pwm.h>
 #include <linux/sysfs.h>
 #include <linux/thermal.h>
+#include <linux/timer.h>
 
 #define MAX_PWM 255
+#define SAMPLE_TIME		1 /* seconds */
+#define PULSE_PER_REVOLUTION	2
 
 struct pwm_fan_ctx {
 	struct mutex lock;
 	struct pwm_device *pwm;
 	int en_gpio;
+
+	int irq;
+	unsigned int pulses;
+	unsigned int rpm;
+	struct timer_list sample_timer;
+
 	unsigned int pwm_value;
 	unsigned int pwm_fan_state;
 	unsigned int pwm_fan_max_state;
 	unsigned int *pwm_fan_cooling_levels;
 	struct thermal_cooling_device *cdev;
 };
+
+static irqreturn_t pulse_handler(int irq, void *dev_id)
+{
+	struct pwm_fan_ctx *ctx = dev_id;
+
+	if (ctx->pulses < INT_MAX / 2)
+		ctx->pulses++;
+
+	return IRQ_HANDLED;
+}
+
+static void sample_timer(unsigned long data)
+{
+	struct pwm_fan_ctx *ctx = (struct pwm_fan_ctx *)data;
+	unsigned int pulses;
+
+	pulses = ctx->pulses;
+	ctx->pulses -= pulses;
+	ctx->rpm = pulses * 60 / SAMPLE_TIME / PULSE_PER_REVOLUTION;
+	mod_timer(&ctx->sample_timer, jiffies + (HZ * SAMPLE_TIME));
+}
 
 static int  __set_pwm(struct pwm_fan_ctx *ctx, unsigned long pwm)
 {
@@ -109,11 +140,20 @@ static ssize_t show_pwm(struct device *dev,
 	return sprintf(buf, "%u\n", ctx->pwm_value);
 }
 
+static ssize_t show_rpm(struct device *dev,
+			struct device_attribute *attr, char *buf)
+{
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+
+	return sprintf(buf, "%u\n", ctx->rpm);
+}
 
 static SENSOR_DEVICE_ATTR(pwm1, S_IRUGO | S_IWUSR, show_pwm, set_pwm, 0);
+static SENSOR_DEVICE_ATTR(fan1_input, S_IRUGO, show_rpm, NULL, 0);
 
 static struct attribute *pwm_fan_attrs[] = {
 	&sensor_dev_attr_pwm1.dev_attr.attr,
+	&sensor_dev_attr_fan1_input.dev_attr.attr,
 	NULL,
 };
 
@@ -276,6 +316,19 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		}
 	}
 
+	setup_timer(&ctx->sample_timer, sample_timer, (unsigned long)ctx);
+
+	ctx->irq = platform_get_irq(pdev, 0);
+	if (ctx->irq >= 0) {
+		ret = devm_request_irq(&pdev->dev, ctx->irq, pulse_handler, 0,
+				       pdev->name, ctx);
+		if (ret) {
+			dev_err(&pdev->dev, "Can't get interrupt working.\n");
+			return ret;
+		}
+		mod_timer(&ctx->sample_timer, jiffies + (HZ * SAMPLE_TIME));
+	}
+
 	hwmon = devm_hwmon_device_register_with_groups(&pdev->dev, "pwmfan",
 						       ctx, pwm_fan_groups);
 	if (IS_ERR(hwmon)) {
@@ -311,6 +364,8 @@ static int pwm_fan_remove(struct platform_device *pdev)
 	struct pwm_fan_ctx *ctx = platform_get_drvdata(pdev);
 
 	thermal_cooling_device_unregister(ctx->cdev);
+	del_timer_sync(&ctx->sample_timer);
+
 	if (ctx->pwm_value)
 		pwm_disable(ctx->pwm);
 
