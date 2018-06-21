@@ -584,5 +584,7 @@
 };
 
 &usbphy1 {
-	tx-d-cal = <0x5>; // FIXME
+	fsl,tx-cal-45-dn-ohms = <30>;
+	fsl,tx-cal-45-dp-ohms = <30>;
+	tx-d-cal = <0x7>;
 };
