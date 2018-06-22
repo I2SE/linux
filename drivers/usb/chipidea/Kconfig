@@ -15,6 +15,7 @@ if USB_CHIPIDEA
 config USB_CHIPIDEA_OF
 	tristate
 	depends on OF
+	select POWER_SUPPLY
 	default USB_CHIPIDEA
 
 config USB_CHIPIDEA_PCI
