@@ -245,6 +245,7 @@ qcaspi_transmit(struct qcaspi *qca)
 		return 0;
 
 	qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
+	qca->tx_available = available;
 
 	while (qca->txr.skb[qca->txr.head]) {
 		pkt_len = qca->txr.skb[qca->txr.head]->len + QCASPI_HW_PKT_LEN;
@@ -308,6 +309,7 @@ qcaspi_receive(struct qcaspi *qca)
 
 	/* Read the packet size. */
 	qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
+	qca->rx_available = available;
 	netdev_dbg(net_dev, "qcaspi_receive: SPI_REG_RDBUF_BYTE_AVA: Value: %08x\n",
 		   available);
 
@@ -556,7 +558,7 @@ qcaspi_spi_thread(void *data)
 
 			if (intr_cause & SPI_INT_RDBUF_ERR) {
 				/* restart sync */
-				netdev_dbg(qca->net_dev, "===> rdbuf error!\n");
+				netdev_info(qca->net_dev, "===> rdbuf error! (avail: %u)\n", qca->rx_available);
 				qca->stats.read_buf_err++;
 				qca->sync = QCASPI_SYNC_UNKNOWN;
 				continue;
@@ -564,7 +566,7 @@ qcaspi_spi_thread(void *data)
 
 			if (intr_cause & SPI_INT_WRBUF_ERR) {
 				/* restart sync */
-				netdev_dbg(qca->net_dev, "===> wrbuf error!\n");
+				netdev_info(qca->net_dev, "===> wrbuf error! (avail: %u)\n", qca->tx_available);
 				qca->stats.write_buf_err++;
 				qca->sync = QCASPI_SYNC_UNKNOWN;
 				continue;

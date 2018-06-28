@@ -86,6 +86,12 @@ qcaspi_info_show(struct seq_file *s, void *what)
 	seq_printf(s, "TX ring size     : %u\n",
 		   qca->txr.size);
 
+	seq_printf(s, "TX available     : %u\n",
+		   qca->tx_available);
+
+	seq_printf(s, "RX available     : %u\n",
+		   qca->rx_available);
+
 	seq_printf(s, "Sync state       : %u (",
 		   (unsigned int)qca->sync);
 	switch (qca->sync) {
