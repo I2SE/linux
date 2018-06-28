@@ -736,8 +736,8 @@ qcaspi_netdev_tx_timeout(struct net_device *dev)
 {
 	struct qcaspi *qca = netdev_priv(dev);
 
-	netdev_info(qca->net_dev, "Transmit timeout at %ld, latency %ld\n",
-		    jiffies, jiffies - dev->trans_start);
+	netdev_info(qca->net_dev, "Transmit timeout at %ld, latency %ld, sync: %d, ring empty: %d\n",
+		    jiffies, jiffies - dev->trans_start, qca->sync, (qca->txr.skb[qca->txr.head] == NULL));
 	qca->net_dev->stats.tx_errors++;
 	/* Trigger tx queue flush and QCA7000 reset */
 	qca->sync = QCASPI_SYNC_UNKNOWN;
