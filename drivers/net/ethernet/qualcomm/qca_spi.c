@@ -450,6 +450,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 		if (signature != QCASPI_GOOD_SIGNATURE) {
 			qca->sync = QCASPI_SYNC_UNKNOWN;
+			netif_stop_queue(qca->net_dev);
 			netdev_dbg(qca->net_dev, "sync: got CPU on, but signature was invalid, restart\n");
 		} else {
 			/* ensure that the WRBUF is empty */
@@ -458,6 +459,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			if (wrbuf_space != QCASPI_HW_BUF_LEN) {
 				netdev_dbg(qca->net_dev, "sync: got CPU on, but wrbuf not empty. reset!\n");
 				qca->sync = QCASPI_SYNC_UNKNOWN;
+				netif_stop_queue(qca->net_dev);
 			} else {
 				netdev_dbg(qca->net_dev, "sync: got CPU on, now in sync\n");
 				qca->sync = QCASPI_SYNC_READY;
@@ -472,6 +474,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 		if (signature != QCASPI_GOOD_SIGNATURE) {
 			qca->sync = QCASPI_SYNC_UNKNOWN;
+			netif_stop_queue(qca->net_dev);
 			netdev_dbg(qca->net_dev, "sync: bad signature, restart\n");
 			/* don't reset right away */
 			return;
@@ -561,6 +564,7 @@ qcaspi_spi_thread(void *data)
 				netdev_info(qca->net_dev, "===> rdbuf error! (avail: %u)\n", qca->rx_available);
 				qca->stats.read_buf_err++;
 				qca->sync = QCASPI_SYNC_UNKNOWN;
+				netif_stop_queue(qca->net_dev);
 				continue;
 			}
 
@@ -569,6 +573,7 @@ qcaspi_spi_thread(void *data)
 				netdev_info(qca->net_dev, "===> wrbuf error! (avail: %u)\n", qca->tx_available);
 				qca->stats.write_buf_err++;
 				qca->sync = QCASPI_SYNC_UNKNOWN;
+				netif_stop_queue(qca->net_dev);
 				continue;
 			}
 
