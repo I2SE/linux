@@ -69,6 +69,10 @@ static int qcaspi_pluggable = QCASPI_PLUGGABLE_MIN;
 module_param(qcaspi_pluggable, int, 0);
 MODULE_PARM_DESC(qcaspi_pluggable, "Pluggable SPI connection (yes/no).");
 
+static int qcaspi_verify;
+module_param(qcaspi_verify, int, 0);
+MODULE_PARM_DESC(qcaspi_verify, "Verify buffer size reads (yes/no).");
+
 #define QCASPI_MTU QCAFRM_ETHMAXMTU
 #define QCASPI_TX_TIMEOUT (1 * HZ)
 #define QCASPI_QCA7K_REBOOT_TIME_MS 1000
@@ -236,7 +240,7 @@ static int
 qcaspi_transmit(struct qcaspi *qca)
 {
 	struct net_device_stats *n_stats = &qca->net_dev->stats;
-	u16 available = 0;
+	u16 available = 0, available2 = 0;
 	u32 pkt_len;
 	u16 new_head;
 	u16 packets = 0;
@@ -246,6 +250,13 @@ qcaspi_transmit(struct qcaspi *qca)
 
 	qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
 	qca->tx_available = available;
+
+	if (qcaspi_verify) {
+		qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available2);
+		if ((available != available2) && net_ratelimit())
+			netdev_warn(qca->net_dev, "SPI_REG_WRBUF_SPC_AVA verify failed: %04x vs %04x\n",
+				    available, available2);
+	}
 
 	while (qca->txr.skb[qca->txr.head]) {
 		pkt_len = qca->txr.skb[qca->txr.head]->len + QCASPI_HW_PKT_LEN;
@@ -291,7 +302,7 @@ qcaspi_receive(struct qcaspi *qca)
 {
 	struct net_device *net_dev = qca->net_dev;
 	struct net_device_stats *n_stats = &net_dev->stats;
-	u16 available = 0;
+	u16 available = 0, available2 = 0;
 	u32 bytes_read;
 	u8 *cp;
 
@@ -310,6 +321,14 @@ qcaspi_receive(struct qcaspi *qca)
 	/* Read the packet size. */
 	qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
 	qca->rx_available = available;
+
+	if (qcaspi_verify) {
+		qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available2);
+		if ((available != available2) && net_ratelimit())
+			netdev_warn(net_dev, "SPI_REG_RDBUF_BYTE_AVA verify failed: %04x vs %04x\n",
+				    available, available2);
+	}
+
 	netdev_dbg(net_dev, "qcaspi_receive: SPI_REG_RDBUF_BYTE_AVA: Value: %08x\n",
 		   available);
 
