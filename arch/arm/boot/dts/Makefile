@@ -400,6 +400,7 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 dtb-$(CONFIG_SOC_IMX6ULL) += \
 	imx6ull-tarragon.dtb \
 	imx6ull-tarragon-init.dtb \
+	imx6ull-tarragon-master.dtb \
 	imx6ull-tarragon-mfg.dtb \
 	imx6ull-tarragon-mmctest.dtb \
 	imx6ull-tarragon-sd.dtb \
