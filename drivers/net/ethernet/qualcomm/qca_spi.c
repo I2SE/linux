@@ -81,6 +81,7 @@ static void
 start_spi_intr_handling(struct qcaspi *qca, u16 *intr_cause)
 {
 	*intr_cause = 0;
+	qca->spi_intr = 0;
 
 	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, 0);
 	qcaspi_read_register(qca, SPI_REG_INTR_CAUSE, intr_cause);
@@ -94,6 +95,8 @@ end_spi_intr_handling(struct qcaspi *qca, u16 intr_cause)
 			   SPI_INT_PKT_AVLBL |
 			   SPI_INT_RDBUF_ERR |
 			   SPI_INT_WRBUF_ERR);
+
+	qca->spi_intr = 1;
 
 	qcaspi_write_register(qca, SPI_REG_INTR_CAUSE, intr_cause);
 	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, intr_enable);

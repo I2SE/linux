@@ -116,6 +116,8 @@ qcaspi_info_show(struct seq_file *s, void *what)
 		   qca->intr_req);
 	seq_printf(s, "INTR SVC         : %u\n",
 		   qca->intr_svc);
+	seq_printf(s, "SPI INTR         : %u\n",
+		   qca->spi_intr);
 
 	seq_printf(s, "SPI max speed    : %lu\n",
 		   (unsigned long)qca->spi_dev->max_speed_hz);

@@ -100,6 +100,7 @@ struct qcaspi {
 
 	u16 rx_available;
 	u16 tx_available;
+	u8 spi_intr;
 
 #ifdef CONFIG_DEBUG_FS
 	struct dentry *device_root;
