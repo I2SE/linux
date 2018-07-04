@@ -89,7 +89,6 @@
 	pinctrl-0 = <&pinctrl_adc_motor &pinctrl_adc_cp &pinctrl_adc_pp>;
 	vref-supply = <&vgen1_reg>;
 	num-channels = <6>;
-	status = "okay";
 };
 
 &cpu0 {
@@ -552,19 +551,16 @@
 &pwm2 { // new
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_dig_in_ref>;
-	status = "okay";
 };
 
 &pwm8 { // keep
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_cp>;
-	status = "okay";
 };
 
 &uart1 { // modified
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_1>; // isolated
-	status = "okay";
 };
 
 &uart4 { // keep
@@ -577,7 +573,6 @@
 &uart6 { // new
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_stm32>;
-	status = "okay";
 };
 
 &usbotg1 { // keep

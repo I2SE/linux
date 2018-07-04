@@ -13,6 +13,10 @@
 	};
 };
 
+&adc1 {
+	status = "okay";
+};
+
 &ecspi2 { // keep
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -226,15 +230,31 @@
 		     &pinctrl_dig_in>;
 };
 
+&pwm2 {
+	status = "okay";
+};
+
 &pwm7 { // keep
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_fan>;
 	status = "okay";
 };
 
+&pwm8 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
 &uart5 { // new
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_2>; // coupled
+	status = "okay";
+};
+
+&uart6 {
 	status = "okay";
 };
 
