@@ -163,13 +163,13 @@ static const u32 vf610_hw_avgs[] = { 1, 4, 8, 16, 32 };
 	.info_mask_separate = BIT(IIO_CHAN_INFO_PROCESSED),	\
 }
 
-static const struct iio_chan_spec vf610_adc_iio_channels[] = {
+static struct iio_chan_spec vf610_adc_iio_channels[] = {
 	VF610_ADC_CHAN(0, IIO_VOLTAGE),
 	VF610_ADC_CHAN(1, IIO_VOLTAGE),
 	VF610_ADC_CHAN(2, IIO_VOLTAGE),
 	VF610_ADC_CHAN(3, IIO_VOLTAGE),
-	VF610_ADC_CHAN(5, IIO_VOLTAGE),
 	VF610_ADC_CHAN(4, IIO_VOLTAGE),
+	VF610_ADC_CHAN(5, IIO_VOLTAGE),
 	VF610_ADC_CHAN(6, IIO_VOLTAGE),
 	VF610_ADC_CHAN(7, IIO_VOLTAGE),
 	VF610_ADC_CHAN(8, IIO_VOLTAGE),
@@ -607,8 +607,6 @@ static int vf610_adc_probe(struct platform_device *pdev)
 	int ret;
 	u32 channels;
 
-	pr_info("VF610 ADC probe start\n");
-
 	indio_dev = devm_iio_device_alloc(&pdev->dev, sizeof(struct vf610_adc));
 	if (!indio_dev) {
 		dev_err(&pdev->dev, "Failed allocating iio device\n");
@@ -675,6 +673,12 @@ static int vf610_adc_probe(struct platform_device *pdev)
 	if (ret)
 		channels = ARRAY_SIZE(vf610_adc_iio_channels);
 
+	if (channels == 5) {
+		/* HACK for Tarragon V0R2 */
+		vf610_adc_iio_channels[4].channel = 5;
+		vf610_adc_iio_channels[5].channel = 4;
+	}
+
 	indio_dev->name = dev_name(&pdev->dev);
 	indio_dev->dev.parent = &pdev->dev;
 	indio_dev->dev.of_node = pdev->dev.of_node;
@@ -698,8 +702,6 @@ static int vf610_adc_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Couldn't register the device.\n");
 		goto error_iio_device_register;
 	}
-
-	pr_info("VF610 ADC probe success\n");
 
 	return 0;
 
