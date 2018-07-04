@@ -83,7 +83,7 @@ start_spi_intr_handling(struct qcaspi *qca, u16 *intr_cause)
 	*intr_cause = 0;
 	qca->spi_intr = 0;
 
-	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, 0);
+	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, 0, qcaspi_verify);
 	qcaspi_read_register(qca, SPI_REG_INTR_CAUSE, intr_cause);
 	netdev_dbg(qca->net_dev, "interrupts: 0x%04x\n", *intr_cause);
 }
@@ -98,8 +98,8 @@ end_spi_intr_handling(struct qcaspi *qca, u16 intr_cause)
 
 	qca->spi_intr = 1;
 
-	qcaspi_write_register(qca, SPI_REG_INTR_CAUSE, intr_cause);
-	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, intr_enable);
+	qcaspi_write_register(qca, SPI_REG_INTR_CAUSE, intr_cause, 0);
+	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, intr_enable, qcaspi_verify);
 	netdev_dbg(qca->net_dev, "acking int: 0x%04x\n", intr_cause);
 }
 
@@ -219,7 +219,7 @@ qcaspi_tx_frame(struct qcaspi *qca, struct sk_buff *skb)
 
 	len = skb->len;
 
-	qcaspi_write_register(qca, SPI_REG_BFR_SIZE, len);
+	qcaspi_write_register(qca, SPI_REG_BFR_SIZE, len, qcaspi_verify);
 	if (qca->legacy_mode)
 		qcaspi_tx_cmd(qca, QCA7K_SPI_WRITE | QCA7K_SPI_EXTERNAL);
 
@@ -348,7 +348,7 @@ qcaspi_receive(struct qcaspi *qca)
 		return -1;
 	}
 
-	qcaspi_write_register(qca, SPI_REG_BFR_SIZE, available);
+	qcaspi_write_register(qca, SPI_REG_BFR_SIZE, available, qcaspi_verify);
 
 	if (qca->legacy_mode)
 		qcaspi_tx_cmd(qca, QCA7K_SPI_READ | QCA7K_SPI_EXTERNAL);
@@ -522,7 +522,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		netdev_dbg(qca->net_dev, "sync: resetting device.\n");
 		qcaspi_read_register(qca, SPI_REG_SPI_CONFIG, &spi_config);
 		spi_config |= QCASPI_SLAVE_RESET_BIT;
-		qcaspi_write_register(qca, SPI_REG_SPI_CONFIG, spi_config);
+		qcaspi_write_register(qca, SPI_REG_SPI_CONFIG, spi_config, 0);
 
 		qca->sync = QCASPI_SYNC_RESET;
 		qca->stats.trig_reset++;
@@ -684,7 +684,7 @@ qcaspi_netdev_close(struct net_device *dev)
 
 	netif_stop_queue(dev);
 
-	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, 0);
+	qcaspi_write_register(qca, SPI_REG_INTR_ENABLE, 0, qcaspi_verify);
 	free_irq(qca->spi_dev->irq, qca);
 
 	kthread_stop(qca->spi_thread);
