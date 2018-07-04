@@ -240,7 +240,7 @@ static int
 qcaspi_transmit(struct qcaspi *qca)
 {
 	struct net_device_stats *n_stats = &qca->net_dev->stats;
-	u16 available = 0, available2 = 0;
+	u16 available = 0;
 	u32 pkt_len;
 	u16 new_head;
 	u16 packets = 0;
@@ -251,11 +251,10 @@ qcaspi_transmit(struct qcaspi *qca)
 	qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
 	qca->tx_available = available;
 
-	if (qcaspi_verify) {
-		qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available2);
-		if ((available != available2) && net_ratelimit())
-			netdev_warn(qca->net_dev, "SPI_REG_WRBUF_SPC_AVA verify failed: %04x vs %04x\n",
-				    available, available2);
+	if (qcaspi_verify && (available > QCASPI_HW_BUF_LEN)) {
+		qca->stats.read_err++;
+		qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
+		qca->tx_available = available;
 	}
 
 	while (qca->txr.skb[qca->txr.head]) {
@@ -302,7 +301,7 @@ qcaspi_receive(struct qcaspi *qca)
 {
 	struct net_device *net_dev = qca->net_dev;
 	struct net_device_stats *n_stats = &net_dev->stats;
-	u16 available = 0, available2 = 0;
+	u16 available = 0;
 	u32 bytes_read;
 	u8 *cp;
 
@@ -322,11 +321,10 @@ qcaspi_receive(struct qcaspi *qca)
 	qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
 	qca->rx_available = available;
 
-	if (qcaspi_verify) {
-		qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available2);
-		if ((available != available2) && net_ratelimit())
-			netdev_warn(net_dev, "SPI_REG_RDBUF_BYTE_AVA verify failed: %04x vs %04x\n",
-				    available, available2);
+	if (qcaspi_verify && (available > QCASPI_HW_BUF_LEN)) {
+		qca->stats.read_err++;
+		qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
+		qca->rx_available = available;
 	}
 
 	netdev_dbg(net_dev, "qcaspi_receive: SPI_REG_RDBUF_BYTE_AVA: Value: %08x\n",
