@@ -69,9 +69,11 @@ static int qcaspi_pluggable = QCASPI_PLUGGABLE_MIN;
 module_param(qcaspi_pluggable, int, 0);
 MODULE_PARM_DESC(qcaspi_pluggable, "Pluggable SPI connection (yes/no).");
 
-static int qcaspi_verify;
+#define QCASPI_VERIFY_MIN 0
+#define QCASPI_VERIFY_MAX 3
+static int qcaspi_verify = QCASPI_VERIFY_MIN;
 module_param(qcaspi_verify, int, 0);
-MODULE_PARM_DESC(qcaspi_verify, "Verify buffer size reads (yes/no).");
+MODULE_PARM_DESC(qcaspi_verify, "SPI register verify trails. Use 0-3.");
 
 #define QCASPI_MTU QCAFRM_ETHMAXMTU
 #define QCASPI_TX_TIMEOUT (1 * HZ)
@@ -264,10 +266,12 @@ qcaspi_transmit(struct qcaspi *qca)
 	qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
 	qca->tx_available = available;
 
-	if (qcaspi_verify && (available > QCASPI_HW_BUF_LEN)) {
-		qca->stats.read_err++;
-		qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
-		qca->tx_available = available;
+	if (available > QCASPI_HW_BUF_LEN) {
+		qca->stats.spi_rx_verify_failed++;
+		if (qcaspi_verify) {
+			qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
+			qca->tx_available = available;
+		}
 	}
 
 	while (qca->txr.skb[qca->txr.head]) {
@@ -334,10 +338,12 @@ qcaspi_receive(struct qcaspi *qca)
 	qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
 	qca->rx_available = available;
 
-	if (qcaspi_verify && (available > QCASPI_HW_BUF_LEN)) {
-		qca->stats.read_err++;
-		qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
-		qca->rx_available = available;
+	if (available > QCASPI_HW_BUF_LEN) {
+		qca->stats.spi_rx_verify_failed++;
+		if (qcaspi_verify) {
+			qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
+			qca->rx_available = available;
+		}
 	}
 
 	netdev_dbg(net_dev, "qcaspi_receive: SPI_REG_RDBUF_BYTE_AVA: Value: %08x\n",
@@ -911,6 +917,13 @@ qca_spi_probe(struct spi_device *spi)
 	    (qcaspi_pluggable > QCASPI_PLUGGABLE_MAX)) {
 		dev_info(&spi->dev, "Invalid pluggable: %d\n",
 			 qcaspi_pluggable);
+		return -EINVAL;
+	}
+
+	if ((qcaspi_verify < QCASPI_VERIFY_MIN) ||
+	    (qcaspi_verify > QCASPI_VERIFY_MAX)) {
+		dev_info(&spi->dev, "Invalid verify: %d\n",
+			 qcaspi_verify);
 		return -EINVAL;
 	}
 
