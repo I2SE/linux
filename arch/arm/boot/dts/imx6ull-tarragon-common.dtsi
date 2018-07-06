@@ -117,6 +117,18 @@
 	fsl,arm-soc-shared = <1>;
 };
 
+&flexcan1 { // new
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan1>;
+	xceiver-supply = <&reg_can_5v>;
+};
+
+&flexcan2 { // keep
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan2>;
+	xceiver-supply = <&reg_can_5v>;
+};
+
 &gpc {
 	fsl,cpu_pupscr_sw2iso = <0x1>; 
 	fsl,cpu_pupscr_sw = <0x0>;

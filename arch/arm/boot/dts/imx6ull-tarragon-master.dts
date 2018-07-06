@@ -89,17 +89,11 @@
 	};
 };
 
-&flexcan1 { // new
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_flexcan1>;
-	xceiver-supply = <&reg_can_5v>;
+&flexcan1 {
 	status = "okay";
 };
 
-&flexcan2 { // keep
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_flexcan2>;
-	xceiver-supply = <&reg_can_5v>;
+&flexcan2 {
 	status = "okay";
 };
 
