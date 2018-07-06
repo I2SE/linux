@@ -60,6 +60,8 @@ static const char qcaspi_gstrings_stats[][ETH_GSTRING_LEN] = {
 	"Write buffer misses",
 	"Transmit ring full",
 	"SPI errors",
+	"SPI rx verify errors",
+	"SPI tx verify errors",
 };
 
 #ifdef CONFIG_DEBUG_FS
