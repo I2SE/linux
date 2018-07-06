@@ -117,6 +117,33 @@
 	fsl,arm-soc-shared = <1>;
 };
 
+&ecspi2 { // keep
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_qca7000_cp_spi>;
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio1 29 0>;
+};
+
+&ecspi4 { // new
+	#address-cells = <1>;
+	#size-cells = <0>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_qca7000_mains_spi>;
+	fsl,spi-num-chipselects = <1>;
+	cs-gpios = <&gpio2 15 0>; // modified
+};
+
+&fec1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_enet1 &pinctrl_enet1_phy_rst &pinctrl_enet_mdio>;
+	phy-supply = <&reg_dcdc_3v3>;
+	phy-mode = "rmii";
+	phy-reset-gpios = <&gpio5 6 GPIO_ACTIVE_LOW>;
+	phy-reset-duration = <25>;
+};
+
 &flexcan1 { // new
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
