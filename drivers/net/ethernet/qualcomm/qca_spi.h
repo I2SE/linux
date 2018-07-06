@@ -73,6 +73,8 @@ struct qcaspi_stats {
 	u64 write_buf_miss;
 	u64 ring_full;
 	u64 spi_err;
+	u64 spi_rx_verify_failed;
+	u64 spi_tx_verify_failed;
 };
 
 struct qcaspi {
