@@ -190,14 +190,13 @@
 		reg = <0x18>;
 	};
 
-	/*
 	iis328dq@19 {
-		compatible = "st,iis328dq", "st,lis3lv02d";
+		compatible = "st,lis331dlh-accel", "st,lis3lv02d";
 		reg = <0x19>;
 		Vdd-supply = <&reg_dcdc_3v3>;
 		Vdd_IO-supply = <&reg_dcdc_3v3>;
 		interrupt-parent = <&gpio5>;
-		interrupts = <5 0>; // INT1
+		interrupts = <5 IRQ_TYPE_EDGE_RISING>; // INT1
 
 		st,click-single-x;
 		st,click-single-y;
@@ -206,7 +205,6 @@
 		st,click-thresh-y = <10>;
 		st,click-thresh-z = <10>;
 		st,irq1-click;
-		st,irq2-click;
 		st,wakeup-x-lo;
 		st,wakeup-x-hi;
 		st,wakeup-y-lo;
@@ -220,7 +218,6 @@
 		st,max-limit-y = <550>;
 		st,max-limit-z = <750>;
 	};
-	*/
 };
 
 &iomuxc {
