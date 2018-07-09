@@ -179,7 +179,7 @@
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_board_var &pinctrl_push_pull_cfg
-		     &rotary_switch1 &rotary_switch2>;
+		     &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
 
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
