@@ -314,13 +314,6 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	u32 nr, j, i = 0;
 	u32 vpu_axi_rate = 0;
 
-	if (of_property_read_bool(np, "fsl,prototype")) {
-		/* Hack to make prototypes run */
-		arm_reg = ERR_PTR(-ENOENT);
-		soc_reg = ERR_PTR(-ENOENT);
-		return 0;
-	}
-
 	cpu_dev = get_cpu_device(0);
 	if (!cpu_dev) {
 		pr_err("failed to get cpu0 device\n");
@@ -331,6 +324,13 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	if (!np) {
 		dev_err(cpu_dev, "failed to find cpu0 node\n");
 		return -ENOENT;
+	}
+
+	if (of_property_read_bool(np, "fsl,prototype")) {
+		/* Hack to make prototypes run */
+		arm_reg = ERR_PTR(-ENOENT);
+		soc_reg = ERR_PTR(-ENOENT);
+		return 0;
 	}
 
 	arm_clk = devm_clk_get(cpu_dev, "arm");
