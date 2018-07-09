@@ -42,6 +42,10 @@
 	};
 };
 
+&cpu0 {
+	fsl,prototype;
+};
+
 &usbotg1 {
 	dr_mode = "host";
 	status = "okay";

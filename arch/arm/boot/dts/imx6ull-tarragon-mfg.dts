@@ -42,6 +42,10 @@
 	};
 };
 
+&cpu0 {
+	fsl,prototype;
+};
+
 &iomuxc {
 	pinctrl-0 = <&pinctrl_push_pull_cfg>;
 };
