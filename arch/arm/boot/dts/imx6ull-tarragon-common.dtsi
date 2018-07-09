@@ -45,10 +45,9 @@
 			linux,default-trigger = "timer";
 		};
 
-		led2 {			/* CAN traffic */
+		led2 {
 			label = "evse:yellow:led2";
 			gpios = <&gpio3 15 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "can0-rx";
 		};
 
 		led3 {			/* Heartbeat */
