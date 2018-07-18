@@ -168,11 +168,6 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_i2c4>;
 	status = "okay";
-
-	atecc508@60 {
-		// compatible = "atmel,atecc508";
-		reg = <0x60>;
-	};
 };
 
 &iomuxc {
