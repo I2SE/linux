@@ -46,7 +46,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_qca7000_mains_int &pinctrl_qca7000_mains_rst &pinctrl_qca7000_mains_btld>;
 		interrupt-parent = <&gpio5>;
-		interrupts = <19 IRQ_TYPE_EDGE_RISING>; // FIXME
+		interrupts = <9 IRQ_TYPE_EDGE_RISING>;
 		spi-cpha;
 		spi-cpol;
 		spi-max-frequency = <16000000>;
