@@ -34,29 +34,6 @@
 		};
 	};
 
-	leds { // modified
-		compatible = "gpio-leds";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_debug_leds>;
-
-		led1 {			/* Boot process */
-			label = "evse:green:led1";
-			gpios = <&gpio3 14 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "timer";
-		};
-
-		led2 {
-			label = "evse:yellow:led2";
-			gpios = <&gpio3 15 GPIO_ACTIVE_HIGH>;
-		};
-
-		led3 {			/* Heartbeat */
-			label = "evse:red:led3";
-			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "heartbeat";
-		};
-	};
-
 	emmc_pwrseq: emmc-pwrseq {
 		compatible = "mmc-pwrseq-emmc";
 		pinctrl-0 = <&pinctrl_emmc_rst>;
