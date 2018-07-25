@@ -103,6 +103,7 @@
 	arm-supply = <&sw1_reg>;
 	soc-supply = <&sw1_reg>;
 	fsl,arm-soc-shared = <1>;
+	fsl,prototype;
 };
 
 &fec1 {

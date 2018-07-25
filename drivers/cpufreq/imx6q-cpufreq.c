@@ -114,20 +114,20 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 		if (!IS_ERR(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg, imx6_soc_volt[index], 0);
 			if (ret) {
-				dev_err(cpu_dev, "failed to scale vddpu up: %d\n", ret);
+				dev_err_once(cpu_dev, "failed to scale vddpu up: %d\n", ret);
 				mutex_unlock(&set_cpufreq_lock);
 				return ret;
 			}
 		}
 		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
 		if (ret) {
-			dev_err(cpu_dev, "failed to scale vddsoc up: %d\n", ret);
+			dev_err_once(cpu_dev, "failed to scale vddsoc up: %d\n", ret);
 			mutex_unlock(&set_cpufreq_lock);
 			return ret;
 		}
 		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
 		if (ret) {
-			dev_err(cpu_dev,
+			dev_err_once(cpu_dev,
 				"failed to scale vddarm up: %d\n", ret);
 			mutex_unlock(&set_cpufreq_lock);
 			return ret;
@@ -200,19 +200,19 @@ static int imx6q_set_target(struct cpufreq_policy *policy, unsigned int index)
 	if (new_freq < old_freq) {
 		ret = regulator_set_voltage_tol(arm_reg, volt, 0);
 		if (ret) {
-			dev_warn(cpu_dev,
+			dev_warn_once(cpu_dev,
 				 "failed to scale vddarm down: %d\n", ret);
 			ret = 0;
 		}
 		ret = regulator_set_voltage_tol(soc_reg, imx6_soc_volt[index], 0);
 		if (ret) {
-			dev_warn(cpu_dev, "failed to scale vddsoc down: %d\n", ret);
+			dev_warn_once(cpu_dev, "failed to scale vddsoc down: %d\n", ret);
 			ret = 0;
 		}
 		if (!IS_ERR(pu_reg)) {
 			ret = regulator_set_voltage_tol(pu_reg, imx6_soc_volt[index], 0);
 			if (ret) {
-				dev_warn(cpu_dev, "failed to scale vddpu down: %d\n", ret);
+				dev_warn_once(cpu_dev, "failed to scale vddpu down: %d\n", ret);
 				ret = 0;
 			}
 		}
@@ -319,11 +319,6 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	u32 nr, j, i = 0;
 	u32 vpu_axi_rate = 0;
 
-	/* FIXME Hack to make prototypes run */
-	arm_reg = ERR_PTR(-ENOENT);
-	soc_reg = ERR_PTR(-ENOENT);
-	return 0;
-
 	cpu_dev = get_cpu_device(0);
 	if (!cpu_dev) {
 		pr_err("failed to get cpu0 device\n");
@@ -334,6 +329,13 @@ static int imx6q_cpufreq_probe(struct platform_device *pdev)
 	if (!np) {
 		dev_err(cpu_dev, "failed to find cpu0 node\n");
 		return -ENOENT;
+	}
+
+	if (of_property_read_bool(np, "fsl,prototype")) {
+		/* Hack to make prototypes run */
+		arm_reg = ERR_PTR(-ENOENT);
+		soc_reg = ERR_PTR(-ENOENT);
+		return 0;
 	}
 
 	arm_clk = clk_get(cpu_dev, "arm");
