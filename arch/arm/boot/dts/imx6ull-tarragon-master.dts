@@ -1,0 +1,203 @@
+#include "imx6ull-tarragon-common.dtsi"
+#include "imx6ull-tarragon-pmic.dtsi"
+
+/ {
+	model = "I2SE Tarragon Master";
+	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
+
+	leds { // modified
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_debug_leds>;
+
+		led1 {			/* Boot process */
+			label = "evse:green:led1";
+			gpios = <&gpio3 14 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "timer";
+		};
+
+		led2 {
+			label = "evse:yellow:led2";
+			gpios = <&gpio3 15 GPIO_ACTIVE_HIGH>;
+		};
+
+		led3 {			/* Heartbeat */
+			label = "evse:red:led3";
+			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
+
+	/* Temporary disabled
+	fan0: pwm-fan {
+		compatible = "pwm-fan";
+		pwms = <&pwm7 0 40000 PWM_POLARITY_INVERTED>;
+		enable-gpios = <&gpio3 5 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
+	};
+	*/
+};
+
+&adc1 {
+	status = "okay";
+};
+
+&ecspi2 { // keep
+	status = "okay";
+
+	qca7000_cp: ethernet@0 {
+		reg = <0x0>;
+		compatible = "qca,qca7000";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_qca7000_cp_int &pinctrl_qca7000_cp_rst &pinctrl_qca7000_cp_btld>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <19 IRQ_TYPE_EDGE_RISING>;
+		spi-cpha;
+		spi-cpol;
+		spi-max-frequency = <16000000>;
+		intr-gpios = <&gpio2 19 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+&ecspi4 { // new
+	status = "okay";
+
+	qca7000_mains: ethernet@0 {
+		reg = <0x0>;
+		compatible = "qca,qca7000";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_qca7000_mains_int &pinctrl_qca7000_mains_rst &pinctrl_qca7000_mains_btld>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <9 IRQ_TYPE_EDGE_RISING>;
+		spi-cpha;
+		spi-cpol;
+		spi-max-frequency = <16000000>;
+		intr-gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>; // modified
+	};
+};
+
+&fec1 {
+	phy-handle = <&ethphy0>;
+	status = "okay";
+
+	mdio {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		ethphy0: ethernet-phy@0 {
+			compatible = "ethernet-phy-ieee802.3-c22";
+			reg = <0>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&pinctrl_enet1_phy_int>;
+			interrupt-parent = <&gpio2>;
+			interrupts = <7 IRQ_TYPE_EDGE_FALLING>;
+			max-speed = <100>;
+		};
+	};
+};
+
+&flexcan1 {
+	status = "okay";
+};
+
+&flexcan2 {
+	status = "okay";
+};
+
+&i2c4 {
+	ds2484@18 {
+		compatible = "dallas,ds2482";
+		reg = <0x18>;
+	};
+
+	iis328dq@19 {
+		compatible = "st,lis331dlh-accel", "st,lis3lv02d";
+		reg = <0x19>;
+		Vdd-supply = <&reg_dcdc_3v3>;
+		Vdd_IO-supply = <&reg_dcdc_3v3>;
+		interrupt-parent = <&gpio5>;
+		interrupts = <5 IRQ_TYPE_EDGE_RISING>; // INT1
+
+		st,click-single-x;
+		st,click-single-y;
+		st,click-single-z;
+		st,click-thresh-x = <10>;
+		st,click-thresh-y = <10>;
+		st,click-thresh-z = <10>;
+		st,irq1-click;
+		st,wakeup-x-lo;
+		st,wakeup-x-hi;
+		st,wakeup-y-lo;
+		st,wakeup-y-hi;
+		st,wakeup-z-lo;
+		st,wakeup-z-hi;
+		st,min-limit-x = <120>;
+		st,min-limit-y = <120>;
+		st,min-limit-z = <140>;
+		st,max-limit-x = <550>;
+		st,max-limit-y = <550>;
+		st,max-limit-z = <750>;
+	};
+};
+
+&iomuxc {
+	pinctrl-0 = <&pinctrl_hog_pins
+		     &pinctrl_gpio_motor
+		     &pinctrl_push_pull_cfg
+		     &pinctrl_dig_in>;
+};
+
+&pwm2 {
+	status = "okay";
+};
+
+&pwm7 { // keep
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_pwm_fan>;
+	status = "okay";
+};
+
+&pwm8 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "okay";
+};
+
+&uart5 { // new
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_rs485_2>; // coupled
+	status = "okay";
+};
+
+&uart6 {
+	status = "okay";
+};
+
+&uart7 { // new
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ext_uart>;
+	status = "okay";
+};
+
+&usbotg1 {
+	dr_mode = "host";
+	status = "okay";
+};
+
+&usdhc2 { // modified
+	pinctrl-names = "default";
+	// pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
+	// pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
+	// pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
+	bus-width = <8>;
+	broken-cd;
+	non-removable;
+	// vmmc-supply = <&sw2_reg>;
+	// vqmmc-supply = <&vgen6_reg>;
+	// mmc-pwrseq = <&emmc_pwrseq>;
+	status = "okay";
+};

@@ -510,10 +510,13 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 dtb-$(CONFIG_SOC_IMX6ULL) += \
 	imx6ull-tarragon.dtb \
 	imx6ull-tarragon-init.dtb \
+	imx6ull-tarragon-master.dtb \
 	imx6ull-tarragon-mfg.dtb \
+	imx6ull-tarragon-micro.dtb \
 	imx6ull-tarragon-mmctest.dtb \
 	imx6ull-tarragon-sd.dtb \
 	imx6ull-tarragon-sd-mfg.dtb \
+	imx6ull-tarragon-slave.dtb \
 	imx6ull-14x14-ddr3-arm2.dtb \
 	imx6ull-14x14-ddr3-arm2-adc.dtb \
 	imx6ull-14x14-ddr3-arm2-cs42888.dtb \

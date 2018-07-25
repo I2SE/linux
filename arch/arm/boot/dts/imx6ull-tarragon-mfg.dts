@@ -1,6 +1,9 @@
-#include "imx6ull-tarragon.dtsi"
+#include "imx6ull-tarragon-common.dtsi"
 
 / {
+	model = "I2SE Tarragon Mfgtool";
+	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
+
 	/* Values take from PF3001 datasheet
 	 * OTP configuration: A7
 	 */
@@ -39,11 +42,16 @@
 	};
 };
 
+&cpu0 {
+	fsl,prototype;
+};
+
 &iomuxc {
-	pinctrl-0 = <&pinctrl_hog_pins
-		     &pinctrl_gpio_motor
-		     &pinctrl_push_pull_cfg
-		     &pinctrl_dig_in>;
+	pinctrl-0 = <&pinctrl_push_pull_cfg>;
+};
+
+&iomuxc_snvs {
+	pinctrl-0 = <&init_GPIO_pinsSnvs>;
 };
 
 &usbotg1 {
@@ -52,17 +60,9 @@
 };
 
 &usdhc2 {
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
-	pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
-	pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
-	bus-width = <8>;
-	// mmc-ddr-1_8v;
-	// mmc-hs200-1_8v;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_sd>;
+	bus-width = <4>;
 	broken-cd;
-	non-removable;
-	// vmmc-supply = <&sw2_reg>;
-	// vqmmc-supply = <&vgen6_reg>;
-	// mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
