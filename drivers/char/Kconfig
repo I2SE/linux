@@ -92,8 +92,9 @@ config BFIN_OTP_WRITE_ENABLE
 	  If unsure, say N.
 
 config FSL_OTP
-	tristate "Freescale On-Chip OTP Memory Support"
+	tristate "Freescale i.MX6/7 On-Chip OTP Memory Support"
 	depends on HAS_IOMEM && OF
+	depends on !SOC_IMX28
 	help
 	  If you say Y here, you will get support for a character device
 	  interface into the One Time Programmable memory pages that are
@@ -105,6 +106,19 @@ config FSL_OTP
 	  will be called fsl_otp.
 
 	  If unsure, it is safe to say Y.
+
+config MX28_OTP
+	tristate "Freescale i.MX28 On-Chip OTP Memory Support"
+	depends on SOC_IMX28
+	help
+	  If you say Y here, you will get support for a SysFS interface for
+	  the One Time Programmable memory pages that are stored on the
+	  i.MX28 processor.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called mx28_otp.
+
+	  If unsure, it is safe to say N.
 
 config PRINTER
 	tristate "Parallel printer support"
