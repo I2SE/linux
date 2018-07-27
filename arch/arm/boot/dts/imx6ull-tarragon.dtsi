@@ -16,6 +16,11 @@
 	model = "I2SE Tarragon";
 	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
 
+	aliases {
+		mmc0 = &usdhc2;
+		mmc1 = &usdhc1;
+	};
+
 	chosen {
 		stdout-path = &uart4;
 	};

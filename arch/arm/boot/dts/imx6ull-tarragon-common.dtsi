@@ -13,6 +13,11 @@
 #include "imx6ull.dtsi"
 
 / {
+	aliases {
+		mmc0 = &usdhc2;
+		mmc1 = &usdhc1;
+	};
+
 	chosen {
 		stdout-path = &uart4;
 	};
