@@ -70,16 +70,15 @@
 };
 
 &usdhc2 { // modified
-	pinctrl-names = "default";
-	// pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
-	// pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
-	// pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
-	bus-width = <8>;
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
+	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;
+	pinctrl-2 = <&pinctrl_usdhc2_4bit_200MHz>;
+	bus-width = <4>;
 	broken-cd;
 	non-removable;
-	// vmmc-supply = <&sw2_reg>;
-	// vqmmc-supply = <&vgen6_reg>;
-	// mmc-pwrseq = <&emmc_pwrseq>;
+	vmmc-supply = <&sw2_reg>;
+	vqmmc-supply = <&vgen6_reg>;
+	mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
