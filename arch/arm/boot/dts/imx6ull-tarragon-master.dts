@@ -28,7 +28,6 @@
 		};
 	};
 
-	/* Temporary disabled
 	fan0: pwm-fan {
 		compatible = "pwm-fan";
 		pwms = <&pwm7 0 40000 PWM_POLARITY_INVERTED>;
@@ -36,7 +35,6 @@
 		interrupt-parent = <&gpio5>;
 		interrupts = <1 IRQ_TYPE_EDGE_FALLING>;
 	};
-	*/
 };
 
 &adc1 {
