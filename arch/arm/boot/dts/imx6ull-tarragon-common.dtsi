@@ -571,8 +571,8 @@
 		pinctrl_relay_senseSnvs: pinctrl_relay_senseSnvsGrp { // modified
 		    fsl,pins = <
 			/* relay 1/2 feedback: disable keeper */
+			MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02        0x00b0
 			MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03        0x00b0
-			MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02        0x00b0			
 		    >;
 		};
 
