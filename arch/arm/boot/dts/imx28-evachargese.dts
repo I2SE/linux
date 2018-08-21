@@ -271,10 +271,6 @@
 				ethphy: ethernet-phy@0 {
 					compatible = "ethernet-phy-ieee802.3-c22";
 					reg = <0>;
-					pinctrl-names = "default";
-					pinctrl-0 = <&mac0_phy_int_pin>;
-					interrupt-parent = <&gpio4>;
-					interrupts = <5 IRQ_TYPE_EDGE_FALLING>;
 					max-speed = <100>;
 				};
 			};
