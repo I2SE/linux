@@ -1020,7 +1020,7 @@ static int i2c_imx_init_recovery_info(struct imx_i2c_struct *i2c_imx,
 		return 0;
 	}
 
-	dev_dbg(&pdev->dev, "using scl-gpio %d and sda-gpio %d for recovery\n",
+	dev_info(&pdev->dev, "using scl-gpio %d and sda-gpio %d for recovery\n",
 			rinfo->sda_gpio, rinfo->scl_gpio);
 
 	rinfo->prepare_recovery = i2c_imx_prepare_recovery;
