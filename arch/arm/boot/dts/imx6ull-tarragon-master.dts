@@ -178,7 +178,6 @@
 	broken-cd;
 	non-removable;
 	vmmc-supply = <&sw2_reg>;
-	vqmmc-supply = <&vgen3_reg>; // pfuze driver doesn't support voltage switching
 	mmc-pwrseq = <&emmc_pwrseq>;
 	status = "okay";
 };
