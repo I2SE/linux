@@ -634,3 +634,11 @@
 	fsl,tx-cal-45-dp-ohms = <30>;
 	tx-d-cal = <0x7>;
 };
+
+&usdhc2 { // modified
+	bus-width = <4>;
+	broken-cd;
+	non-removable;
+	only-1-8-v;
+	status = "okay";
+};

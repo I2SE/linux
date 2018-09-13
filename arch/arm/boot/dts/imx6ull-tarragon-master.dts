@@ -174,10 +174,6 @@
 	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
 	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;
 	pinctrl-2 = <&pinctrl_usdhc2_4bit_200MHz>;
-	bus-width = <4>;
-	broken-cd;
-	non-removable;
 	vmmc-supply = <&sw2_reg>;
 	mmc-pwrseq = <&emmc_pwrseq>;
-	status = "okay";
 };

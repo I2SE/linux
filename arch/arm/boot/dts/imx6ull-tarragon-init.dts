@@ -54,7 +54,4 @@
 &usdhc2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
-	bus-width = <4>;
-	broken-cd;
-	status = "okay";
 };
