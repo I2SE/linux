@@ -1172,6 +1172,11 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
 	else
 		boarddata->support_vsel = true;
 
+	if (of_get_property(np, "only-1-8-v", NULL)) {
+		boarddata->support_vsel = true;
+		host->quirks2 |= SDHCI_QUIRK2_FORCE_1_8_V;
+	}
+
 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
 		boarddata->delay_line = 0;
 

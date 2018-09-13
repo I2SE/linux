@@ -218,6 +218,13 @@ static void sdhci_do_reset(struct sdhci_host *host, u8 mask)
 static void sdhci_init(struct sdhci_host *host, int soft)
 {
 	struct mmc_host *mmc = host->mmc;
+	u16 ctrl;
+
+	if (host->quirks2 & SDHCI_QUIRK2_FORCE_1_8_V) {
+		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+		ctrl |= SDHCI_CTRL_VDD_180;
+		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+	}
 
 	if (soft)
 		sdhci_do_reset(host, SDHCI_RESET_CMD|SDHCI_RESET_DATA);
@@ -3543,6 +3550,12 @@ int sdhci_setup_host(struct sdhci_host *host)
 	 * Maximum block count.
 	 */
 	mmc->max_blk_count = (host->quirks & SDHCI_QUIRK_NO_MULTIBLOCK) ? 1 : 65535;
+
+	if (host->quirks2 & SDHCI_QUIRK2_FORCE_1_8_V) {
+		host->flags &= ~SDHCI_SIGNALING_330;
+		mmc->ios.signal_voltage = MMC_SIGNAL_VOLTAGE_180;
+		sdhci_start_signal_voltage_switch(mmc, &mmc->ios);
+	}
 
 	return 0;
 
