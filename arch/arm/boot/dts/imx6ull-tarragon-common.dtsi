@@ -43,7 +43,7 @@
 		compatible = "mmc-pwrseq-emmc";
 		pinctrl-0 = <&pinctrl_emmc_rst>;
 		pinctrl-names = "default";
-		reset-gpios = <&gpio1 9 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpio4 10 GPIO_ACTIVE_LOW>;
 	};
 
 	reg_can_5v: regulator-can-5v {
@@ -475,7 +475,7 @@
 
 		pinctrl_emmc_rst: pinctrl_emmc_rstGrp { // modified
 			fsl,pins = <
-				MX6UL_PAD_NAND_ALE__USDHC2_RESET_B	0x40017059
+				MX6UL_PAD_NAND_ALE__GPIO4_IO10		0x400000b0
 			>;
 		};
 
