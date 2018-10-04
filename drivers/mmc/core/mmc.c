@@ -355,6 +355,16 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
 	}
 }
 
+static int mmc_can_reset(struct mmc_card *card)
+{
+	u8 rst_n_function;
+
+	rst_n_function = card->ext_csd.rst_n_function;
+	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
+		return 0;
+	return 1;
+}
+
 /* Minimum partition switch timeout in milliseconds */
 #define MMC_MIN_PART_SWITCH_TIME	300
 
@@ -563,6 +573,10 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
 
 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
 		card->ext_csd.rst_n_function = ext_csd[EXT_CSD_RST_N_FUNCTION];
+		if (!mmc_can_reset(card)) {
+			pr_info("%s: RST_n_FUNCTION bit is not set\n",
+				mmc_hostname(card->host));
+		}
 
 		/*
 		 * RPMB regions are defined in multiples of 128K.
@@ -2131,16 +2145,6 @@ static int mmc_runtime_resume(struct mmc_host *host)
 			mmc_hostname(host), err);
 
 	return 0;
-}
-
-static int mmc_can_reset(struct mmc_card *card)
-{
-	u8 rst_n_function;
-
-	rst_n_function = card->ext_csd.rst_n_function;
-	if ((rst_n_function & EXT_CSD_RST_N_EN_MASK) != EXT_CSD_RST_N_ENABLED)
-		return 0;
-	return 1;
 }
 
 static int _mmc_hw_reset(struct mmc_host *host)
