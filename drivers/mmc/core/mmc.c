@@ -552,6 +552,9 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
 		}
 
 		card->ext_csd.rel_param = ext_csd[EXT_CSD_WR_REL_PARAM];
+		pr_info("%s: WR_REL_SET = %02x\n", mmc_hostname(card->host),
+			ext_csd[EXT_CSD_WR_REL_SET]);
+
 		card->ext_csd.rst_n_function = ext_csd[EXT_CSD_RST_N_FUNCTION];
 		if (!mmc_can_reset(card)) {
 			pr_info("%s: RST_n_FUNCTION bit is not set\n",
