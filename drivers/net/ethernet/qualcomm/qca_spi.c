@@ -263,9 +263,11 @@ qcaspi_transmit(struct qcaspi *qca)
 	qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
 
 	if (available > QCASPI_HW_BUF_LEN) {
+		/* This could only happen by interferences on the SPI line.
+		 * So retry later ...
+		 */
 		qca->stats.spi_rx_verify_failed++;
-		if (qcaspi_verify)
-			qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA, &available);
+		return -1;
 	}
 
 	while (qca->txr.skb[qca->txr.head]) {
@@ -330,16 +332,16 @@ qcaspi_receive(struct qcaspi *qca)
 	/* Read the packet size. */
 	qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
 
-	if (available > QCASPI_HW_BUF_LEN) {
-		qca->stats.spi_rx_verify_failed++;
-		if (qcaspi_verify)
-			qcaspi_read_register(qca, SPI_REG_RDBUF_BYTE_AVA, &available);
-	}
-
 	netdev_dbg(net_dev, "qcaspi_receive: SPI_REG_RDBUF_BYTE_AVA: Value: %08x\n",
 		   available);
 
-	if (available == 0) {
+	if (available > QCASPI_HW_BUF_LEN) {
+		/* This could only happen by interferences on the SPI line.
+		 * So retry later ...
+		 */
+		qca->stats.spi_rx_verify_failed++;
+		return -1;
+	} else if (available == 0) {
 		netdev_dbg(net_dev, "qcaspi_receive called without any data being available!\n");
 		return -1;
 	}
