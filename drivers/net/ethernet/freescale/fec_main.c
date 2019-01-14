@@ -74,6 +74,7 @@
 
 static void set_multicast_list(struct net_device *ndev);
 static void fec_enet_itr_coal_init(struct net_device *ndev);
+static int fec_reset_phy(struct platform_device *pdev);
 
 #define DRIVER_NAME	"fec"
 
@@ -1898,6 +1899,8 @@ static int fec_enet_clk_enable(struct net_device *ndev, bool enable)
 		ret = clk_prepare_enable(fep->clk_ref);
 		if (ret)
 			goto failed_clk_ref;
+
+		fec_reset_phy(fep->pdev);
 	} else {
 		clk_disable_unprepare(fep->clk_enet_out);
 
@@ -3323,44 +3326,55 @@ static int fec_enet_init(struct net_device *ndev)
 #ifdef CONFIG_OF
 static int fec_reset_phy(struct platform_device *pdev)
 {
-	int err, phy_reset;
-	bool active_high = false;
+	struct net_device *ndev = platform_get_drvdata(pdev);
+	struct fec_enet_private *fep = netdev_priv(ndev);
+	bool active_high;
 	int msec = 1;
 	struct device_node *np = pdev->dev.of_node;
 
-	if (!np)
+	if (!gpio_is_valid(fep->phy_reset_gpio))
 		return 0;
 
-	err = of_property_read_u32(np, "phy-reset-duration", &msec);
 	/* A sane reset duration should not be longer than 1s */
-	if (!err && msec > 1000)
+	if (!of_property_read_u32(np, "phy-reset-duration", &msec) && msec > 1000)
 		msec = 1;
-
-	phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
-	if (phy_reset == -EPROBE_DEFER)
-		return phy_reset;
-	else if (!gpio_is_valid(phy_reset))
-		return 0;
 
 	active_high = of_property_read_bool(np, "phy-reset-active-high");
 
-	err = devm_gpio_request_one(&pdev->dev, phy_reset,
-			active_high ? GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW,
-			"phy-reset");
-	if (err) {
-		dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", err);
-		return err;
-	}
+	gpio_set_value_cansleep(fep->phy_reset_gpio, active_high);
 
 	if (msec > 20)
 		msleep(msec);
 	else
 		usleep_range(msec * 1000, msec * 1000 + 1000);
 
-	gpio_set_value_cansleep(phy_reset, !active_high);
+	gpio_set_value_cansleep(fep->phy_reset_gpio, !active_high);
 
 	return 0;
 }
+
+static int fec_get_reset_gpio(struct platform_device *pdev)
+{
+	int err, phy_reset;
+	struct device_node *np = pdev->dev.of_node;
+	bool active_high;
+
+	phy_reset = of_get_named_gpio(np, "phy-reset-gpios", 0);
+	if (!gpio_is_valid(phy_reset))
+		return phy_reset;
+
+	active_high = of_property_read_bool(np, "phy-reset-active-high");
+
+	err = devm_gpio_request_one(&pdev->dev, phy_reset,
+				    active_high ? GPIOF_OUT_INIT_LOW : GPIOF_OUT_INIT_HIGH, "phy-reset");
+	if (err) {
+		dev_err(&pdev->dev, "failed to get phy-reset-gpios: %d\n", err);
+		return err;
+	}
+
+	return phy_reset;
+ }
+
 #else /* CONFIG_OF */
 static int fec_reset_phy(struct platform_device *pdev)
 {
@@ -3369,6 +3383,11 @@ static int fec_reset_phy(struct platform_device *pdev)
 	 * by machine code.
 	 */
 	return 0;
+}
+
+static inline int fec_get_reset_gpio(struct platform_device *pdev)
+{
+	return -EINVAL;
 }
 #endif /* CONFIG_OF */
 
@@ -3503,6 +3522,11 @@ fec_probe(struct platform_device *pdev)
 		fep->quirks |= FEC_QUIRK_ERR006687;
 
 	fec_enet_of_parse_stop_mode(pdev);
+
+	ret = fec_get_reset_gpio(pdev);
+	if (ret == -EPROBE_DEFER)
+		goto gpio_defer;
+	fep->phy_reset_gpio = ret;
 
 	if (of_get_property(np, "fsl,magic-packet", NULL))
 		fep->wol_flag |= FEC_WOL_HAS_MAGIC_PACKET;
@@ -3692,6 +3716,7 @@ failed_clk:
 		of_phy_deregister_fixed_link(np);
 failed_phy:
 	of_node_put(phy_node);
+gpio_defer:
 failed_ioremap:
 	free_netdev(ndev);
 

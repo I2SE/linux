@@ -560,6 +560,7 @@ struct fec_enet_private {
 	int	wake_irq;
 	u32	quirks;
 	u32	fixups;
+	int	phy_reset_gpio;
 
 	struct	napi_struct napi;
 	int	csum_flags;
