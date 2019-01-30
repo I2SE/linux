@@ -166,7 +166,8 @@ static int imx_pwm_apply_v2(struct pwm_chip *chip, struct pwm_device *pwm,
 
 	pwm_get_state(pwm, &cstate);
 
-	if (state->enabled) {
+	if ((cstate.enabled && (state->polarity == PWM_POLARITY_INVERSED)) ||
+	     state->enabled) {
 		c = clk_get_rate(imx->clk_per);
 		c *= state->period;
 
