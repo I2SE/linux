@@ -23,6 +23,7 @@
 #include <linux/of.h>
 #include <linux/platform_device.h>
 #include <linux/pwm.h>
+#include <linux/regulator/consumer.h>
 #include <linux/sysfs.h>
 #include <linux/thermal.h>
 
@@ -31,6 +32,7 @@
 struct pwm_fan_ctx {
 	struct mutex lock;
 	struct pwm_device *pwm;
+	struct regulator *reg_en;
 	unsigned int pwm_value;
 	unsigned int pwm_fan_state;
 	unsigned int pwm_fan_max_state;
@@ -227,6 +229,21 @@ static int pwm_fan_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, ctx);
 
+	ctx->reg_en = devm_regulator_get_optional(&pdev->dev, "fan");
+	if (IS_ERR(ctx->reg_en)) {
+		if (PTR_ERR(ctx->reg_en) == -ENODEV)
+			ctx->reg_en = NULL;
+		else
+			return PTR_ERR(ctx->reg_en);
+	} else {
+		ret = regulator_enable(ctx->reg_en);
+		if (ret) {
+			dev_err(&pdev->dev,
+				"Failed to enable fan supply: %d\n", ret);
+			return ret;
+		}
+	}
+
 	ctx->pwm_value = MAX_PWM;
 
 	/* Set duty cycle to maximum allowed and enable PWM output */
@@ -237,7 +254,7 @@ static int pwm_fan_probe(struct platform_device *pdev)
 	ret = pwm_apply_state(ctx->pwm, &state);
 	if (ret) {
 		dev_err(&pdev->dev, "Failed to configure PWM\n");
-		return ret;
+		goto err_reg_disable;
 	}
 
 	hwmon = devm_hwmon_device_register_with_groups(&pdev->dev, "pwmfan",
@@ -273,6 +290,9 @@ err_pwm_disable:
 	state.enabled = false;
 	pwm_apply_state(ctx->pwm, &state);
 
+err_reg_disable:
+	regulator_disable(ctx->reg_en);
+
 	return ret;
 }
 
@@ -283,6 +303,10 @@ static int pwm_fan_remove(struct platform_device *pdev)
 	thermal_cooling_device_unregister(ctx->cdev);
 	if (ctx->pwm_value)
 		pwm_disable(ctx->pwm);
+
+	if (ctx->reg_en)
+		regulator_disable(ctx->reg_en);
+
 	return 0;
 }
 
@@ -294,6 +318,12 @@ static int pwm_fan_suspend(struct device *dev)
 	int ret;
 
 	pwm_get_args(ctx->pwm, &args);
+
+	if (ctx->reg_en) {
+		ret = regulator_disable(ctx->reg_en);
+		if (ret)
+			dev_err(dev, "Failed to disable fan supply: %d\n", ret);
+	}
 
 	if (ctx->pwm_value) {
 		ret = pwm_config(ctx->pwm, 0, args.period);
@@ -312,6 +342,12 @@ static int pwm_fan_resume(struct device *dev)
 	struct pwm_args pargs;
 	unsigned long duty;
 	int ret;
+
+	if (ctx->reg_en) {
+		ret = regulator_enable(ctx->reg_en);
+		if (ret)
+			dev_err(dev, "Failed to enable fan supply: %d\n", ret);
+	}
 
 	if (ctx->pwm_value == 0)
 		return 0;
