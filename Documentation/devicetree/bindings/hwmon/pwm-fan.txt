@@ -8,6 +8,13 @@ Required properties:
 
 Optional properties:
 - fan-supply    : phandle to the regulator that provides power to the fan
+- interrupts      : This contains a single interrupt specifier which
+		    describes the tachometer output of the fan as an
+		    interrupt source. The output signal must generate a
+		    defined number of interrupts per fan revolution.
+		    See interrupt-controller/interrupts.txt for the format.
+- interrupt-ratio : defines the ratio interrupts per fan revolution as an
+		    integer (default is 2 interrupts per revolution)
 
 Example:
 	fan0: pwm-fan {
