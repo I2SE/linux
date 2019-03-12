@@ -30,7 +30,6 @@
 #include <linux/timer.h>
 
 #define MAX_PWM 255
-#define SAMPLE_TIME		1 /* seconds */
 #define PULSE_PER_REVOLUTION	2
 
 struct pwm_fan_ctx {
@@ -39,9 +38,10 @@ struct pwm_fan_ctx {
 	int en_gpio;
 
 	int irq;
-	unsigned int pulses;
+	atomic_t pulses;
 	unsigned int rpm;
-	struct timer_list sample_timer;
+	ktime_t sample_start;
+	struct timer_list rpm_timer;
 
 	unsigned int pwm_value;
 	unsigned int pwm_fan_state;
@@ -50,12 +50,14 @@ struct pwm_fan_ctx {
 	struct thermal_cooling_device *cdev;
 };
 
+/* This handler assumes self resetting edge triggered interrupt. */
 static irqreturn_t pulse_handler(int irq, void *dev_id)
 {
 	struct pwm_fan_ctx *ctx = dev_id;
 
-	if (ctx->pulses < INT_MAX / 2)
-		ctx->pulses++;
+	/* Avoid possible overflow */
+	if (atomic_read(&ctx->pulses) < 100000)
+		atomic_inc(&ctx->pulses);
 
 	return IRQ_HANDLED;
 }
@@ -63,12 +65,15 @@ static irqreturn_t pulse_handler(int irq, void *dev_id)
 static void sample_timer(unsigned long data)
 {
 	struct pwm_fan_ctx *ctx = (struct pwm_fan_ctx *)data;
-	unsigned int pulses;
+	int pulses, sample_ms;
 
-	pulses = ctx->pulses;
-	ctx->pulses -= pulses;
-	ctx->rpm = pulses * 60 / SAMPLE_TIME / PULSE_PER_REVOLUTION;
-	mod_timer(&ctx->sample_timer, jiffies + (HZ * SAMPLE_TIME));
+	pulses = atomic_read(&ctx->pulses);
+	atomic_sub(pulses, &ctx->pulses);
+	sample_ms = ktime_ms_delta(ktime_get(), ctx->sample_start);
+	ctx->rpm = pulses * 60 * sample_ms / 1000 / PULSE_PER_REVOLUTION;
+
+	ctx->sample_start = ktime_get();
+	mod_timer(&ctx->rpm_timer, jiffies + HZ);
 }
 
 static int  __set_pwm(struct pwm_fan_ctx *ctx, unsigned long pwm)
@@ -157,7 +162,32 @@ static struct attribute *pwm_fan_attrs[] = {
 	NULL,
 };
 
-ATTRIBUTE_GROUPS(pwm_fan);
+static umode_t pwm_fan_attrs_visible(struct kobject *kobj, struct attribute *a,
+				     int n)
+{
+	struct device *dev = container_of(kobj, struct device, kobj);
+	struct pwm_fan_ctx *ctx = dev_get_drvdata(dev);
+	struct device_attribute *devattr;
+
+	/* Hide fan_input in case no interrupt is available  */
+	devattr = container_of(a, struct device_attribute, attr);
+	if (devattr == &sensor_dev_attr_fan1_input.dev_attr) {
+		if (ctx->irq < 0)
+			return 0;
+	}
+
+	return a->mode;
+}
+
+static const struct attribute_group pwm_fan_group = {
+	.attrs = pwm_fan_attrs,
+	.is_visible = pwm_fan_attrs_visible,
+};
+
+static const struct attribute_group *pwm_fan_groups[] = {
+	&pwm_fan_group,
+	NULL,
+};
 
 /* thermal cooling device callbacks */
 static int pwm_fan_get_max_state(struct thermal_cooling_device *cdev,
@@ -316,8 +346,9 @@ static int pwm_fan_probe(struct platform_device *pdev)
 		}
 	}
 
-	setup_timer(&ctx->sample_timer, sample_timer, (unsigned long)ctx);
+	setup_timer(&ctx->rpm_timer, sample_timer, (unsigned long)ctx);
 
+	atomic_set(&ctx->pulses, 0);
 	ctx->irq = platform_get_irq(pdev, 0);
 	if (ctx->irq >= 0) {
 		ret = devm_request_irq(&pdev->dev, ctx->irq, pulse_handler, 0,
@@ -326,7 +357,8 @@ static int pwm_fan_probe(struct platform_device *pdev)
 			dev_err(&pdev->dev, "Can't get interrupt working.\n");
 			return ret;
 		}
-		mod_timer(&ctx->sample_timer, jiffies + (HZ * SAMPLE_TIME));
+		ctx->sample_start = ktime_get();
+		mod_timer(&ctx->rpm_timer, jiffies + HZ);
 	}
 
 	hwmon = devm_hwmon_device_register_with_groups(&pdev->dev, "pwmfan",
@@ -364,7 +396,7 @@ static int pwm_fan_remove(struct platform_device *pdev)
 	struct pwm_fan_ctx *ctx = platform_get_drvdata(pdev);
 
 	thermal_cooling_device_unregister(ctx->cdev);
-	del_timer_sync(&ctx->sample_timer);
+	del_timer_sync(&ctx->rpm_timer);
 
 	if (ctx->pwm_value)
 		pwm_disable(ctx->pwm);
