@@ -63,6 +63,13 @@ enum usb_otg_state {
 	OTG_STATE_A_VBUS_ERR,
 };
 
+/* The usb role of phy to be working with */
+enum usb_current_mode {
+	USB_CURRENT_MODE_NONE,
+	USB_CURRENT_MODE_HOST,
+	USB_CURRENT_MODE_DEVICE,
+};
+
 struct usb_phy;
 struct usb_otg;
 
@@ -155,6 +162,13 @@ struct usb_phy {
 	 * manually detect the charger type.
 	 */
 	enum usb_charger_type (*charger_detect)(struct usb_phy *x);
+
+	/*
+	 * Set current working mode of the USB controller
+	 * (device, host)
+	 */
+	int	(*set_mode)(struct usb_phy *x,
+			enum usb_current_mode mode);
 };
 
 /* for board-specific init logic */
@@ -211,6 +225,15 @@ usb_phy_vbus_off(struct usb_phy *x)
 		return 0;
 
 	return x->set_vbus(x, false);
+}
+
+static inline int
+usb_phy_set_mode(struct usb_phy *x, enum usb_current_mode mode)
+{
+	if (!x || !x->set_mode)
+		return 0;
+
+	return x->set_mode(x, mode);
 }
 
 /* for usb host and peripheral controller drivers */
