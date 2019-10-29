@@ -1,0 +1,27 @@
+#include "imx6ull-tarragon-common.dtsi"
+#include "imx6ull-tarragon-pmic.dtsi"
+
+/ {
+	model = "I2SE Tarragon Mfgtool";
+	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
+};
+
+&iomuxc {
+	pinctrl-0 = <&pinctrl_push_pull_cfg>;
+};
+
+&iomuxc_snvs {
+	pinctrl-0 = <&init_GPIO_pinsSnvs>;
+};
+
+&usbotg1 {
+	dr_mode = "peripheral";
+	status = "okay";
+};
+
+&usdhc2 {
+	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
+	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;
+	pinctrl-2 = <&pinctrl_usdhc2_4bit_200MHz>;
+};

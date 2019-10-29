@@ -183,6 +183,11 @@ properties:
               - fsl,imx6ull-14x14-evk     # i.MX6 UltraLiteLite 14x14 EVK Board
           - const: fsl,imx6ull
 
+      - description: I2SE Tarragon Board
+        items:
+          - const: i2se,imx6ull-tarragon
+          - const: fsl,imx6ul
+
       - description: i.MX6ULZ based Boards
         items:
           - enum:
