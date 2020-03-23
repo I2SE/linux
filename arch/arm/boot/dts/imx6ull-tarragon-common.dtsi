@@ -629,9 +629,20 @@
 	status = "okay";
 };
 
+&uart5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_rs485_2>;
+};
+
 &uart6 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_stm32>;
+};
+
+&uart7 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ext_uart>;
+	status = "okay";
 };
 
 &usbotg1 {
