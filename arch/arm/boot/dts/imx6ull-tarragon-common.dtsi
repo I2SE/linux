@@ -498,6 +498,12 @@
 			>;
 		};
 
+		pinctrl_wdog2: wdogGrp { // new
+			fsl,pins = <
+				MX6UL_PAD_LCD_VSYNC__WDOG2_WDOG_B	0x30b0
+			>;
+		};
+
 		pinctrl_hog_pins: pinctrl_hog_pinsGrp {
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT	0x17059 /* to PF3001 */
@@ -641,4 +647,10 @@
 	non-removable;
 	only-1-8-v;
 	status = "okay";
+};
+
+&wdog2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_wdog2>;
+	fsl,ext-reset-output;
 };
