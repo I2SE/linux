@@ -5,7 +5,7 @@
 	model = "I2SE Tarragon Master";
 	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
 
-	leds { // modified
+	leds {
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_debug_leds>;
@@ -41,7 +41,7 @@
 	status = "okay";
 };
 
-&ecspi2 { // keep
+&ecspi2 {
 	status = "okay";
 
 	qca7000_cp: ethernet@0 {
@@ -58,7 +58,7 @@
 	};
 };
 
-&ecspi4 { // new
+&ecspi4 {
 	status = "okay";
 
 	qca7000_mains: ethernet@0 {
@@ -71,7 +71,7 @@
 		spi-cpha;
 		spi-cpol;
 		spi-max-frequency = <16000000>;
-		intr-gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>; // modified
+		intr-gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -134,7 +134,7 @@
 	status = "okay";
 };
 
-&pwm7 { // keep
+&pwm7 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_fan>;
 	status = "okay";
@@ -148,7 +148,7 @@
 	status = "okay";
 };
 
-&uart5 { // new
+&uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_rs485_2>; // coupled
 	status = "okay";
@@ -158,7 +158,7 @@
 	status = "okay";
 };
 
-&uart7 { // new
+&uart7 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_ext_uart>;
 	status = "okay";
@@ -169,7 +169,7 @@
 	status = "okay";
 };
 
-&usdhc2 { // modified
+&usdhc2 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
 	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;

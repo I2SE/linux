@@ -5,7 +5,7 @@
 	model = "I2SE Tarragon Micro";
 	compatible = "fsl,imx6ull-tarragon", "fsl,imx6ull";
 
-	leds { // modified
+	leds {
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_debug_leds>;
@@ -69,7 +69,7 @@
 	status = "okay";
 };
 
-&usdhc2 { // modified
+&usdhc2 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
 	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;
