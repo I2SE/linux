@@ -15,7 +15,6 @@
 / {
 	aliases {
 		mmc0 = &usdhc2;
-		mmc1 = &usdhc1;
 	};
 
 	chosen {
