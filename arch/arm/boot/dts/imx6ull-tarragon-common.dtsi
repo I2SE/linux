@@ -652,7 +652,7 @@
 	tx-d-cal = <0x7>;
 };
 
-&usbphy1 {
+&usbphy2 {
 	fsl,tx-cal-45-dn-ohms = <30>;
 	fsl,tx-cal-45-dp-ohms = <30>;
 	tx-d-cal = <0x7>;
