@@ -125,9 +125,9 @@
 
 &iomuxc {
 	pinctrl-0 = <&pinctrl_hog_pins
-		     &pinctrl_gpio_motor
-		     &pinctrl_push_pull_cfg
-		     &pinctrl_dig_in>;
+	             &pinctrl_gpio_motor
+	             &pinctrl_push_pull_cfg
+	             &pinctrl_dig_in>;
 };
 
 &pwm2 {

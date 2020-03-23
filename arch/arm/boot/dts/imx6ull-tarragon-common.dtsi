@@ -138,7 +138,7 @@
 };
 
 &gpc {
-	fsl,cpu_pupscr_sw2iso = <0x1>; 
+	fsl,cpu_pupscr_sw2iso = <0x1>;
 	fsl,cpu_pupscr_sw = <0x0>;
 	fsl,cpu_pdnscr_iso2sw = <0x1>;
 	fsl,cpu_pdnscr_iso = <0x1>;
@@ -158,7 +158,7 @@
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_board_var &pinctrl_push_pull_cfg
-		     &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
+	             &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
 
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
@@ -167,7 +167,7 @@
 				MX6UL_PAD_LCD_DATA10__GPIO3_IO15	0x17059
 				MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x17059
 			>;
-	        };
+		};
 
 		pinctrl_adc_motor: pinctrl_adc_motorGrp {
 			fsl,pins = <
@@ -175,7 +175,7 @@
 				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x000b0 /* ADC1_IN1  */
 				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x000b0 /* ADC1_IN4  */
 			>;
-	        };
+		};
 
 		pinctrl_gpio_motor: pinctrl_gpio_motorGrp {
 			fsl,pins = <
@@ -186,7 +186,7 @@
 				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x17059
 				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25	0x17059
 			>;
-        	};
+		};
 
 		pinctrl_adc_cp: pinctrl_adc_cpGrp {
 			fsl,pins = <
@@ -212,7 +212,7 @@
 				MX6UL_PAD_SD1_CLK__USB_OTG1_OC		0x17059
 				MX6UL_PAD_SD1_DATA0__ANATOP_OTG1_ID	0x17059
 			>;
-        	};
+		};
 
 		pinctrl_enet_mdio: pinctrl_enet_mdioGrp {
 			fsl,pins = <
@@ -353,7 +353,7 @@
 
 		pinctrl_qca7000_mains_btld: pinctrl_qca7000_mains_btldGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x400010b0 
+				MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x400010b0
 			>;
 		};
 
@@ -534,50 +534,57 @@
 &iomuxc_snvs {
 	pinctrl-names = "default_snvs";
 	pinctrl-0 = <&init_GPIO_pinsSnvs
-		     &pinctrl_gpio_motorSnvs
-		     &pinctrl_qca7000_mains_rst
-		     &pinctrl_rotary_switch1_snvs
-		     &pinctrl_fan_senseSnvs
-		     &pinctrl_accelero_int1Snvs
-		     &pinctrl_relay_senseSnvs>;
+	             &pinctrl_gpio_motorSnvs
+	             &pinctrl_qca7000_mains_rst
+	             &pinctrl_rotary_switch1_snvs
+	             &pinctrl_fan_senseSnvs
+	             &pinctrl_accelero_int1Snvs
+	             &pinctrl_relay_senseSnvs>;
 
 	tarragon {
 		init_GPIO_pinsSnvs: init_GPIO_pinsSnvsGrp {
-		    fsl,pins = <
-		        MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10          0x000130A0
-		        MX6ULL_PAD_BOOT_MODE1__GPIO5_IO11          0x000130A0
-		    >;
+			fsl,pins = <
+				MX6ULL_PAD_BOOT_MODE0__GPIO5_IO10          0x000130A0
+				MX6ULL_PAD_BOOT_MODE1__GPIO5_IO11          0x000130A0
+			>;
 		};
+
 		pinctrl_gpio_motorSnvs: pinctrl_gpio_motorSnvsGrp {
-		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER8__GPIO5_IO08        0x000110A0
-		    >;
+			fsl,pins = <
+				MX6ULL_PAD_SNVS_TAMPER8__GPIO5_IO08        0x000110A0
+				>;
 		};
+
 		pinctrl_enet1_phy_rst: pinctrl_enet1_phy_rstGrp {
-		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06        0x000110A0
-		    >;
-	        };
+			fsl,pins = <
+				MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06        0x000110A0
+			>;
+		};
+
 		pinctrl_qca7000_mains_rst: pinctrl_qca7000_mains_rstGrp {
 			fsl,pins = <
 				MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07	0x400010b0
 			>;
 		};
+
 		pinctrl_qca7000_mains_int: pinctrl_qca7000_mains_intGrp {
 			fsl,pins = <
 				MX6ULL_PAD_SNVS_TAMPER9__GPIO5_IO09	0x10b0
 			>;
 		};
+
 		pinctrl_mains_present_Snvs: pinctrl_mains_present_SnvsGrp {
-		    fsl,pins = <
-		        MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04        0x0
-		    >;
+			fsl,pins = <
+				MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04        0x0
+			>;
 		};
+
 		pinctrl_fan_senseSnvs: pinctrl_fan_senseSnvsGrp {
-		    fsl,pins = <
+			fsl,pins = <
 			MX6ULL_PAD_SNVS_TAMPER1__GPIO5_IO01        0x0
-		    >;
+			>;
 		};
+
 		pinctrl_accelero_int1Snvs: pinctrl_accelero_int1SnvsGrp {
 			fsl,pins = <
 				MX6ULL_PAD_SNVS_TAMPER5__GPIO5_IO05	0x10b0
@@ -585,11 +592,11 @@
 		};
 
 		pinctrl_relay_senseSnvs: pinctrl_relay_senseSnvsGrp {
-		    fsl,pins = <
-			/* relay 1/2 feedback: disable keeper */
-			MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03        0x00b0
-			MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02        0x00b0			
-		    >;
+			fsl,pins = <
+				/* relay 1/2 feedback: disable keeper */
+				MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03        0x00b0
+				MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02        0x00b0
+			>;
 		};
 
 		pinctrl_rotary_switch1_snvs: pinctrl_rotary_switch1SnvsGrp {
