@@ -635,7 +635,17 @@
 	disable-over-current;
 };
 
+&usbotg2 { // new
+	disable-over-current;
+};
+
 &usbphy1 {
+	fsl,tx-cal-45-dn-ohms = <30>;
+	fsl,tx-cal-45-dp-ohms = <30>;
+	tx-d-cal = <0x7>;
+};
+
+&usbphy1 { // new
 	fsl,tx-cal-45-dn-ohms = <30>;
 	fsl,tx-cal-45-dp-ohms = <30>;
 	tx-d-cal = <0x7>;
