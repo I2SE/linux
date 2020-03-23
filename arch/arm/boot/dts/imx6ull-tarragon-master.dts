@@ -172,12 +172,3 @@
 &usbotg2 {
 	dr_mode = "host";
 };
-
-&usdhc2 {
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2_8bit>;
-	pinctrl-1 = <&pinctrl_usdhc2_8bit_100MHz>;
-	pinctrl-2 = <&pinctrl_usdhc2_8bit_200MHz>;
-	vmmc-supply = <&sw2_reg>;
-	mmc-pwrseq = <&emmc_pwrseq>;
-};
