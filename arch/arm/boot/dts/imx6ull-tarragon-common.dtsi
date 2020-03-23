@@ -62,6 +62,29 @@
 		regulator-boot-on;
 		regulator-always-on;
 	};
+
+	leds {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_status_leds>;
+
+		led1 {
+			label = "evse:green:led1";
+			gpios = <&gpio3 14 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "timer";
+		};
+
+		led2 {
+			label = "evse:yellow:led2";
+			gpios = <&gpio3 15 GPIO_ACTIVE_HIGH>;
+		};
+
+		led3 {
+			label = "evse:red:led3";
+			gpios = <&gpio3 19 GPIO_ACTIVE_HIGH>;
+			linux,default-trigger = "heartbeat";
+		};
+	};
 };
 
 &adc1 {
@@ -160,7 +183,7 @@
 	             &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
 
 	tarragon {
-		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
+		pinctrl_status_leds: pinctrl_status_ledsGrp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_DATA09__GPIO3_IO14	0x17059
 				MX6UL_PAD_LCD_DATA10__GPIO3_IO15	0x17059
