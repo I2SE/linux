@@ -642,7 +642,7 @@
 };
 
 &usdhc2 {
-	bus-width = <4>;
+	bus-width = <8>; // modified
 	broken-cd;
 	non-removable;
 	only-1-8-v;
