@@ -168,7 +168,3 @@
 	dr_mode = "host";
 	status = "okay";
 };
-
-&usbotg2 {
-	dr_mode = "host";
-};
