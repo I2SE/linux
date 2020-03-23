@@ -375,7 +375,7 @@
 			>;
 		};
 
-		pinctrl_board_var: pinctrl_board_varGrp { // assembly option coding
+		pinctrl_board_var: pinctrl_board_varGrp {
 			fsl,pins = <
 				MX6UL_PAD_NAND_CLE__GPIO4_IO15		0x0
 				MX6UL_PAD_NAND_CE0_B__GPIO4_IO13	0x0
@@ -498,7 +498,7 @@
 			>;
 		};
 
-		pinctrl_wdog2: wdogGrp { // new
+		pinctrl_wdog2: wdogGrp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_VSYNC__WDOG2_WDOG_B	0x30b0
 			>;
@@ -620,7 +620,7 @@
 
 &uart1 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_rs485_1>; // isolated
+	pinctrl-0 = <&pinctrl_rs485_1>;
 };
 
 &uart4 {
@@ -642,7 +642,7 @@
 	disable-over-current;
 };
 
-&usbotg2 { // new
+&usbotg2 {
 	disable-over-current;
 };
 
@@ -652,14 +652,14 @@
 	tx-d-cal = <0x7>;
 };
 
-&usbphy1 { // new
+&usbphy1 {
 	fsl,tx-cal-45-dn-ohms = <30>;
 	fsl,tx-cal-45-dp-ohms = <30>;
 	tx-d-cal = <0x7>;
 };
 
 &usdhc2 {
-	bus-width = <8>; // modified
+	bus-width = <8>;
 	broken-cd;
 	non-removable;
 	only-1-8-v;
