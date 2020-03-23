@@ -508,7 +508,6 @@ dtb-$(CONFIG_SOC_IMX6UL) += \
 	imx6ul-9x9-evk-csi.dtb \
 	imx6ul-9x9-evk-ldo.dtb
 dtb-$(CONFIG_SOC_IMX6ULL) += \
-	imx6ull-tarragon-init.dtb \
 	imx6ull-tarragon-master.dtb \
 	imx6ull-tarragon-mfg.dtb \
 	imx6ull-tarragon-micro.dtb \
