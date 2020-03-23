@@ -637,6 +637,7 @@
 &usbotg1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_usb &pinctrl_usb_pwr>;
+	dr_mode = "host";
 	power-active-high;
 	disable-over-current;
 };
