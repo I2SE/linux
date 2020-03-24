@@ -604,6 +604,10 @@
 	pinctrl-0 = <&pinctrl_pwm_dig_in_ref>;
 };
 
+&pwm7 {
+	#pwm-cells = <3>;
+};
+
 &pwm8 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_cp>;
