@@ -19,14 +19,6 @@
 	status = "okay";
 };
 
-&can1 {
-	status = "okay";
-};
-
-&can2 {
-	status = "okay";
-};
-
 &iomuxc {
 	pinctrl-0 = <&pinctrl_hog_pins
 	             &pinctrl_gpio_motor

@@ -40,14 +40,6 @@
 	status = "okay";
 };
 
-&can1 {
-	status = "okay";
-};
-
-&can2 {
-	status = "okay";
-};
-
 &i2c4 {
 	ds2484@18 {
 		compatible = "dallas,ds2482";
