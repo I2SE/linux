@@ -491,7 +491,8 @@
 
 		pinctrl_wdog2: wdogGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_VSYNC__WDOG2_WDOG_B           0x30b0
+				/* WDOG_B output on > V0R4: reset defaults (keeper enabled) */
+				MX6UL_PAD_LCD_VSYNC__WDOG2_WDOG_B           0x000010b0
 			>;
 		};
 
