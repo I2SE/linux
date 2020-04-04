@@ -586,9 +586,19 @@
 	status = "okay";
 };
 
+&uart5 { // new
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_rs485_2>; // coupled
+};
+
 &uart6 { // new
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_stm32>;
+};
+
+&uart7 { // new
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_ext_uart>;
 };
 
 &usbotg1 { // keep

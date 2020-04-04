@@ -158,9 +158,7 @@
 	status = "okay";
 };
 
-&uart5 { // new
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_rs485_2>; // coupled
+&uart5 {
 	status = "okay";
 };
 
@@ -168,9 +166,7 @@
 	status = "okay";
 };
 
-&uart7 { // new
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_ext_uart>;
+&uart7 {
 	status = "okay";
 };
 
