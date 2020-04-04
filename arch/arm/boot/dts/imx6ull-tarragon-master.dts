@@ -83,8 +83,8 @@
 	iis328dq@19 {
 		compatible = "st,lis331dlh-accel", "st,lis3lv02d";
 		reg = <0x19>;
-		Vdd-supply = <&reg_dcdc_3v3>;
-		Vdd_IO-supply = <&reg_dcdc_3v3>;
+		vdd-supply = <&reg_dcdc_3v3>;
+		vddio-supply = <&reg_dcdc_3v3>;
 		interrupt-parent = <&gpio5>;
 		interrupts = <5 IRQ_TYPE_EDGE_RISING>; // INT1
 
