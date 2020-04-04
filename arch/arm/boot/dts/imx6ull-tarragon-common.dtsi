@@ -121,7 +121,7 @@
 &iomuxc {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog_pins &pinctrl_gpio_motor &pinctrl_board_var &pinctrl_push_pull_cfg
-		     &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
+	             &pinctrl_rotary_switch1 &pinctrl_rotary_switch2>;
 
 	tarragon {
 		pinctrl_debug_leds: pinctrl_debug_ledsGrp {
@@ -130,7 +130,7 @@
 				MX6UL_PAD_LCD_DATA10__GPIO3_IO15	0x17059 // modified
 				MX6UL_PAD_LCD_DATA14__GPIO3_IO19	0x17059 // keep
 			>;
-	        };
+		};
 
 		pinctrl_adc_motor: pinctrl_adc_motorGrp { // modified
 			fsl,pins = <
@@ -138,7 +138,7 @@
 				MX6UL_PAD_GPIO1_IO01__GPIO1_IO01	0x000b0 /* ADC1_IN1  */
 				MX6UL_PAD_GPIO1_IO04__GPIO1_IO04	0x000b0 /* ADC1_IN4  */ //new
 			>;
-	        };
+		};
 
 		pinctrl_gpio_motor: pinctrl_gpio_motorGrp {
 			fsl,pins = <
@@ -149,7 +149,7 @@
 				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19	0x17059 // modified
 				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25	0x17059
 			>;
-        	};
+		};
 
 		pinctrl_adc_cp: pinctrl_adc_cpGrp { // keep
 			fsl,pins = <
@@ -175,7 +175,7 @@
 				MX6UL_PAD_SD1_CLK__USB_OTG1_OC		0x17059
 				MX6UL_PAD_SD1_DATA0__ANATOP_OTG1_ID	0x17059
 			>;
-        	};
+		};
 
 		pinctrl_enet_mdio: pinctrl_enet_mdioGrp { // keep
 			fsl,pins = <
@@ -316,7 +316,7 @@
 
 		pinctrl_qca7000_mains_btld: pinctrl_qca7000_mains_btldGrp { // new
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x400010b0 
+				MX6UL_PAD_LCD_DATA11__GPIO3_IO16	0x400010b0
 			>;
 		};
 
