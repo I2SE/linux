@@ -96,12 +96,3 @@
 	dr_mode = "host";
 	status = "okay";
 };
-
-&usdhc2 { // modified
-	pinctrl-names = "default", "state_100mhz", "state_200mhz";
-	pinctrl-0 = <&pinctrl_usdhc2_4bit>;
-	pinctrl-1 = <&pinctrl_usdhc2_4bit_100MHz>;
-	pinctrl-2 = <&pinctrl_usdhc2_4bit_200MHz>;
-	vmmc-supply = <&sw2_reg>;
-	mmc-pwrseq = <&emmc_pwrseq>;
-};
