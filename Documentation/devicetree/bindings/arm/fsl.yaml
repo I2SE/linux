@@ -341,6 +341,11 @@ properties:
           - const: kontron,imx6ull-n6411-som
           - const: fsl,imx6ull
 
+      - description: I2SE Tarragon Board
+        items:
+          - const: i2se,imx6ull-tarragon
+          - const: fsl,imx6ull
+
       - description: i.MX6ULZ based Boards
         items:
           - enum:
