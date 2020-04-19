@@ -1,0 +1,12 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2018 I2SE GmbH
+ * Copyright (C) 2020 in-tech smart charging GmbH
+ */
+
+#include "imx6ull-tarragon.dtsi"
+
+/ {
+	model = "I2SE Tarragon Micro";
+	compatible = "i2se,imx6ull-tarragon", "fsl,imx6ull";
+};
