@@ -127,8 +127,10 @@
 	#size-cells = <0>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_qca7000_cp_spi>;
-	fsl,spi-num-chipselects = <1>;
-	cs-gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
+	fsl,spi-num-chipselects = <3>;
+	cs-gpios = <&gpio1 29 GPIO_ACTIVE_HIGH
+		    &gpio3 2  GPIO_ACTIVE_HIGH
+		    &gpio3 4  GPIO_ACTIVE_HIGH>;
 };
 
 &ecspi4 {
@@ -187,9 +189,9 @@
 	tarragon {
 		pinctrl_status_leds: pinctrl_status_ledsGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA09__GPIO3_IO14            0x17059
-				MX6UL_PAD_LCD_DATA10__GPIO3_IO15            0x17059
-				MX6UL_PAD_LCD_DATA14__GPIO3_IO19            0x17059
+				MX6UL_PAD_LCD_DATA09__GPIO3_IO14            0xb0
+				MX6UL_PAD_LCD_DATA10__GPIO3_IO15            0xb0
+				MX6UL_PAD_LCD_DATA14__GPIO3_IO19            0xb0
 			>;
 		};
 
@@ -203,12 +205,12 @@
 
 		pinctrl_gpio_motor: pinctrl_gpio_motorGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA02__GPIO3_IO07            0x40017059
-				MX6UL_PAD_LCD_DATA03__GPIO3_IO08            0x40017059
-				MX6UL_PAD_LCD_DATA04__GPIO3_IO09            0x40017059
+				MX6UL_PAD_LCD_DATA02__GPIO3_IO07            0x400000b0
+				MX6UL_PAD_LCD_DATA03__GPIO3_IO08            0x400000b0
+				MX6UL_PAD_LCD_DATA04__GPIO3_IO09            0x400000b0
 				// EN_MOTOR_CAP_CHARGING removed MX6UL_PAD_LCD_DATA06__GPIO3_IO11	0x40017059
-				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19           0x17059
-				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25         0x17059
+				MX6UL_PAD_UART1_RTS_B__GPIO1_IO19           0xb0
+				MX6UL_PAD_UART3_RX_DATA__GPIO1_IO25         0xb0
 			>;
 		};
 
@@ -227,14 +229,14 @@
 
 		pinctrl_usb_pwr: pinctrl_usb_pwrGrp {
 			fsl,pins = <
-				MX6UL_PAD_SD1_CMD__USB_OTG1_PWR             0x10b0
+				MX6UL_PAD_SD1_CMD__USB_OTG1_PWR             0xb0
 			>;
 		};
 
 		pinctrl_usb: pinctrl_usbGrp {
 			fsl,pins = <
-				MX6UL_PAD_SD1_CLK__USB_OTG1_OC              0x17059
-				MX6UL_PAD_SD1_DATA0__ANATOP_OTG1_ID         0x17059
+				MX6UL_PAD_SD1_CLK__USB_OTG1_OC              0x70b0
+				MX6UL_PAD_SD1_DATA0__ANATOP_OTG1_ID         0x70b0
 			>;
 		};
 
@@ -253,39 +255,39 @@
 
 		pinctrl_enet1: pinctrl_enet1Grp {
 			fsl,pins = <
-				MX6UL_PAD_ENET1_RX_DATA0__ENET1_RDATA00     0x1b0b0
-				MX6UL_PAD_ENET1_RX_DATA1__ENET1_RDATA01     0x1b0b0
-				MX6UL_PAD_ENET1_RX_EN__ENET1_RX_EN          0x1b0b0
-				MX6UL_PAD_ENET1_TX_CLK__ENET1_REF_CLK1      0x4001b031
-				MX6UL_PAD_ENET1_TX_DATA0__ENET1_TDATA00     0x1b0b0
-				MX6UL_PAD_ENET1_TX_DATA1__ENET1_TDATA01     0x1b0b0
-				MX6UL_PAD_ENET1_TX_EN__ENET1_TX_EN          0x1b0b0
+				MX6UL_PAD_ENET1_RX_DATA0__ENET1_RDATA00     0x100b0
+				MX6UL_PAD_ENET1_RX_DATA1__ENET1_RDATA01     0x100b0
+				MX6UL_PAD_ENET1_RX_EN__ENET1_RX_EN          0x100b0
+				MX6UL_PAD_ENET1_TX_CLK__ENET1_REF_CLK1      0x400000b1
+				MX6UL_PAD_ENET1_TX_DATA0__ENET1_TDATA00     0xb0
+				MX6UL_PAD_ENET1_TX_DATA1__ENET1_TDATA01     0xb0
+				MX6UL_PAD_ENET1_TX_EN__ENET1_TX_EN          0xb0
 			>;
 		};
 
 		pinctrl_pwm_dig_in_ref: pinctrl_pwm_dig_in_refGrp {
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO09__PWM2_OUT              0x110b0
+				MX6UL_PAD_GPIO1_IO09__PWM2_OUT              0xb0
 			>;
 		};
 
 		pinctrl_pwm_fan: pinctrl_pwm_fanGrp {
 			fsl,pins = <
-				MX6UL_PAD_JTAG_TCK__PWM7_OUT                0x110b0
+				MX6UL_PAD_JTAG_TCK__PWM7_OUT                0x60a0
 			>;
 		};
 
 		pinctrl_pwm_cp: pinctrl_pwm_cpGrp {
 			fsl,pins = <
-				MX6UL_PAD_JTAG_TRST_B__PWM8_OUT             0x110b0
+				MX6UL_PAD_JTAG_TRST_B__PWM8_OUT             0x60a0
 			>;
 		};
 
 		pinctrl_rs485_1: pinctrl_rs485_1Grp {
 			fsl,pins = <
-				MX6UL_PAD_UART1_CTS_B__GPIO1_IO18           0x10b0
-				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX       0x10b0
-				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX       0x10b0
+				MX6UL_PAD_UART1_CTS_B__GPIO1_IO18           0xb0
+				MX6UL_PAD_UART1_RX_DATA__UART1_DCE_RX       0xb0
+				MX6UL_PAD_UART1_TX_DATA__UART1_DCE_TX       0xb0
 			>;
 		};
 
@@ -306,42 +308,44 @@
 
 		pinctrl_ext_uart: pinctrl_ext_uart_Grp {
 			fsl,pins = <
-				MX6UL_PAD_ENET2_TX_DATA0__UART7_DCE_RX      0x10b0
-				MX6UL_PAD_ENET2_RX_EN__UART7_DCE_TX         0x10b0
+				MX6UL_PAD_ENET2_TX_DATA0__UART7_DCE_RX      0xb0
+				MX6UL_PAD_ENET2_RX_EN__UART7_DCE_TX         0xb0
 			>;
 		};
 
 		pinctrl_flexcan1: pinctrl_flexcan1Grp {
 			fsl,pins = <
-				MX6UL_PAD_UART3_CTS_B__FLEXCAN1_TX          0x1b020
-				MX6UL_PAD_UART3_RTS_B__FLEXCAN1_RX          0x1b020
+				MX6UL_PAD_UART3_CTS_B__FLEXCAN1_TX          0xb0b0
+				MX6UL_PAD_UART3_RTS_B__FLEXCAN1_RX          0xb0b0
 			>;
 		};
 
 		pinctrl_flexcan2: pinctrl_flexcan2Grp {
 			fsl,pins = <
-				MX6UL_PAD_SD1_DATA2__FLEXCAN2_TX            0x1b020
-				MX6UL_PAD_SD1_DATA3__FLEXCAN2_RX            0x1b020
+				MX6UL_PAD_SD1_DATA2__FLEXCAN2_TX            0xb0b0
+				MX6UL_PAD_SD1_DATA3__FLEXCAN2_RX            0xb0b0
 			>;
 		};
 
 		pinctrl_i2c4: pinctrl_i2c4Grp {
 			fsl,pins = <
-				MX6UL_PAD_UART2_RX_DATA__I2C4_SDA           0x4001b8b0
-				MX6UL_PAD_UART2_TX_DATA__I2C4_SCL           0x4001b8b0
+				MX6UL_PAD_UART2_RX_DATA__I2C4_SDA           0x400000b0
+				MX6UL_PAD_UART2_TX_DATA__I2C4_SCL           0x400000b0
 			>;
 		};
 
 		pinctrl_i2c4_gpio: pinctrl_i2c4_gpioGrp {
 			fsl,pins = <
-				MX6UL_PAD_UART2_RX_DATA__GPIO1_IO21         0x4001b8b0
-				MX6UL_PAD_UART2_TX_DATA__GPIO1_IO20         0x4001b8b0
+				MX6UL_PAD_UART2_RX_DATA__GPIO1_IO21         0x400000b0
+				MX6UL_PAD_UART2_TX_DATA__GPIO1_IO20         0x400000b0
 			>;
 		};
 
 		pinctrl_qca7000_cp_spi: pinctrl_qca7000_cp_spiGrp {
 			fsl,pins = <
-				MX6UL_PAD_UART4_RX_DATA__GPIO1_IO29         0x10b0
+				MX6UL_PAD_UART4_RX_DATA__GPIO1_IO29         0x10b0 /* CS for QCA7000 CP */
+				MX6UL_PAD_LCD_HSYNC__GPIO3_IO02             0xb0
+				MX6UL_PAD_LCD_RESET__GPIO3_IO04             0xb0
 				MX6UL_PAD_UART4_TX_DATA__ECSPI2_SCLK        0x10b0
 				MX6UL_PAD_UART5_RX_DATA__ECSPI2_MISO        0x10b0
 				MX6UL_PAD_UART5_TX_DATA__ECSPI2_MOSI        0x10b0
@@ -356,13 +360,13 @@
 
 		pinctrl_qca7000_cp_rst: pinctrl_qca7000_cp_rstGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA12__GPIO3_IO17            0x400010b0
+				MX6UL_PAD_LCD_DATA12__GPIO3_IO17            0x400000b0
 			>;
 		};
 
 		pinctrl_qca7000_cp_btld: pinctrl_qca7000_cp_btldGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA13__GPIO3_IO18            0x400010b0
+				MX6UL_PAD_LCD_DATA13__GPIO3_IO18            0x400000b0
 			>;
 		};
 
@@ -377,34 +381,34 @@
 
 		pinctrl_qca7000_mains_btld: pinctrl_qca7000_mains_btldGrp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_DATA11__GPIO3_IO16            0x400010b0
+				MX6UL_PAD_LCD_DATA11__GPIO3_IO16            0x400000b0
 			>;
 		};
 
 		pinctrl_uart4: pinctrl_uart4Grp {
 			fsl,pins = <
-				MX6UL_PAD_LCD_CLK__UART4_DTE_RX             0x1b0b1
-				MX6UL_PAD_LCD_ENABLE__UART4_DTE_TX          0x1b0b1
+				MX6UL_PAD_LCD_CLK__UART4_DTE_RX             0xb0
+				MX6UL_PAD_LCD_ENABLE__UART4_DTE_TX          0xb0
 			>;
 		};
 
 		pinctrl_dig_in: pinctrl_dig_inGrp {
 			fsl,pins = <
-				MX6UL_PAD_CSI_DATA04__GPIO4_IO25            0x0
-				MX6UL_PAD_CSI_DATA05__GPIO4_IO26            0x0
-				MX6UL_PAD_CSI_DATA07__GPIO4_IO28            0x0
-				MX6UL_PAD_CSI_DATA06__GPIO4_IO27            0x0
-				MX6UL_PAD_CSI_HSYNC__GPIO4_IO20             0x0
-				MX6UL_PAD_CSI_DATA02__GPIO4_IO23            0x0
+				MX6UL_PAD_CSI_DATA04__GPIO4_IO25            0xb0
+				MX6UL_PAD_CSI_DATA05__GPIO4_IO26            0xb0
+				MX6UL_PAD_CSI_DATA07__GPIO4_IO28            0xb0
+				MX6UL_PAD_CSI_DATA06__GPIO4_IO27            0xb0
+				MX6UL_PAD_CSI_HSYNC__GPIO4_IO20             0xb0
+				MX6UL_PAD_CSI_DATA02__GPIO4_IO23            0xb0
 			>;
 		};
 
 		pinctrl_board_var: pinctrl_board_varGrp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_CLE__GPIO4_IO15              0x0
-				MX6UL_PAD_NAND_CE0_B__GPIO4_IO13            0x0
-				MX6UL_PAD_NAND_CE1_B__GPIO4_IO14            0x0
-				MX6UL_PAD_NAND_DQS__GPIO4_IO16              0x0
+				MX6UL_PAD_NAND_CLE__GPIO4_IO15              0xb0
+				MX6UL_PAD_NAND_CE0_B__GPIO4_IO13            0xb0
+				MX6UL_PAD_NAND_CE1_B__GPIO4_IO14            0xb0
+				MX6UL_PAD_NAND_DQS__GPIO4_IO16              0xb0
 			>;
 		};
 
@@ -421,71 +425,71 @@
 
 		pinctrl_usdhc2_8bit: pinctrl_usdhc2_8bitGrp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x10069
-				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x17059
-				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x17059
-				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x17059
-				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x17059
-				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x17059
-				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x17059
-				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x17059
-				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x17059
-				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x17059
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x7071
+				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x7071
+				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x7071
+				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x7071
+				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x7071
+				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x7071
+				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x7071
+				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x7071
+				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x7071
+				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x7071
 			>;
 		};
 
 		pinctrl_usdhc2_8bit_100MHz: pinctrl_usdhc2_8bit_100MHz_Grp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x100b9
-				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x170b9
-				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x170b9
-				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x170b9
-				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x170b9
-				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x170b9
-				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x170b9
-				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x170b9
-				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x170b9
-				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x170b9
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x70b1
+				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x70b1
+				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x70b1
+				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x70b1
+				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x70b1
+				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x70b1
+				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x70b1
+				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x70b1
+				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x70b1
+				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x70b1
 			>;
 		};
 
 		pinctrl_usdhc2_8bit_200MHz: pinctrl_usdhc2_8bit_200MHz_Grp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x100f9
-				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x170f9
-				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x170f9
-				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x170f9
-				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x170f9
-				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x170f9
-				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x170f9
-				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x170f9
-				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x170f9
-				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x170f9
+				MX6UL_PAD_NAND_RE_B__USDHC2_CLK             0x70f1
+				MX6UL_PAD_NAND_WE_B__USDHC2_CMD             0x70f1
+				MX6UL_PAD_NAND_DATA00__USDHC2_DATA0         0x70f1
+				MX6UL_PAD_NAND_DATA01__USDHC2_DATA1         0x70f1
+				MX6UL_PAD_NAND_DATA02__USDHC2_DATA2         0x70f1
+				MX6UL_PAD_NAND_DATA03__USDHC2_DATA3         0x70f1
+				MX6UL_PAD_NAND_DATA04__USDHC2_DATA4         0x70f1
+				MX6UL_PAD_NAND_DATA05__USDHC2_DATA5         0x70f1
+				MX6UL_PAD_NAND_DATA06__USDHC2_DATA6         0x70f1
+				MX6UL_PAD_NAND_DATA07__USDHC2_DATA7         0x70f1
 			>;
 		};
 
 		pinctrl_emmc_rst: pinctrl_emmc_rstGrp {
 			fsl,pins = <
-				MX6UL_PAD_NAND_ALE__GPIO4_IO10              0x400000b0
+				MX6UL_PAD_NAND_ALE__GPIO4_IO10              0x400010b0
 			>;
 		};
 
 		pinctrl_rotary_switch1: pinctrl_rotary_switch1Grp {
 			fsl,pins = <
 				/* rotary switch 1 - bit 1-3: 100k pull-up */
-				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22           0xb0b0
-				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23           0xb0b0
-				MX6UL_PAD_UART3_TX_DATA__GPIO1_IO24         0xb0b0
+				MX6UL_PAD_UART2_CTS_B__GPIO1_IO22           0xb0
+				MX6UL_PAD_UART2_RTS_B__GPIO1_IO23           0xb0
+				MX6UL_PAD_UART3_TX_DATA__GPIO1_IO24         0xb0
 			>;
 		};
 
 		pinctrl_rotary_switch2: pinctrl_rotary_switch2Grp {
 			fsl,pins = <
 				/* rotary switch 2 - bit 0-3: 100k pull-up */
-				MX6UL_PAD_CSI_PIXCLK__GPIO4_IO18            0xb0b0
-				MX6UL_PAD_LCD_DATA23__GPIO3_IO28            0xb0b0
-				MX6UL_PAD_LCD_DATA22__GPIO3_IO27            0xb0b0
-				MX6UL_PAD_LCD_DATA21__GPIO3_IO26            0xb0b0
+				MX6UL_PAD_CSI_PIXCLK__GPIO4_IO18            0xb0
+				MX6UL_PAD_LCD_DATA23__GPIO3_IO28            0xb0
+				MX6UL_PAD_LCD_DATA22__GPIO3_IO27            0xb0
+				MX6UL_PAD_LCD_DATA21__GPIO3_IO26            0xb0
 			>;
 		};
 
@@ -498,26 +502,26 @@
 
 		pinctrl_hog_pins: pinctrl_hog_pinsGrp {
 			fsl,pins = <
-				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT        0x17059 /* to PF3001 */
-				MX6UL_PAD_CSI_VSYNC__GPIO4_IO19             0x17059 /* AUD_INT from PF3001 */
+				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT        0x70b1 /* to PF3001 */
+				MX6UL_PAD_CSI_VSYNC__GPIO4_IO19             0xb0 /* AUD_INT from PF3001 */
 
-				MX6UL_PAD_LCD_DATA01__GPIO3_IO06            0x0 // EXT_GPIO
+				MX6UL_PAD_LCD_DATA01__GPIO3_IO06            0xb0 // EXT_GPIO
 
 				/* relay 1/2 control */
-				MX6UL_PAD_LCD_DATA07__GPIO3_IO12            0x400010b0
-				MX6UL_PAD_LCD_DATA08__GPIO3_IO13            0x400010b0
+				MX6UL_PAD_LCD_DATA07__GPIO3_IO12            0x400000b0
+				MX6UL_PAD_LCD_DATA08__GPIO3_IO13            0x400000b0
 
 				/* CP invert: 47k pull-up (reset default) */
 				MX6UL_PAD_JTAG_TDI__GPIO1_IO13              0x400070a0
 
 				/* fan enable */
-				MX6UL_PAD_LCD_DATA00__GPIO3_IO05            0x40017059
+				MX6UL_PAD_LCD_DATA00__GPIO3_IO05            0x400000b0
 
 				/* Co processor BOOT0 */
-				MX6UL_PAD_LCD_DATA05__GPIO3_IO10            0x40017059
+				MX6UL_PAD_LCD_DATA05__GPIO3_IO10            0x400000b0
 
 				/* Co processor RESET */
-				MX6UL_PAD_LCD_DATA06__GPIO3_IO11            0x40017059
+				MX6UL_PAD_LCD_DATA06__GPIO3_IO11            0x400000b0
 			>;
 		};
 	};
@@ -549,52 +553,50 @@
 
 		pinctrl_enet1_phy_rst: pinctrl_enet1_phy_rstGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06         0x110a0
+				MX6ULL_PAD_SNVS_TAMPER6__GPIO5_IO06         0x100a0
 			>;
 		};
 
 		pinctrl_qca7000_mains_rst: pinctrl_qca7000_mains_rstGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07         0x400010b0
+				MX6ULL_PAD_SNVS_TAMPER7__GPIO5_IO07         0x400100a0
 			>;
 		};
 
 		pinctrl_qca7000_mains_int: pinctrl_qca7000_mains_intGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER9__GPIO5_IO09         0x10b0
+				MX6ULL_PAD_SNVS_TAMPER9__GPIO5_IO09         0x130a0
 			>;
 		};
 
 		pinctrl_mains_present_Snvs: pinctrl_mains_present_SnvsGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04         0x0
+				MX6ULL_PAD_SNVS_TAMPER4__GPIO5_IO04         0x100a0
 			>;
 		};
 
 		pinctrl_fan_senseSnvs: pinctrl_fan_senseSnvsGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER1__GPIO5_IO01         0x0
+				MX6ULL_PAD_SNVS_TAMPER1__GPIO5_IO01         0x100a0
 			>;
 		};
 
 		pinctrl_accelero_int1Snvs: pinctrl_accelero_int1SnvsGrp {
 			fsl,pins = <
-				MX6ULL_PAD_SNVS_TAMPER5__GPIO5_IO05         0x10b0
+				MX6ULL_PAD_SNVS_TAMPER5__GPIO5_IO05         0x130a0
 			>;
 		};
 
 		pinctrl_relay_senseSnvs: pinctrl_relay_senseSnvsGrp {
 			fsl,pins = <
-				/* relay 1/2 feedback: disable keeper */
-				MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03         0xb0
-				MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02         0xb0
+				MX6ULL_PAD_SNVS_TAMPER3__GPIO5_IO03         0x100a0
+				MX6ULL_PAD_SNVS_TAMPER2__GPIO5_IO02         0x100a0
 			>;
 		};
 
 		pinctrl_rotary_switch1_snvs: pinctrl_rotary_switch1SnvsGrp {
 			fsl,pins = <
-				/* rotary switch - bit 0: 100k pull-up */
-				MX6ULL_PAD_SNVS_TAMPER0__GPIO5_IO00         0xb0b0
+				MX6ULL_PAD_SNVS_TAMPER0__GPIO5_IO00         0x110a0
 			>;
 		};
 	};
