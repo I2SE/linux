@@ -267,7 +267,7 @@ static void __init crystalfontz_init(void)
 	update_fec_mac_prop(OUI_CRYSTALFONTZ);
 }
 
-static void __init duckbill_init(void)
+static void __init i2se_init(void)
 {
 	update_fec_mac_prop(OUI_I2SE);
 }
@@ -414,8 +414,9 @@ static void __init mxs_machine_init(void)
 	else if (of_machine_is_compatible("eukrea,mbmx283lc"))
 		eukrea_mbmx283lc_init();
 	else if (of_machine_is_compatible("i2se,duckbill") ||
-		 of_machine_is_compatible("i2se,duckbill-2"))
-		duckbill_init();
+		 of_machine_is_compatible("i2se,duckbill-2") ||
+		 of_machine_is_compatible("i2se,imx28-ievachargese"))
+		i2se_init();
 	else if (of_machine_is_compatible("msr,m28cu3"))
 		m28cu3_init();
 
