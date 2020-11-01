@@ -41,7 +41,7 @@
  * - strong_pullup = 1	Enable automatic strong pullup detection
  * - strong_pullup = 2	Force strong pullup
  */
-static int w1_strong_pullup = 1;
+static int w1_strong_pullup;
 module_param_named(strong_pullup, w1_strong_pullup, int, 0);
 
 /* Counter for devices supporting bulk reading */
