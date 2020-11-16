@@ -1569,7 +1569,7 @@ imx_set_termios(struct uart_port *port, struct ktermios *termios,
 	old_ucr2 = readl(sport->port.membase + UCR2);
 	writel(old_ucr2 & ~(UCR2_TXEN | UCR2_RXEN),
 			sport->port.membase + UCR2);
-	old_ucr2 &= (UCR2_TXEN | UCR2_RXEN | UCR2_ATEN);
+	old_ucr2 &= (UCR2_TXEN | UCR2_RXEN);
 
 	/* custom-baudrate handling */
 	div = sport->port.uartclk / (baud * 16);
@@ -1614,6 +1614,11 @@ imx_set_termios(struct uart_port *port, struct ktermios *termios,
 
 	if (UART_ENABLE_MS(&sport->port, termios->c_cflag))
 		imx_enable_ms(&sport->port);
+
+	if (!sport->dma_is_enabled) {
+		ucr2 = readl(sport->port.membase + UCR2);
+		writel(ucr2 | UCR2_ATEN, sport->port.membase + UCR2);
+	}
 
 	spin_unlock_irqrestore(&sport->port.lock, flags);
 }
