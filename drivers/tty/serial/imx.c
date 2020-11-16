@@ -1188,6 +1188,7 @@ static void imx_uart_clear_rx_errors(struct imx_port *sport)
 
 #define TXTL_DEFAULT 2 /* reset default */
 #define RXTL_DEFAULT 1 /* reset default */
+#define RXTL_UART 16 /* For uart */
 #define TXTL_DMA 8 /* DMA burst setting */
 #define RXTL_DMA 9 /* DMA burst setting */
 
@@ -1314,6 +1315,7 @@ static int imx_uart_startup(struct uart_port *port)
 	unsigned long flags;
 	int dma_is_inited = 0;
 	u32 ucr1, ucr2, ucr4;
+	unsigned char rx_fifo_trig;
 
 	retval = clk_prepare_enable(sport->clk_per);
 	if (retval)
@@ -1324,7 +1326,12 @@ static int imx_uart_startup(struct uart_port *port)
 		return retval;
 	}
 
-	imx_uart_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	if (uart_console(&sport->port))
+		rx_fifo_trig = RXTL_DEFAULT;
+	else
+		rx_fifo_trig = RXTL_UART;
+
+	imx_uart_setup_ufcr(sport, TXTL_DEFAULT, rx_fifo_trig);
 
 	/* disable the DREN bit (Data Ready interrupt enable) before
 	 * requesting IRQs
