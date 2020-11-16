@@ -1295,6 +1295,7 @@ static void imx_uart_clear_rx_errors(struct imx_port *sport)
 
 #define TXTL_DEFAULT 2 /* reset default */
 #define RXTL_DEFAULT 1 /* reset default */
+#define RXTL_UART 16 /* For UART */
 #define TXTL_DMA 8 /* DMA burst setting */
 #define RXTL_DMA 9 /* DMA burst setting */
 
@@ -1421,6 +1422,7 @@ static int imx_uart_startup(struct uart_port *port)
 	unsigned long flags;
 	int dma_is_inited = 0;
 	u32 ucr1, ucr2, ucr3, ucr4;
+	unsigned char rx_fifo_trig;
 
 	retval = clk_prepare_enable(sport->clk_per);
 	if (retval)
@@ -1431,7 +1433,12 @@ static int imx_uart_startup(struct uart_port *port)
 		return retval;
 	}
 
-	imx_uart_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	if (uart_console(&sport->port))
+		rx_fifo_trig = RXTL_DEFAULT;
+	else
+		rx_fifo_trig = RXTL_UART;
+
+	imx_uart_setup_ufcr(sport, TXTL_DEFAULT, rx_fifo_trig);
 
 	/* disable the DREN bit (Data Ready interrupt enable) before
 	 * requesting IRQs
@@ -1681,7 +1688,7 @@ imx_uart_set_termios(struct uart_port *port, struct ktermios *termios,
 	 * except those we will or may need to preserve.
 	 */
 	old_ucr2 = imx_uart_readl(sport, UCR2);
-	ucr2 = old_ucr2 & (UCR2_TXEN | UCR2_RXEN | UCR2_ATEN | UCR2_CTS);
+	ucr2 = old_ucr2 & (UCR2_TXEN | UCR2_RXEN | UCR2_CTS);
 
 	ucr2 |= UCR2_SRST | UCR2_IRTS;
 	if ((termios->c_cflag & CSIZE) == CS8)
@@ -1801,6 +1808,9 @@ imx_uart_set_termios(struct uart_port *port, struct ktermios *termios,
 
 	if (UART_ENABLE_MS(&sport->port, termios->c_cflag))
 		imx_uart_enable_ms(&sport->port);
+
+	ucr2 = imx_uart_readl(sport, UCR2);
+	imx_uart_writel(sport, ucr2 | UCR2_ATEN, UCR2);
 
 	spin_unlock_irqrestore(&sport->port.lock, flags);
 }
