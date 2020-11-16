@@ -899,6 +899,9 @@ static irqreturn_t imx_uart_int(int irq, void *dev_id)
 		usr2 &= ~USR2_ORE;
 
 	if (usr1 & (USR1_RRDY | USR1_AGTIM)) {
+		if (usr1 & USR1_AGTIM)
+			imx_uart_writel(sport, USR1_AGTIM, USR1);
+
 		imx_uart_rxint(irq, dev_id);
 		ret = IRQ_HANDLED;
 	}
