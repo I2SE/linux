@@ -1106,17 +1106,23 @@ static void clear_rx_errors(struct imx_port *sport)
 
 #define TXTL_DEFAULT 2 /* reset default */
 #define RXTL_DEFAULT 1 /* reset default */
+#define RXTL_UART 16 /* For uart */
 #define TXTL_DMA 8 /* DMA burst setting */
 #define RXTL_DMA 9 /* DMA burst setting */
 
-static void imx_setup_ufcr(struct imx_port *sport,
-			  unsigned char txwl, unsigned char rxwl)
+static void imx_setup_ufcr(struct imx_port *sport, unsigned int mode)
 {
 	unsigned int val;
+	unsigned int rx_fifo_trig;
+
+	if (uart_console(&sport->port))
+		rx_fifo_trig = RXTL_DEFAULT;
+	else
+		rx_fifo_trig = RXTL_UART;
 
 	/* set receiver / transmitter trigger level */
 	val = readl(sport->port.membase + UFCR) & (UFCR_RFDIV | UFCR_DCEDTE);
-	val |= txwl << UFCR_TXTL_SHF | rxwl;
+	val |= TXTL_DEFAULT << UFCR_TXTL_SHF | rx_fifo_trig;
 	writel(val, sport->port.membase + UFCR);
 }
 
@@ -1213,7 +1219,7 @@ static void imx_enable_dma(struct imx_port *sport)
 	temp |= UCR2_ATEN;
 	writel(temp, sport->port.membase + UCR2);
 
-	imx_setup_ufcr(sport, TXTL_DMA, RXTL_DMA);
+	imx_setup_ufcr(sport, 0);
 
 	sport->dma_is_enabled = 1;
 }
@@ -1232,7 +1238,7 @@ static void imx_disable_dma(struct imx_port *sport)
 	temp &= ~(UCR2_CTSC | UCR2_CTS | UCR2_ATEN);
 	writel(temp, sport->port.membase + UCR2);
 
-	imx_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	imx_setup_ufcr(sport, 0);
 
 	sport->dma_is_enabled = 0;
 }
@@ -1255,7 +1261,7 @@ static int imx_startup(struct uart_port *port)
 		return retval;
 	}
 
-	imx_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	imx_setup_ufcr(sport, 0);
 
 	/* disable the DREN bit (Data Ready interrupt enable) before
 	 * requesting IRQs
@@ -1667,7 +1673,7 @@ static int imx_poll_init(struct uart_port *port)
 	if (retval)
 		clk_disable_unprepare(sport->clk_ipg);
 
-	imx_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	imx_setup_ufcr(sport, 0);
 
 	spin_lock_irqsave(&sport->port.lock, flags);
 
@@ -1942,7 +1948,7 @@ imx_console_setup(struct console *co, char *options)
 	else
 		imx_console_get_options(sport, &baud, &parity, &bits);
 
-	imx_setup_ufcr(sport, TXTL_DEFAULT, RXTL_DEFAULT);
+	imx_setup_ufcr(sport, 0);
 
 	retval = uart_set_options(&sport->port, co, baud, parity, bits, flow);
 
