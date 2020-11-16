@@ -816,6 +816,9 @@ static unsigned int imx_uart_get_hwmctrl(struct imx_port *sport)
 	if (usr1 & USR1_RTSS)
 		tmp |= TIOCM_CTS;
 
+	if (imx_uart_readl(sport, UCR2) & UCR2_CTS)
+		tmp |= TIOCM_RTS;
+
 	/* in DCE mode DCDIN is always 0 */
 	if (!(usr2 & USR2_DCDIN))
 		tmp |= TIOCM_CAR;
@@ -823,6 +826,9 @@ static unsigned int imx_uart_get_hwmctrl(struct imx_port *sport)
 	if (sport->dte_mode)
 		if (!(imx_uart_readl(sport, USR2) & USR2_RIIN))
 			tmp |= TIOCM_RI;
+
+	if (imx_uart_readl(sport, imx_uart_uts_reg(sport)) & UTS_LOOP)
+		tmp |= TIOCM_LOOP;
 
 	return tmp;
 }
