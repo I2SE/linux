@@ -106,6 +106,8 @@
 	cs-gpios = <&gpio1 29 GPIO_ACTIVE_HIGH
 		    &gpio3 2  GPIO_ACTIVE_HIGH
 		    &gpio3 4  GPIO_ACTIVE_HIGH>;
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
 };
 
 &ecspi4 {
@@ -115,6 +117,8 @@
 	pinctrl-0 = <&pinctrl_qca7000_mains_spi>;
 	fsl,spi-num-chipselects = <1>;
 	cs-gpios = <&gpio2 15 GPIO_ACTIVE_HIGH>;
+	/delete-property/ dmas;
+	/delete-property/ dma-names;
 };
 
 &fec1 {
