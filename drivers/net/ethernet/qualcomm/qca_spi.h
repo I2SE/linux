@@ -75,6 +75,7 @@ struct qcaspi_stats {
 	u64 spi_err;
 	u64 spi_rx_verify_failed;
 	u64 spi_tx_verify_failed;
+	u64 bad_signature;
 };
 
 struct qcaspi {
