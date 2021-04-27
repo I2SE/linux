@@ -21,7 +21,7 @@
 
 &iomuxc {
 	pinctrl-0 = <&pinctrl_hog_pins
-	             &pinctrl_gpio_motor
+	             &pinctrl_gpio_motor // no motor interface populated
 	             &pinctrl_push_pull_cfg
 	             &pinctrl_dig_in>;
 };
