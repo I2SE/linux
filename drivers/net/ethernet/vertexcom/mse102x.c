@@ -435,10 +435,9 @@ static int mse102x_tx_pkt_spi(struct mse102x_net *mse, struct sk_buff *txb,
 	};
 
 	ret = mse102x_tx_frame_spi(mse, txb, pad);
-	if (ret) {
+	if (ret)
 		net_dbg_ratelimited("%s: Failed to send (%d), drop frame\n",
 				    __func__, ret);
-	}
 
 	return ret;
 }
