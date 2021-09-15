@@ -580,15 +580,7 @@ static int mse102x_net_stop(struct net_device *ndev)
 	/* stop any outstanding work */
 	flush_work(&mses->tx_work);
 
-	/* ensure any queued tx buffers are dumped */
-	while (!skb_queue_empty(&mse->txq)) {
-		struct sk_buff *txb = skb_dequeue(&mse->txq);
-
-		netif_dbg(mse, ifdown, ndev,
-			  "%s: freeing txb %p\n", __func__, txb);
-
-		dev_kfree_skb(txb);
-	}
+	skb_queue_purge(&mse->txq);
 
 	free_irq(ndev->irq, mse);
 
