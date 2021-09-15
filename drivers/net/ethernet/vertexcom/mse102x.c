@@ -319,7 +319,6 @@ static void mse102x_dump_packet(const char *msg, int len, const char *data)
 
 static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 {
-	struct mse102x_net_spi *mses = to_mse102x_spi(mse);
 	struct sk_buff *skb;
 	unsigned int rxalign;
 	unsigned int rxlen;
@@ -327,8 +326,6 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 	u16 cmd_resp;
 	u8 *rxpkt;
 	int ret;
-
-	mutex_lock(&mses->lock);
 
 	mse102x_tx_cmd_spi(mse, CMD_CTR);
 	ret = mse102x_rx_cmd_spi(mse, (u8 *)&rx);
@@ -341,12 +338,12 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 		ret = mse102x_rx_cmd_spi(mse, (u8 *)&rx);
 		cmd_resp = be16_to_cpu(rx);
 		if (ret) {
-			goto unlock_spi;
+			return;
 		} else if ((cmd_resp & CMD_MASK) != CMD_RTS) {
 			net_dbg_ratelimited("%s: Unexpected response (0x%04x)\n",
 					    __func__, cmd_resp);
 			mse->stats.invalid_rts++;
-			goto unlock_spi;
+			return;
 		} else {
 			net_dbg_ratelimited("%s: Unexpected response to first CMD\n",
 					    __func__);
@@ -357,13 +354,13 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 	if (!rxlen) {
 		net_dbg_ratelimited("%s: No frame length defined\n", __func__);
 		mse->stats.invalid_len++;
-		goto unlock_spi;
+		return;
 	}
 
 	rxalign = ALIGN(rxlen + DET_SOF_LEN + DET_DFT_LEN, 4);
 	skb = netdev_alloc_skb_ip_align(mse->ndev, rxalign);
 	if (!skb)
-		goto unlock_spi;
+		return;
 
 	/* 2 bytes Start of frame (before ethernet header)
 	 * 2 bytes Data frame tail (after ethernet frame)
@@ -373,7 +370,7 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 	if (mse102x_rx_frame_spi(mse, rxpkt, rxlen)) {
 		mse->ndev->stats.rx_errors++;
 		dev_kfree_skb(skb);
-		goto unlock_spi;
+		return;
 	}
 
 	if (netif_msg_pktdata(mse))
@@ -384,9 +381,6 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 
 	mse->ndev->stats.rx_packets++;
 	mse->ndev->stats.rx_bytes += rxlen;
-
-unlock_spi:
-	mutex_unlock(&mses->lock);
 }
 
 static int mse102x_tx_pkt_spi(struct mse102x_net *mse, struct sk_buff *txb,
@@ -518,8 +512,11 @@ static void mse102x_init_mac(struct mse102x_net *mse, struct device_node *np)
 static irqreturn_t mse102x_irq(int irq, void *_mse)
 {
 	struct mse102x_net *mse = _mse;
+	struct mse102x_net_spi *mses = to_mse102x_spi(mse);
 
+	mutex_lock(&mses->lock);
 	mse102x_rx_pkt_spi(mse);
+	mutex_unlock(&mses->lock);
 
 	return IRQ_HANDLED;
 }
