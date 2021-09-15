@@ -485,21 +485,18 @@ static netdev_tx_t mse102x_start_xmit_spi(struct sk_buff *skb,
 {
 	struct mse102x_net *mse = netdev_priv(ndev);
 	struct mse102x_net_spi *mses = to_mse102x_spi(mse);
-	netdev_tx_t ret = NETDEV_TX_OK;
 
 	netif_dbg(mse, tx_queued, ndev,
 		  "%s: skb %p, %d@%p\n", __func__, skb, skb->len, skb->data);
 
-	if (skb_queue_len(&mse->txq) >= TX_QUEUE_MAX) {
+	skb_queue_tail(&mse->txq, skb);
+
+	if (skb_queue_len(&mse->txq) >= TX_QUEUE_MAX)
 		netif_stop_queue(ndev);
-		ret = NETDEV_TX_BUSY;
-	} else {
-		skb_queue_tail(&mse->txq, skb);
-	}
 
 	schedule_work(&mses->tx_work);
 
-	return ret;
+	return NETDEV_TX_OK;
 }
 
 static void mse102x_init_mac(struct mse102x_net *mse, struct device_node *np)
