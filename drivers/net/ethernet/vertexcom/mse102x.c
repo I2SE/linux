@@ -609,7 +609,6 @@ static void mse102x_get_drvinfo(struct net_device *ndev,
 				struct ethtool_drvinfo *di)
 {
 	strscpy(di->driver, DRV_NAME, sizeof(di->driver));
-	strscpy(di->version, "1.00", sizeof(di->version));
 	strscpy(di->bus_info, dev_name(ndev->dev.parent), sizeof(di->bus_info));
 }
 
