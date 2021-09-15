@@ -524,7 +524,6 @@ static irqreturn_t mse102x_irq(int irq, void *_mse)
 static int mse102x_net_open(struct net_device *ndev)
 {
 	struct mse102x_net *mse = netdev_priv(ndev);
-	struct mse102x_net_spi *mses = to_mse102x_spi(mse);
 	int ret;
 
 	ret = request_threaded_irq(ndev->irq, NULL, mse102x_irq, IRQF_ONESHOT,
@@ -534,11 +533,6 @@ static int mse102x_net_open(struct net_device *ndev)
 		return ret;
 	}
 
-	/* lock the card, even if we may not actually be doing anything
-	 * else at the moment
-	 */
-	mutex_lock(&mses->lock);
-
 	netif_dbg(mse, ifup, ndev, "opening\n");
 
 	netif_start_queue(ndev);
@@ -546,8 +540,6 @@ static int mse102x_net_open(struct net_device *ndev)
 	netif_carrier_on(ndev);
 
 	netif_dbg(mse, ifup, ndev, "network device up\n");
-
-	mutex_unlock(&mses->lock);
 
 	return 0;
 }
