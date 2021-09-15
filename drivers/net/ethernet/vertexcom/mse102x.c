@@ -451,22 +451,15 @@ static void mse102x_tx_work(struct work_struct *work)
 	struct mse102x_net_spi *mses;
 	struct mse102x_net *mse;
 	struct sk_buff *txb;
-	bool done = false;
 	int ret = 0;
 
 	mses = container_of(work, struct mse102x_net_spi, tx_work);
 	mse = &mses->mse102x;
 
-	while (!done) {
+	while ((txb = skb_dequeue(&mse->txq))) {
 		mutex_lock(&mses->lock);
-
-		txb = skb_dequeue(&mse->txq);
-		if (!txb) {
-			done = true;
-			goto unlock_spi;
-		}
-
 		ret = mse102x_tx_pkt_spi(mse, txb, work_timeout);
+		mutex_unlock(&mses->lock);
 		if (ret) {
 			mse->ndev->stats.tx_dropped++;
 		} else {
@@ -474,10 +467,7 @@ static void mse102x_tx_work(struct work_struct *work)
 			mse->ndev->stats.tx_packets++;
 		}
 
-		dev_kfree_skb(txb);
-
-unlock_spi:
-		mutex_unlock(&mses->lock);
+		dev_kfree_skb(txb);		
 	}
 
 	if (ret == -ETIMEDOUT) {
