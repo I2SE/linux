@@ -331,7 +331,7 @@
 		pinctrl_qca7000_cp_spi: pinctrl_qca7000_cp_spiGrp {
 			fsl,pins = <
 				MX6UL_PAD_UART4_RX_DATA__GPIO1_IO29         0x10b0 /* CS for QCA7000 CP */
-				MX6UL_PAD_LCD_HSYNC__GPIO3_IO02             0xb0
+				MX6UL_PAD_LCD_HSYNC__GPIO3_IO02             0x10b0 /* CS for MSE1021 CP */
 				MX6UL_PAD_LCD_RESET__GPIO3_IO04             0xb0
 				MX6UL_PAD_UART4_TX_DATA__ECSPI2_SCLK        0x10b0
 				MX6UL_PAD_UART5_RX_DATA__ECSPI2_MISO        0x10b0
@@ -369,6 +369,12 @@
 		pinctrl_qca7000_mains_btld: pinctrl_qca7000_mains_btldGrp {
 			fsl,pins = <
 				MX6UL_PAD_LCD_DATA11__GPIO3_IO16            0x400000b0
+			>;
+		};
+
+		pinctrl_mse1021_cp_int: pinctrl_mse1021_cp_intGrp {
+			fsl,pins = <
+				MX6UL_PAD_LCD_DATA01__GPIO3_IO06            0x10b0 // EXT_GPIO
 			>;
 		};
 
@@ -491,8 +497,6 @@
 			fsl,pins = <
 				MX6UL_PAD_GPIO1_IO08__USDHC2_VSELECT        0x70b1 /* to PF3001 */
 				MX6UL_PAD_CSI_VSYNC__GPIO4_IO19             0xb0 /* AUD_INT from PF3001 */
-
-				MX6UL_PAD_LCD_DATA01__GPIO3_IO06            0xb0 // EXT_GPIO
 
 				/* relay 1/2 control */
 				MX6UL_PAD_LCD_DATA07__GPIO3_IO12            0x400000b0
