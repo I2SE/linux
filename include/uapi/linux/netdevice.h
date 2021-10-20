@@ -52,7 +52,8 @@ enum {
         IF_PORT_AUI,
         IF_PORT_100BASET,
         IF_PORT_100BASETX,
-        IF_PORT_100BASEFX
+        IF_PORT_100BASEFX,
+        IF_PORT_HOMEPLUG
 };
 
 /* hardware address assignment types */
