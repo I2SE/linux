@@ -380,13 +380,6 @@ static int mse102x_tx_pkt_spi(struct mse102x_net *mse, struct sk_buff *txb,
 		pad = 60 - txb->len;
 
 	while (1) {
-		/* It's not predictable how long / many retries it takes to
-		 * send at least one packet, so TX timeouts are possible.
-		 * That's the reason why the netdev watchdog is not used here.
-		 */
-		if (time_after(jiffies, work_timeout))
-			return -ETIMEDOUT;
-
 		mse102x_tx_cmd_spi(mse, CMD_RTS | (txb->len + pad));
 		ret = mse102x_rx_cmd_spi(mse, (u8 *)&rx);
 		cmd_resp = be16_to_cpu(rx);
@@ -400,6 +393,13 @@ static int mse102x_tx_pkt_spi(struct mse102x_net *mse, struct sk_buff *txb,
 					    __func__, cmd_resp);
 			mse->stats.invalid_ctr++;
 		}
+
+		/* It's not predictable how long / many retries it takes to
+		 * send at least one packet, so TX timeouts are possible.
+		 * That's the reason why the netdev watchdog is not used here.
+		 */
+		if (time_after(jiffies, work_timeout))
+			return -ETIMEDOUT;
 
 		if (first) {
 			/* throttle at first issue */
