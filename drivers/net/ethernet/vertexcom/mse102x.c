@@ -698,6 +698,8 @@ static int mse102x_probe_spi(struct spi_device *spi)
 	if (!ndev)
 		return -ENOMEM;
 
+	ndev->needed_tailroom = ALIGN(DET_DFT_LEN, 4);
+	ndev->needed_headroom = ALIGN(DET_SOF_LEN, 4);
 	ndev->priv_flags &= ~IFF_TX_SKB_SHARING;
 	ndev->tx_queue_len = 100;
 
