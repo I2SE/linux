@@ -729,7 +729,7 @@ static int mse102x_probe_spi(struct spi_device *spi)
 	dev_set_drvdata(dev, mse);
 
 	netif_carrier_off(mse->ndev);
-	ndev->if_port = IF_PORT_10BASET;
+	ndev->if_port = IF_PORT_HOMEPLUG;
 	ndev->netdev_ops = &mse102x_netdev_ops;
 	ndev->ethtool_ops = &mse102x_ethtool_ops;
 
