@@ -35,9 +35,9 @@
 #define CMD_MASK	GENMASK(15, CMD_SHIFT)
 #define LEN_MASK	GENMASK(CMD_SHIFT - 1, 0)
 
-#define	DET_CMD_LEN	4
-#define	DET_SOF_LEN	2
-#define	DET_DFT_LEN	2
+#define DET_CMD_LEN	4
+#define DET_SOF_LEN	2
+#define DET_DFT_LEN	2
 
 #define MIN_FREQ_HZ	6000000
 #define MAX_FREQ_HZ	7142857
