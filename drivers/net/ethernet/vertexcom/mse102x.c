@@ -91,10 +91,6 @@ struct mse102x_net_spi {
 
 #define to_mse102x_spi(mse) container_of((mse), struct mse102x_net_spi, mse102x)
 
-static int msg_enable;
-module_param_named(message, msg_enable, int, 0);
-MODULE_PARM_DESC(message, "Message verbosity level (0=none, 31=all)");
-
 #ifdef CONFIG_DEBUG_FS
 
 static int mse102x_info_show(struct seq_file *s, void *what)
@@ -720,7 +716,7 @@ static int mse102x_probe_spi(struct spi_device *spi)
 	mse->ndev = ndev;
 
 	/* set the default message enable */
-	mse->msg_enable = netif_msg_init(msg_enable, MSG_DEFAULT);
+	mse->msg_enable = netif_msg_init(-1, MSG_DEFAULT);
 
 	skb_queue_head_init(&mse->txq);
 
