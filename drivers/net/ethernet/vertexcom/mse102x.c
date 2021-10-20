@@ -547,6 +547,8 @@ static int mse102x_net_stop(struct net_device *ndev)
 
 	netif_info(mse, ifdown, ndev, "shutting down\n");
 
+	netif_carrier_off(mse->ndev);
+
 	/* stop any outstanding work */
 	flush_work(&mses->tx_work);
 
