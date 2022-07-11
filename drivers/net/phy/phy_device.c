@@ -1276,6 +1276,7 @@ static int gen10g_config_aneg(struct phy_device *phydev)
  */
 int genphy_update_link(struct phy_device *phydev)
 {
+	static int last_status;
 	int status;
 
 	/* Do a fake read */
@@ -1287,6 +1288,11 @@ int genphy_update_link(struct phy_device *phydev)
 	status = phy_read(phydev, MII_BMSR);
 	if (status < 0)
 		return status;
+
+	if (last_status != status) {
+		pr_info("%s: MII_BMSR: %d [0x%08x]\n", __func__, status, status);
+		last_status = status;
+	}
 
 	if ((status & BMSR_LSTATUS) == 0)
 		phydev->link = 0;
