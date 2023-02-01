@@ -807,7 +807,7 @@ static irqreturn_t imx_uart_txint(int irq, void *dev_id)
 static irqreturn_t __imx_uart_rxint(int irq, void *dev_id)
 {
 	struct imx_port *sport = dev_id;
-	unsigned int rx, flg, ignored = 0;
+	unsigned int rx, flg;
 	struct tty_port *port = &sport->port.state->port;
 
 	while (imx_uart_readl(sport, USR2) & USR2_RDR) {
@@ -835,11 +835,8 @@ static irqreturn_t __imx_uart_rxint(int irq, void *dev_id)
 			if (rx & URXD_OVRRUN)
 				sport->port.icount.overrun++;
 
-			if (rx & sport->port.ignore_status_mask) {
-				if (++ignored > 100)
-					goto out;
+			if (rx & sport->port.ignore_status_mask)
 				continue;
-			}
 
 			rx &= (sport->port.read_status_mask | 0xFF);
 
@@ -858,13 +855,12 @@ static irqreturn_t __imx_uart_rxint(int irq, void *dev_id)
 		}
 
 		if (sport->port.ignore_status_mask & URXD_DUMMY_READ)
-			goto out;
+			continue;
 
 		if (tty_insert_flip_char(port, rx, flg) == 0)
 			sport->port.icount.buf_overrun++;
 	}
 
-out:
 	tty_flip_buffer_push(port);
 
 	return IRQ_HANDLED;
