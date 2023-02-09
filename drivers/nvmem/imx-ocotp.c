@@ -24,6 +24,7 @@
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/delay.h>
+#include <linux/sysfs.h>
 
 #define IMX_OCOTP_OFFSET_B0W0		0x400 /* Offset from base address of the
 					       * OTP Bank0 Word0
@@ -75,7 +76,50 @@
 #define IMX_OCOTP_WR_UNLOCK		0x3E770000
 #define IMX_OCOTP_READ_LOCKED_VAL	0xBADABADA
 
+#define BANK8(a, b, c, d, e, f, g, h) { \
+	"HW_OCOTP_"#a, "HW_OCOTP_"#b, "HW_OCOTP_"#c, "HW_OCOTP_"#d, \
+	"HW_OCOTP_"#e, "HW_OCOTP_"#f, "HW_OCOTP_"#g, "HW_OCOTP_"#h, \
+}
+
+#define BANK4(a, b, c, d) { \
+	"HW_OCOTP_"#a, "HW_OCOTP_"#b, "HW_OCOTP_"#c, "HW_OCOTP_"#d, \
+}
+
+static const char *imx6ul_otp_desc[][8] = {
+	BANK8(LOCK, CFG0, CFG1, CFG2, CFG3, CFG4, CFG5, CFG6),
+	BANK8(MEM0, MEM1, MEM2, MEM3, MEM4, ANA0, ANA1, ANA2),
+	BANK8(OTPMK0, OTPMK1, OTPMK2, OTPMK3, OTPMK4, OTPMK5, OTPMK6, OTPMK7),
+	BANK8(SRK0, SRK1, SRK2, SRK3, SRK4, SRK5, SRK6, SRK7),
+	BANK8(SJC_RESP0, SJC_RESP1, MAC0, MAC1, MAC2, CRC, GP1, GP2),
+	BANK8(SW_GP0, SW_GP1, SW_GP2, SW_GP3, SW_GP4,  MISC_CONF,  FIELD_RETURN, SRK_REVOKE),
+	BANK8(ROM_PATCH0, ROM_PATCH1, ROM_PATCH2, ROM_PATCH3, ROM_PATCH4, ROM_PATCH5, ROM_PATCH6, ROM_PATCH7),
+	BANK8(ROM_PATCH8, ROM_PATCH9, ROM_PATCH10, ROM_PATCH11, ROM_PATCH12, ROM_PATCH13, ROM_PATCH14, ROM_PATCH15),
+	BANK8(GP30, GP31, GP32, GP33, GP34, GP35, GP36, GP37),
+	BANK8(GP38, GP39, GP310, GP311, GP312, GP313, GP314, GP315),
+	BANK8(GP40, GP41, GP42, GP43, GP44, GP45, GP46, GP47),
+	BANK8(GP48, GP49, GP410, GP411, GP412, GP413, GP414, GP415),
+	BANK8(GP50, GP51, GP52, GP53, GP54, GP55, GP56, GP57),
+	BANK8(GP58, GP59, GP510, GP511, GP512, GP513, GP514, GP515),
+	BANK8(GP60, GP61, GP62, GP63, GP64, GP65, GP66, GP67),
+	BANK8(GP70, GP71, GP72, GP73, GP80, GP81, GP82, GP83),
+};
+
+static const char *imx6ull_otp_desc[][8] = {
+	BANK8(LOCK, CFG0, CFG1, CFG2, CFG3, CFG4, CFG5, CFG6),
+	BANK8(MEM0, MEM1, MEM2, MEM3, MEM4, ANA0, ANA1, ANA2),
+	BANK8(OTPMK0, OTPMK1, OTPMK2, OTPMK3, OTPMK4, OTPMK5, OTPMK6, OTPMK7),
+	BANK8(SRK0, SRK1, SRK2, SRK3, SRK4, SRK5, SRK6, SRK7),
+	BANK8(SJC_RESP0, SJC_RESP1, MAC0, MAC1, MAC2, CRC, GP1, GP2),
+	BANK8(SW_GP0, SW_GP1, SW_GP2, SW_GP3, SW_GP4,  MISC_CONF,  FIELD_RETURN, SRK_REVOKE),
+	BANK8(ROM_PATCH0, ROM_PATCH1, ROM_PATCH2, ROM_PATCH3, ROM_PATCH4, ROM_PATCH5, ROM_PATCH6, ROM_PATCH7),
+	BANK8(GP30, GP31, GP32, GP33, GP40, GP41, GP42, GP43),
+};
+
 static DEFINE_MUTEX(ocotp_mutex);
+struct kobject *otp_kobj;
+struct kobj_attribute *otp_kattr;
+struct attribute_group *otp_attr_group;
+struct ocotp_priv *priv;
 
 struct ocotp_priv {
 	struct device *dev;
@@ -98,7 +142,42 @@ struct ocotp_params {
 	void (*set_timing)(struct ocotp_priv *priv);
 	struct ocotp_ctrl_reg ctrl;
 	bool reverse_mac_address;
+	const char **bank_desc;
 };
+
+static u32 fsl_otp_bank_physical(int bank)
+{
+	u32 phy_bank;
+
+	if (bank == 0)
+		phy_bank = bank;
+	else {
+		if (bank >= 6)
+			phy_bank = fsl_otp_bank_physical(5) + bank - 3;
+		else
+			phy_bank = bank;
+	}
+
+	return phy_bank;
+}
+
+static u32 fsl_otp_word_physical(const struct ocotp_params *params, int index)
+{
+	u32 phy_bank_off;
+	u32 word_off, bank_off;
+	u32 words_per_bank;
+
+	if (params->bank_address_words == 4)
+		words_per_bank = 4;
+	else
+		words_per_bank = 8;
+
+	bank_off = index / words_per_bank;
+	word_off = index % words_per_bank;
+	phy_bank_off = fsl_otp_bank_physical(bank_off);
+
+	return phy_bank_off * words_per_bank + word_off;
+}
 
 static int imx_ocotp_wait_for_busy(struct ocotp_priv *priv, u32 flags)
 {
@@ -481,6 +560,21 @@ write_end:
 	return ret < 0 ? ret : bytes;
 }
 
+static ssize_t fsl_otp_show(struct kobject *kobj, struct kobj_attribute *attr,
+			    char *buf)
+{
+	unsigned int index = attr - otp_kattr;
+	unsigned int phy_index;
+	u32 value = 0;
+	int ret;
+
+	phy_index = fsl_otp_word_physical(priv->params, index);
+
+	ret = imx_ocotp_read(priv, phy_index * 4, &value, 4);
+
+	return ret ? 0 : sprintf(buf, "0x%x\n", value);
+}
+
 static struct nvmem_config imx_ocotp_nvmem_config = {
 	.name = "imx-ocotp",
 	.read_only = false,
@@ -524,6 +618,7 @@ static const struct ocotp_params imx6ul_params = {
 	.bank_address_words = 0,
 	.set_timing = imx_ocotp_set_imx6_timing,
 	.ctrl = IMX_OCOTP_BM_CTRL_DEFAULT,
+	.bank_desc = (const char **)imx6ul_otp_desc,
 };
 
 static const struct ocotp_params imx6ull_params = {
@@ -531,6 +626,7 @@ static const struct ocotp_params imx6ull_params = {
 	.bank_address_words = 0,
 	.set_timing = imx_ocotp_set_imx6_timing,
 	.ctrl = IMX_OCOTP_BM_CTRL_DEFAULT,
+	.bank_desc = (const char **)imx6ull_otp_desc,
 };
 
 static const struct ocotp_params imx7d_params = {
@@ -598,8 +694,11 @@ MODULE_DEVICE_TABLE(of, imx_ocotp_dt_ids);
 static int imx_ocotp_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
-	struct ocotp_priv *priv;
 	struct nvmem_device *nvmem;
+	struct attribute **attrs;
+	const char **desc;
+	int i, num;
+	int ret;
 
 	priv = devm_kzalloc(dev, sizeof(*priv), GFP_KERNEL);
 	if (!priv)
@@ -626,6 +725,44 @@ static int imx_ocotp_probe(struct platform_device *pdev)
 	clk_disable_unprepare(priv->clk);
 
 	nvmem = devm_nvmem_register(dev, &imx_ocotp_nvmem_config);
+
+	desc = priv->params->bank_desc;
+	num = priv->params->nregs;
+
+	if (!desc)
+		return PTR_ERR_OR_ZERO(nvmem);
+
+	/* The last one is NULL, which is used to detect the end */
+	attrs = devm_kzalloc(&pdev->dev, (num + 1) * sizeof(*attrs),
+			     GFP_KERNEL);
+	otp_kattr = devm_kzalloc(&pdev->dev, num * sizeof(*otp_kattr),
+				 GFP_KERNEL);
+	otp_attr_group = devm_kzalloc(&pdev->dev, sizeof(*otp_attr_group),
+				      GFP_KERNEL);
+	if (!attrs || !otp_kattr || !otp_attr_group)
+		return -ENOMEM;
+
+	for (i = 0; i < num; i++) {
+		sysfs_attr_init(&otp_kattr[i].attr);
+		otp_kattr[i].attr.name = desc[i];
+		otp_kattr[i].attr.mode = 0400;
+		otp_kattr[i].show = fsl_otp_show;
+		attrs[i] = &otp_kattr[i].attr;
+	}
+	otp_attr_group->attrs = attrs;
+
+	otp_kobj = kobject_create_and_add("fsl_otp", NULL);
+	if (!otp_kobj) {
+		dev_err(&pdev->dev, "failed to add kobject\n");
+		return -ENOMEM;
+	}
+
+	ret = sysfs_create_group(otp_kobj, otp_attr_group);
+	if (ret) {
+		dev_err(&pdev->dev, "failed to create sysfs group: %d\n", ret);
+		kobject_put(otp_kobj);
+		return ret;
+	}
 
 	return PTR_ERR_OR_ZERO(nvmem);
 }
