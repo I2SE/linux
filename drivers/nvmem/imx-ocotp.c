@@ -568,6 +568,8 @@ static ssize_t fsl_otp_show(struct kobject *kobj, struct kobj_attribute *attr,
 	u32 value = 0;
 	int ret;
 
+	pr_warn_once("/sys/fsl_otp is deprecated, use /sys/bus/nvmem\n");
+
 	phy_index = fsl_otp_word_physical(priv->params, index);
 
 	ret = imx_ocotp_read(priv, phy_index * 4, &value, 4);
