@@ -54,8 +54,9 @@
 };
 
 &pwm7 {
-	pinctrl-names = "default";
+	pinctrl-names = "default", "idle";
 	pinctrl-0 = <&pinctrl_pwm_fan>;
+	pinctrl-1 = <&pinctrl_pwm_fan_idle>;
 	status = "okay";
 };
 

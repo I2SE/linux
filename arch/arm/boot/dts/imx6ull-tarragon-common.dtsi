@@ -549,6 +549,13 @@
 		>;
 	};
 
+	pinctrl_pwm_fan_idle: pwm-fan-idlegrp {
+		fsl,pins = <
+			MX6UL_PAD_JTAG_TCK__GPIO1_IO14              0x60a0
+		>;
+		output-high;
+	};
+
 	pinctrl_qca700x_cp_btld: qca700x-cp-btldgrp {
 		fsl,pins = <
 			MX6UL_PAD_LCD_DATA13__GPIO3_IO18            0x400000b0
