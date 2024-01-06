@@ -18,6 +18,7 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/of.h>
+#include <linux/pinctrl/consumer.h>
 #include <linux/platform_device.h>
 #include <linux/pwm.h>
 #include <linux/slab.h>
@@ -256,12 +257,17 @@ static int pwm_imx27_apply(struct pwm_chip *chip, struct pwm_device *pwm,
 	 */
 	if (cstate.enabled) {
 		pwm_imx27_wait_fifo_slot(chip, pwm);
+
+		if (!state->enabled)
+			pinctrl_pm_select_idle_state(chip->dev);
 	} else {
 		ret = pwm_imx27_clk_prepare_enable(imx);
 		if (ret)
 			return ret;
 
 		pwm_imx27_sw_reset(chip);
+
+		pinctrl_pm_select_default_state(chip->dev);
 	}
 
 	writel(duty_cycles, imx->mmio_base + MX3_PWMSAR);
