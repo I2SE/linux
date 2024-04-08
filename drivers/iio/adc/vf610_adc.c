@@ -151,6 +151,8 @@ struct vf610_adc_feature {
 	bool	ovwren;
 };
 
+#define VF610_MAX_CHAN 16
+
 struct vf610_adc {
 	struct device *dev;
 	void __iomem *regs;
@@ -164,6 +166,8 @@ struct vf610_adc {
 	struct vf610_adc_feature adc_feature;
 
 	u32 sample_freq_avail[5];
+
+	int mock_adc_value[VF610_MAX_CHAN];
 
 	struct completion completion;
 	/* Ensure the timestamp is naturally aligned */
@@ -658,7 +662,10 @@ static int vf610_read_raw(struct iio_dev *indio_dev,
 
 		switch (chan->type) {
 		case IIO_VOLTAGE:
-			*val = info->value;
+			if (info->mock_adc_value[chan->channel] > -1)
+				*val = info->mock_adc_value[chan->channel];
+			else
+				*val = info->value;
 			break;
 		case IIO_TEMP:
 			/*
@@ -705,6 +712,13 @@ static int vf610_write_raw(struct iio_dev *indio_dev,
 	int i;
 
 	switch (mask) {
+	case IIO_CHAN_INFO_RAW:
+		if (val < 4096) {
+			info->mock_adc_value[chan->channel] = val;
+			return 0;
+		}
+		break;
+
 	case IIO_CHAN_INFO_SAMP_FREQ:
 		for (i = 0;
 			i < ARRAY_SIZE(info->sample_freq_avail);
@@ -812,6 +826,9 @@ static int vf610_adc_probe(struct platform_device *pdev)
 
 	info = iio_priv(indio_dev);
 	info->dev = &pdev->dev;
+
+	for (int i = 0; i < VF610_MAX_CHAN; i++)
+		info->mock_adc_value[i] = -1;
 
 	info->regs = devm_platform_ioremap_resource(pdev, 0);
 	if (IS_ERR(info->regs))
