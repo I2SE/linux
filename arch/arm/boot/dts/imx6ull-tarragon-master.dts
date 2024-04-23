@@ -5,7 +5,7 @@
 #include "imx6ull-tarragon-common.dtsi"
 
 / {
-	model = "chargebyte Tarragon Master";
+	model = "chargebyte Tarragon Master CAN";
 	compatible = "chargebyte,imx6ull-tarragon-master", "fsl,imx6ull";
 
 	fan0: pwm-fan {
@@ -29,6 +29,10 @@
 		enable-active-high;
 		regulator-boot-on;
 	};
+};
+
+&can2 {
+	status = "okay";
 };
 
 &ecspi2 {
@@ -74,9 +78,5 @@
 &pwm7 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_pwm_fan>;
-	status = "okay";
-};
-
-&uart5 {
 	status = "okay";
 };

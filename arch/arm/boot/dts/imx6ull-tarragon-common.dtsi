@@ -30,6 +30,15 @@
 		reset-gpios = <&gpio4 10 GPIO_ACTIVE_LOW>;
 	};
 
+	reg_can_5v: regulator-can-5v {
+		compatible = "regulator-fixed";
+		regulator-name = "can-5v";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
+
 	reg_dcdc_3v3: regulator-dcdc-3v3 {
 		compatible = "regulator-fixed";
 		regulator-name = "dcdc-3v3";
@@ -82,6 +91,12 @@
 		     &pinctrl_adc_pp>;
 	vref-supply = <&vgen1_reg>;
 	status = "okay";
+};
+
+&can2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_flexcan2>;
+	xceiver-supply = <&reg_can_5v>;
 };
 
 &cpu0 {
@@ -491,6 +506,13 @@
 	pinctrl_fan_enable: fan-enablegrp {
 		fsl,pins = <
 			MX6UL_PAD_LCD_DATA00__GPIO3_IO05            0x400000b0
+		>;
+	};
+
+	pinctrl_flexcan2: flexcan2grp {
+		fsl,pins = <
+			MX6UL_PAD_SD1_DATA2__FLEXCAN2_TX            0xb0b0
+			MX6UL_PAD_SD1_DATA3__FLEXCAN2_RX            0xb0b0
 		>;
 	};
 
