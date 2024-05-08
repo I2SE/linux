@@ -55,7 +55,7 @@
 					interrupts = <25 IRQ_TYPE_EDGE_RISING>;
 					spi-cpha;
 					spi-cpol;
-					spi-max-frequency = <16000000>;
+					spi-max-frequency = <12000000>;
 					intr-gpios = <&gpio3 25 GPIO_ACTIVE_HIGH>;
 				};
 
