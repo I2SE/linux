@@ -475,8 +475,10 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 		if (signature != QCASPI_GOOD_SIGNATURE) {
-			if (qca->sync == QCASPI_SYNC_READY)
+			if (qca->sync == QCASPI_SYNC_READY) {
 				qca->stats.bad_signature++;
+				netdev_info(qca->net_dev, "sync: got CPU on, but signature was invalid (0x%04X), restart\n", signature);
+			}
 
 			qca->sync = QCASPI_SYNC_UNKNOWN;
 			netdev_dbg(qca->net_dev, "sync: got CPU on, but signature was invalid, restart\n");
@@ -498,17 +500,20 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 
 	switch (qca->sync) {
 	case QCASPI_SYNC_READY:
+		int i = 0;
 		/* Check signature twice, if not valid go to unknown state. */
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
-		if (signature != QCASPI_GOOD_SIGNATURE)
+		while (signature != QCASPI_GOOD_SIGNATURE) {
+			netdev_info(qca->net_dev, "sync: bad signature #%d (0x%04X)\n", i, signature);
 			qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
+			i++;
 
-		if (signature != QCASPI_GOOD_SIGNATURE) {
-			qca->sync = QCASPI_SYNC_UNKNOWN;
-			qca->stats.bad_signature++;
-			netdev_dbg(qca->net_dev, "sync: bad signature, restart\n");
-			/* don't reset right away */
-			return;
+			if (i == 20) {
+				qca->sync = QCASPI_SYNC_UNKNOWN;
+				qca->stats.bad_signature++;
+				/* don't reset right away */
+				return;
+			}
 		}
 		break;
 	case QCASPI_SYNC_UNKNOWN:
