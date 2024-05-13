@@ -508,9 +508,10 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 			i++;
 
-			if (i == 20) {
-				qca->sync = QCASPI_SYNC_UNKNOWN;
+			if (i == 2) {
 				qca->stats.bad_signature++;
+			} else if (i == 20) {
+				qca->sync = QCASPI_SYNC_UNKNOWN;
 				/* don't reset right away */
 				return;
 			}
