@@ -504,7 +504,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		/* Check signature twice, if not valid go to unknown state. */
 		qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 		while (signature != QCASPI_GOOD_SIGNATURE) {
-			netdev_info(qca->net_dev, "sync: bad signature #%d (0x%04X)\n", i, signature);
+			netdev_info(qca->net_dev, "sync: bad signature #%d (0x%04X, intr %d)\n", i, signature, qca->intr_svc != qca->intr_req);
 			qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 			i++;
 
