@@ -491,7 +491,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 				netdev_dbg(qca->net_dev, "sync: got CPU on, but wrbuf not empty. reset!\n");
 				qca->sync = QCASPI_SYNC_UNKNOWN;
 			} else {
-				netdev_dbg(qca->net_dev, "sync: got CPU on, now in sync\n");
+				netdev_info(qca->net_dev, "sync: got CPU on, now in sync\n");
 				qca->sync = QCASPI_SYNC_READY;
 				return;
 			}
