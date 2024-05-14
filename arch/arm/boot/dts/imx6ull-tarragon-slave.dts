@@ -5,8 +5,12 @@
 #include "imx6ull-tarragon-common.dtsi"
 
 / {
-	model = "chargebyte Tarragon Slave";
+	model = "chargebyte Tarragon Slave CAN";
 	compatible = "chargebyte,imx6ull-tarragon-slave", "fsl,imx6ull";
+};
+
+&can2 {
+	status = "okay";
 };
 
 &ecspi2 {
