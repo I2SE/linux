@@ -1033,8 +1033,12 @@ int tpm_tis_core_init(struct device *dev, struct tpm_tis_data *priv, int irq,
 	dev_set_drvdata(&chip->dev, priv);
 
 	rc = tpm_tis_read32(priv, TPM_DID_VID(0), &vendor);
-	if (rc < 0)
+	if (rc < 0) {
+		dev_err(dev, "tpm_tis_read32 failed: %d\n", rc);
 		return rc;
+	}
+
+	dev_info(dev, "tpm_tis_read32: TPM_DID_VID = 0x%0x\n", vendor);
 
 	priv->manufacturer_id = vendor;
 
@@ -1062,6 +1066,7 @@ int tpm_tis_core_init(struct device *dev, struct tpm_tis_data *priv, int irq,
 		chip->ops->clk_enable(chip, true);
 
 	if (wait_startup(chip, 0) != 0) {
+		dev_err(dev, "wait_startup failed\n");
 		rc = -ENODEV;
 		goto out_err;
 	}
@@ -1071,10 +1076,14 @@ int tpm_tis_core_init(struct device *dev, struct tpm_tis_data *priv, int irq,
 	if (rc < 0)
 		goto out_err;
 
+	dev_info(dev, "tpm_tis_read32: TPM_INT_ENABLE = 0x%0x\n", intmask);
+
 	/* Figure out the capabilities */
 	rc = tpm_tis_read32(priv, TPM_INTF_CAPS(priv->locality), &intfcaps);
 	if (rc < 0)
 		goto out_err;
+
+	dev_info(dev, "tpm_tis_read32: TPM_INTF_CAPS = 0x%0x\n", intfcaps);
 
 	dev_dbg(dev, "TPM interface capabilities (0x%x):\n",
 		intfcaps);
@@ -1109,6 +1118,7 @@ int tpm_tis_core_init(struct device *dev, struct tpm_tis_data *priv, int irq,
 
 	rc = tpm_tis_request_locality(chip, 0);
 	if (rc < 0) {
+		dev_err(dev, "tpm_tis_request_locality() failed: %d\n", rc);
 		rc = -ENODEV;
 		goto out_err;
 	}
@@ -1117,12 +1127,16 @@ int tpm_tis_core_init(struct device *dev, struct tpm_tis_data *priv, int irq,
 	tpm_tis_relinquish_locality(chip, 0);
 
 	rc = tpm_chip_start(chip);
-	if (rc)
+	if (rc) {
+		dev_err(dev, "tpm_chip_start() failed: %d\n", rc);
 		goto out_err;
+	}
 	rc = tpm2_probe(chip);
 	tpm_chip_stop(chip);
-	if (rc)
+	if (rc) {
+		dev_err(dev, "tpm2_probe() failed: %d\n", rc);
 		goto out_err;
+	}
 
 	rc = tpm_tis_read8(priv, TPM_RID(0), &rid);
 	if (rc < 0)
