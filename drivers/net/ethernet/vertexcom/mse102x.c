@@ -737,7 +737,7 @@ static void mse102x_remove_spi(struct spi_device *spi)
 	struct mse102x_net_spi *mses = to_mse102x_spi(mse);
 
 	if (netif_msg_drv(mse))
-		dev_info(&spi->dev, "remove\n");
+		dev_dbg(&spi->dev, "remove\n");
 
 	mse102x_remove_device_debugfs(mses);
 	unregister_netdev(mse->ndev);
