@@ -330,8 +330,11 @@ static int fsl_lpspi_set_bitrate(struct fsl_lpspi_data *fsl_lpspi)
 		}
 	}
 
-	if (scldiv < 0 || scldiv >= 256)
+	if (scldiv < 0 || scldiv >= 256) {
+		dev_err(fsl_lpspi->dev, "Unable to find scldiv (per-clk=%u, speed=%u)\n",
+			perclk_rate, config.speed_hz);
 		return -EINVAL;
+	}
 
 	writel(scldiv | (scldiv << 8) | ((scldiv >> 1) << 16),
 					fsl_lpspi->base + IMX7ULP_CCR);
