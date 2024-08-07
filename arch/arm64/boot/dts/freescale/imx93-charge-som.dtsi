@@ -17,23 +17,14 @@
 };
 
 &lpi2c2 {
-	clock-frequency = <100000>;
+	clock-frequency = <400000>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpi2c2>;
 	#address-cells = <1>;
 	#size-cells = <0>;
 	status = "okay";
-/*
-	i2c_plc1: plc1@E4 {
-		compatible = "";
-		reg = <0xe4>;
-	};
-	
-	i2c_plc2: plc2@94 {
-		compatible = "";
-		reg = <0x94>;
-	};
-*/
+
+	/* Note: MSE102x uses addresses 0xe4 and 0x94 */
 };
 
 /* Console */
