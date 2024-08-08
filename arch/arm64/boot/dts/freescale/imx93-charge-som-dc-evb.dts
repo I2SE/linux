@@ -142,7 +142,6 @@
 		interrupt-parent = <&gpio4>;
 		wakeup-source;
 		trickle-resistor-ohms = <3000>;
-		enable-level-switching-mode;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_rtc>;
 		reg = <0x52>;
