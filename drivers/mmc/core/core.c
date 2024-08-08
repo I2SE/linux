@@ -1168,11 +1168,11 @@ void mmc_set_initial_signal_voltage(struct mmc_host *host)
 {
 	/* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
 	if (!mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330))
-		dev_dbg(mmc_dev(host), "Initial signal voltage of 3.3v\n");
+		dev_info(mmc_dev(host), "Initial signal voltage of 3.3v\n");
 	else if (!mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180))
-		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.8v\n");
+		dev_info(mmc_dev(host), "Initial signal voltage of 1.8v\n");
 	else if (!mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120))
-		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.2v\n");
+		dev_info(mmc_dev(host), "Initial signal voltage of 1.2v\n");
 }
 
 int mmc_host_set_uhs_voltage(struct mmc_host *host)

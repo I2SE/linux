@@ -2078,6 +2078,8 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
 {
 	u8 pwr = 0;
 
+	pr_info("%s: vdd = 0x%x\n", __func__, vdd);
+
 	if (mode != MMC_POWER_OFF) {
 		switch (1 << vdd) {
 		case MMC_VDD_165_195:

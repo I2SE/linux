@@ -600,6 +600,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 	struct mmc_command cmd = {};
 	bool use_r1b_resp;
 	unsigned char old_timing = host->ios.timing;
+	static u8 last_index = 0xff;
 
 	mmc_retune_hold(host);
 
@@ -614,6 +615,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		  (index << 16) |
 		  (value << 8) |
 		  set;
+
+	if (last_index != index) {
+		pr_info_ratelimited("%s: arg = 0x%08x\n", __func__, cmd.arg);
+		last_index = index;
+	}
+
 	use_r1b_resp = mmc_prepare_busy_cmd(host, &cmd, timeout_ms);
 
 	err = mmc_wait_for_cmd(host, &cmd, retries);

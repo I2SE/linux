@@ -1241,11 +1241,17 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+	static unsigned last_timing = 0xffff;
 
 	/* disable ddr mode and disable HS400 mode */
 	m = readl(host->ioaddr + ESDHC_MIX_CTRL);
 	m &= ~(ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN);
 	imx_data->is_ddr = 0;
+
+	if (last_timing != timing) {
+		pr_info("%s: timing = %u\n", __func__, timing);
+		last_timing = timing;
+	}
 
 	switch (timing) {
 	case MMC_TIMING_UHS_SDR12:

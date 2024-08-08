@@ -33,6 +33,8 @@ static void mmc_pwrseq_emmc_reset(struct mmc_host *host)
 {
 	struct mmc_pwrseq_emmc *pwrseq =  to_pwrseq_emmc(host->pwrseq);
 
+	pr_info("%s\n", __func__);
+
 	gpiod_set_value_cansleep(pwrseq->reset_gpio, 1);
 	udelay(1);
 	gpiod_set_value_cansleep(pwrseq->reset_gpio, 0);
@@ -44,6 +46,9 @@ static int mmc_pwrseq_emmc_reset_nb(struct notifier_block *this,
 {
 	struct mmc_pwrseq_emmc *pwrseq = container_of(this,
 					struct mmc_pwrseq_emmc, reset_nb);
+
+	pr_info("%s\n", __func__);
+
 	gpiod_set_value(pwrseq->reset_gpio, 1);
 	udelay(1);
 	gpiod_set_value(pwrseq->reset_gpio, 0);

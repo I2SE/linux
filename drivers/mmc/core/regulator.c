@@ -109,15 +109,23 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 {
 	int			result = 0;
 	int			min_uV, max_uV;
+	static int		last_min_uV = 0;
 
 	if (vdd_bit) {
 		mmc_ocrbitnum_to_vdd(vdd_bit, &min_uV, &max_uV);
 
+		if (last_min_uV != min_uV) {
+			pr_info("%s: min_uV = %d uV\n", __func__, min_uV);
+			last_min_uV = min_uV;
+		}
+
 		result = regulator_set_voltage(supply, min_uV, max_uV);
 		if (result == 0 && !mmc->regulator_enabled) {
 			result = regulator_enable(supply);
-			if (!result)
+			if (!result) {
+				pr_info("%s: regulator enabled\n", __func__);
 				mmc->regulator_enabled = true;
+			}
 		}
 	} else if (mmc->regulator_enabled) {
 		result = regulator_disable(supply);
@@ -180,6 +188,7 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
 {
 	struct device *dev = mmc_dev(mmc);
 	int ret, volt, min_uV, max_uV;
+	static char last_signal_voltage = 0xff;
 
 	/* If no vqmmc supply then we can't change the voltage */
 	if (IS_ERR(mmc->supply.vqmmc))
@@ -190,12 +199,21 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
 		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
 						1100000, 1200000, 1300000);
 	case MMC_SIGNAL_VOLTAGE_180:
+		if (last_signal_voltage != ios->signal_voltage) {
+			pr_info("%s: vqmmc = 1.8V\n", __func__);
+			last_signal_voltage = ios->signal_voltage;
+		}
 		return mmc_regulator_set_voltage_if_supported(mmc->supply.vqmmc,
 						1700000, 1800000, 1950000);
 	case MMC_SIGNAL_VOLTAGE_330:
 		ret = mmc_ocrbitnum_to_vdd(mmc->ios.vdd, &volt, &max_uV);
 		if (ret < 0)
 			return ret;
+
+		if (last_signal_voltage != ios->signal_voltage) {
+			pr_info("%s: vqmmc = 3.3V\n", __func__);
+			last_signal_voltage = ios->signal_voltage;
+		}
 
 		dev_dbg(dev, "%s: found vmmc voltage range of %d-%duV\n",
 			__func__, volt, max_uV);
