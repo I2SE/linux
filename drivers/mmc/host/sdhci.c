@@ -242,6 +242,8 @@ static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
 			return false;
 	}
 
+	pr_err("%s: %s: calling host->ops->reset()\n", __func__, mmc_hostname(host->mmc));
+
 	host->ops->reset(host, mask);
 
 	return true;
@@ -2588,8 +2590,12 @@ static void sdhci_hw_reset(struct mmc_host *mmc)
 {
 	struct sdhci_host *host = mmc_priv(mmc);
 
-	if (host->ops && host->ops->hw_reset)
+	if (host->ops && host->ops->hw_reset) {
+		pr_info("%s: calling host->ops->hw_reset(host)\n", __func__);
 		host->ops->hw_reset(host);
+	} else {
+		pr_info("%s: SKIPPED calling host->ops->hw_reset(host)\n", __func__);
+	}
 }
 
 static void sdhci_enable_sdio_irq_nolock(struct sdhci_host *host, int enable)
@@ -2650,11 +2656,16 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 
 	switch (ios->signal_voltage) {
 	case MMC_SIGNAL_VOLTAGE_330:
-		if (!(host->flags & SDHCI_SIGNALING_330))
+		if (!(host->flags & SDHCI_SIGNALING_330)) {
+			pr_warn("%s: Switching to 3.3V prevented due to flags\n",
+					mmc_hostname(mmc));
 			return -EINVAL;
+		}
 		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
 		ctrl &= ~SDHCI_CTRL_VDD_180;
 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
+
+		pr_warn("%s: Switched to 3.3V host controller signaling\n", mmc_hostname(mmc));
 
 		if (!IS_ERR(mmc->supply.vqmmc)) {
 			ret = mmc_regulator_set_vqmmc(mmc, ios);
@@ -2677,8 +2688,11 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 
 		return -EAGAIN;
 	case MMC_SIGNAL_VOLTAGE_180:
-		if (!(host->flags & SDHCI_SIGNALING_180))
+		if (!(host->flags & SDHCI_SIGNALING_180)) {
+			pr_warn("%s: Switching to 1.8V prevented due to flags\n",
+					mmc_hostname(mmc));
 			return -EINVAL;
+		}
 		if (!IS_ERR(mmc->supply.vqmmc)) {
 			ret = mmc_regulator_set_vqmmc(mmc, ios);
 			if (ret < 0) {
@@ -2698,6 +2712,8 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 		/* Some controller need to do more when switching */
 		if (host->ops->voltage_switch)
 			host->ops->voltage_switch(host);
+
+		pr_warn("%s: Switched to 1.8V host controller signaling\n", mmc_hostname(mmc));
 
 		/* 1.8V regulator output should be stable within 5 ms */
 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
@@ -4537,21 +4553,31 @@ int sdhci_setup_host(struct sdhci_host *host)
 
 	if (!IS_ERR(mmc->supply.vqmmc)) {
 		if (enable_vqmmc) {
+			pr_info("%s: enabling regulator for vqmmc\n", mmc_hostname(mmc));
+
 			ret = regulator_enable(mmc->supply.vqmmc);
 			host->sdhci_core_to_disable_vqmmc = !ret;
+		} else {
+			pr_info("%s: NOT enabling regulator for vqmmc\n", mmc_hostname(mmc));
 		}
 
 		/* If vqmmc provides no 1.8V signalling, then there's no UHS */
 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 1700000,
-						    1950000))
+						    1950000)) {
 			host->caps1 &= ~(SDHCI_SUPPORT_SDR104 |
 					 SDHCI_SUPPORT_SDR50 |
 					 SDHCI_SUPPORT_DDR50);
+			pr_info("%s: clearing SDHCI_SUPPORT_{SDR104,SDR50,DDR50}\n",
+				mmc_hostname(mmc));
+		}
 
 		/* In eMMC case vqmmc might be a fixed 1.8V regulator */
 		if (!regulator_is_supported_voltage(mmc->supply.vqmmc, 2700000,
-						    3600000))
+						    3600000)) {
 			host->flags &= ~SDHCI_SIGNALING_330;
+			pr_info("%s: clearing SDHCI_SIGNALING_330\n",
+				mmc_hostname(mmc));
+		}
 
 		if (ret) {
 			pr_warn("%s: Failed to enable vqmmc regulator: %d\n",
@@ -4564,6 +4590,8 @@ int sdhci_setup_host(struct sdhci_host *host)
 	if (host->quirks2 & SDHCI_QUIRK2_NO_1_8_V) {
 		host->caps1 &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_SDR50 |
 				 SDHCI_SUPPORT_DDR50);
+		pr_info("%s: clearing SDHCI_SUPPORT_{SDR104,SDR50,DDR50} due to SDHCI_QUIRK2_NO_1_8_V\n",
+			mmc_hostname(mmc));
 		/*
 		 * The SDHCI controller in a SoC might support HS200/HS400
 		 * (indicated using mmc-hs200-1_8v/mmc-hs400-1_8v dt property),
@@ -4584,11 +4612,17 @@ int sdhci_setup_host(struct sdhci_host *host)
 	/* SDR104 supports also implies SDR50 support */
 	if (host->caps1 & SDHCI_SUPPORT_SDR104) {
 		mmc->caps |= MMC_CAP_UHS_SDR104 | MMC_CAP_UHS_SDR50;
+		pr_info("%s: promoting MMC_CAP_UHS_SDR104 & MMC_CAP_UHS_SDR50\n",
+			mmc_hostname(mmc));
 		/* SD3.0: SDR104 is supported so (for eMMC) the caps2
 		 * field can be promoted to support HS200.
 		 */
-		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200))
+		if (!(host->quirks2 & SDHCI_QUIRK2_BROKEN_HS200)) {
 			mmc->caps2 |= MMC_CAP2_HS200;
+			pr_info("%s: promoting MMC_CAP2_HS200\n",
+				mmc_hostname(mmc));
+		}
+
 	} else if (host->caps1 & SDHCI_SUPPORT_SDR50) {
 		mmc->caps |= MMC_CAP_UHS_SDR50;
 	}

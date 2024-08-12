@@ -1999,10 +1999,17 @@ EXPORT_SYMBOL(mmc_set_blocklen);
 
 static void mmc_hw_reset_for_init(struct mmc_host *host)
 {
+	pr_debug("%s: calling mmc_pwrseq_reset\n", __func__);
+
 	mmc_pwrseq_reset(host);
+
+	pr_debug("%s: after mmc_pwrseq_reset\n", __func__);
 
 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->card_hw_reset)
 		return;
+
+	pr_debug("%s: calling host->ops->card_hw_reset()\n", __func__);
+
 	host->ops->card_hw_reset(host);
 }
 

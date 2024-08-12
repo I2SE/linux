@@ -2249,12 +2249,14 @@ static int _mmc_hw_reset(struct mmc_host *host)
 
 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->card_hw_reset &&
 	     mmc_can_reset(card)) {
+		pr_info("%s: card HW_RESET enabled\n", __func__);
 		/* If the card accept RST_n signal, send it. */
 		mmc_set_clock(host, host->f_init);
 		host->ops->card_hw_reset(host);
 		/* Set initial state and call mmc_set_ios */
 		mmc_set_initial_state(host);
 	} else {
+		pr_info("%s: card HW_RESET NOT enabled -> calling mmc_pwrseq_reset()\n", __func__);
 		/* Do a brute force power cycle */
 		mmc_power_cycle(host, card->ocr);
 		mmc_pwrseq_reset(host);
