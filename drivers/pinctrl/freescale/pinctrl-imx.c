@@ -557,6 +557,24 @@ static void imx_pinctrl_parse_pin_mmio(struct imx_pinctrl *ipctl,
 		if (config & IMX_PAD_SION)
 			pin_mmio->mux_mode |= IOMUXC_CONFIG_SION;
 		pin_mmio->config = config & ~IMX_PAD_SION;
+
+		if (config & 1)
+			dev_warn(ipctl->dev, "%s: 0x%x 0x%08lx RESERVED!", info->pins[*pin_id].name,
+			     pin_mmio->mux_mode, pin_mmio->config);
+
+		switch ((config >> 1) & 0x3f) {
+		case 0x00:
+		case 0x01:
+		case 0x03:
+		case 0x07:
+		case 0x0f:
+		case 0x1f:
+		case 0x3f:
+			break;
+		default:
+			dev_warn(ipctl->dev, "%s: 0x%x 0x%08lx INV DSE!", info->pins[*pin_id].name,
+			     pin_mmio->mux_mode, pin_mmio->config);
+		}
 	}
 
 	*list_p = list;
