@@ -32,8 +32,6 @@
 		regulator-name = "CAN_EN";
 	};
 
-	// FIXME: This seems like a workaround for the PWREN pins.
-	// So drop this as soon GPIO handling works as expected.
 	reg_usb_otg1_vbus: regulator-usb-otg1-vbus {
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_usbotg1grp>;
@@ -46,8 +44,6 @@
 		regulator-boot-on;
 	};
 
-	// FIXME: This seems like a workaround for the PWREN pins.
-	// So drop this as soon GPIO handling works as expected.
 	reg_usb_otg2_vbus: regulator-usb-otg2-vbus {
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_usbotg2grp>;
