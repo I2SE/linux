@@ -1235,6 +1235,23 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
 	}
 }
 
+static void esdhc_voltage_switch(struct sdhci_host *host, bool v18)
+{
+	u16 vendor_spec;
+
+	if (v18)
+		pr_info("%s: ----- SWITCHING TO 1.8 V NOW -----\n", __func__);
+	else
+		pr_info("%s: ----- SWITCHING TO 3.3 V NOW -----\n", __func__);
+
+	vendor_spec = sdhci_readw(host, ESDHC_VENDOR_SPEC);
+	if (v18)
+		vendor_spec |= ESDHC_VENDOR_SPEC_VSELECT;
+	else
+		vendor_spec &= ~ESDHC_VENDOR_SPEC_VSELECT;
+	sdhci_writew(host, vendor_spec, ESDHC_VENDOR_SPEC);
+}
+
 static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 {
 	u32 m;
@@ -1261,6 +1278,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	case MMC_TIMING_MMC_HS:
 	case MMC_TIMING_MMC_HS200:
 		writel(m, host->ioaddr + ESDHC_MIX_CTRL);
+		//esdhc_voltage_switch(host, timing == MMC_TIMING_MMC_HS200);
 		break;
 	case MMC_TIMING_UHS_DDR50:
 	case MMC_TIMING_MMC_DDR52:
@@ -1276,6 +1294,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 				v <<= 1;
 			writel(v, host->ioaddr + ESDHC_DLL_CTRL);
 		}
+		//esdhc_voltage_switch(host, false);
 		break;
 	case MMC_TIMING_MMC_HS400:
 		m |= ESDHC_MIX_CTRL_DDREN | ESDHC_MIX_CTRL_HS400_EN;
@@ -1288,6 +1307,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	case MMC_TIMING_LEGACY:
 	default:
 		esdhc_reset_tuning(host);
+		//esdhc_voltage_switch(host, false);
 		break;
 	}
 
@@ -1335,6 +1355,14 @@ static u32 esdhc_cqhci_irq(struct sdhci_host *host, u32 intmask)
 	return 0;
 }
 
+static void sdhci_voltage_switch(struct sdhci_host *host)
+{
+	esdhc_voltage_switch(host, true);
+
+	/* wait for 5ms for voltage to stabilize */
+	usleep_range(5000, 5500);
+}
+
 static struct sdhci_ops sdhci_esdhc_ops = {
 	.read_l = esdhc_readl_le,
 	.read_w = esdhc_readw_le,
@@ -1352,6 +1380,7 @@ static struct sdhci_ops sdhci_esdhc_ops = {
 	.set_uhs_signaling = esdhc_set_uhs_signaling,
 	.reset = esdhc_reset,
 	.irq = esdhc_cqhci_irq,
+	.voltage_switch = sdhci_voltage_switch,
 	.dump_vendor_regs = esdhc_dump_debug_regs,
 };
 
