@@ -1254,7 +1254,7 @@ static void esdhc_voltage_switch(struct sdhci_host *host, bool v18)
 
 static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 {
-	u32 m;
+	u32 m, vs;
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
@@ -1268,6 +1268,9 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 	if (last_timing != timing) {
 		pr_info("%s: timing = %u\n", __func__, timing);
 		last_timing = timing;
+
+		vs = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
+		pr_info("%s: VSELECT is currently set to: %s V\n", __func__, (vs & ESDHC_VENDOR_SPEC_VSELECT) ? "1.8" : "3.3");
 	}
 
 	switch (timing) {
