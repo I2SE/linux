@@ -67,6 +67,13 @@
 		regulator-name = "VCC_SD";
 	};
 
+	reg_vdd_3v3: regulator-vdd-3v3 {
+		compatible = "regulator-fixed";
+		regulator-max-microvolt = <3300000>;
+		regulator-min-microvolt = <3300000>;
+		regulator-name = "VDD_IO_3V3";
+	};
+
 	user_keys: gpio-keys {
 		compatible = "gpio-keys";
 		pinctrl-names = "default";
@@ -200,6 +207,12 @@
 		gpios = <6 GPIO_ACTIVE_HIGH>;
 		output-high;
 	};
+};
+
+&tpm5 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_backlight>;
+	status = "okay";
 };
 
 &usdhc2 {
@@ -361,6 +374,12 @@
 	pinctrl_x11: x11grp {
 		fsl,pins = <
 			MX93_PAD_ENET1_RXC__GPIO4_IO09		0x31e // X11_GPIO4_9
+		>;
+	};
+
+	pinctrl_backlight: backlight_grp {
+		fsl,pins = <
+			MX93_PAD_GPIO_IO18__TPM5_CH2		0x31e // BACKLIGHT_PWM
 		>;
 	};
 };
