@@ -67,6 +67,7 @@ struct pfuze_regulator {
 	unsigned char stby_reg;
 	unsigned char stby_mask;
 	bool sw_reg;
+	bool sd_vsel; /* false = higher voltage range, true = lower voltage range */
 };
 
 struct pfuze_chip {
@@ -104,6 +105,10 @@ static const int pfuze3000_sw2lo[] = {
 
 static const int pfuze3000_sw2hi[] = {
 	2500000, 2800000, 2850000, 3000000, 3100000, 3150000, 3200000, 3300000,
+};
+
+static const int pfuze300x_vccsd_voltages[] = {
+	1800000, 1800000, 1800000, 1850000, 2850000, 3000000, 3150000, 3300000,
 };
 
 static const struct of_device_id pfuze_dt_ids[] = {
@@ -156,6 +161,35 @@ static int pfuze100_set_ramp_delay(struct regulator_dev *rdev, int ramp_delay)
 	}
 
 	return ret;
+}
+
+static int pfuze300x_vccsd_set_voltage_sel_regmap(struct regulator_dev *rdev, unsigned sel)
+{
+	struct pfuze_chip *pfuze_chip = rdev_get_drvdata(rdev);
+	int id = rdev_get_id(rdev);
+
+	/* we can read back the current configured selector from hw, but we cannot determine
+	 * the current state of SD_VSEL, thus we need to remember it when setting */
+	pfuze_chip->regulator_descs[id].sd_vsel = sel < 4;
+
+	return regulator_set_voltage_sel_regmap(rdev, sel % 4);
+}
+
+static int pfuze300x_vccsd_get_voltage_sel_regmap(struct regulator_dev *rdev)
+{
+	struct pfuze_chip *pfuze_chip = rdev_get_drvdata(rdev);
+	int id = rdev_get_id(rdev);
+	int retval;
+
+	retval = regulator_get_voltage_sel_regmap(rdev);
+	if (retval < 0)
+		return retval;
+
+	/* sd_vsel == false means higher voltage range */
+	if (!pfuze_chip->regulator_descs[id].sd_vsel)
+		retval += 4;
+
+	return retval;
 }
 
 static const struct regulator_ops pfuze100_ldo_regulator_ops = {
@@ -214,7 +248,16 @@ static const struct regulator_ops pfuze3000_sw_regulator_ops = {
 	.get_voltage_sel = regulator_get_voltage_sel_regmap,
 	.set_voltage_time_sel = regulator_set_voltage_time_sel,
 	.set_ramp_delay = pfuze100_set_ramp_delay,
+};
 
+static const struct regulator_ops pfuze300x_vccsd_regulator_ops = {
+	.enable = regulator_enable_regmap,
+	.disable = regulator_disable_regmap,
+	.is_enabled = regulator_is_enabled_regmap,
+	.list_voltage = regulator_list_voltage_table,
+	.map_voltage = regulator_map_voltage_ascend,
+	.set_voltage_sel = pfuze300x_vccsd_set_voltage_sel_regmap,
+	.get_voltage_sel = pfuze300x_vccsd_get_voltage_sel_regmap,
 };
 
 #define PFUZE100_FIXED_REG(_chip, _name, base, voltage)	\
@@ -366,6 +409,24 @@ static const struct regulator_ops pfuze3000_sw_regulator_ops = {
 	.stby_mask = 0xf,	\
 }
 
+#define PFUZE300x_VCCSD_REG(_chip, _name, base, voltages)	{	\
+	.desc = {	\
+		.name = #_name,	\
+		.n_voltages = ARRAY_SIZE(voltages),	\
+		.ops = &pfuze300x_vccsd_regulator_ops,	\
+		.type = REGULATOR_VOLTAGE,	\
+		.id = _chip ## _ ## _name,	\
+		.owner = THIS_MODULE,	\
+		.volt_table = voltages,	\
+		.vsel_reg = (base),	\
+		.vsel_mask = 0x3,	\
+		.enable_reg = (base),	\
+		.enable_mask = 0x10,	\
+	},	\
+	.stby_reg = (base),	\
+	.stby_mask = 0x20,	\
+}
+
 /* PFUZE100 */
 static struct pfuze_regulator pfuze100_regulators[] = {
 	PFUZE100_SW_REG(PFUZE100, SW1AB, PFUZE100_SW1ABVOL, 300000, 1875000, 25000),
@@ -413,7 +474,7 @@ static struct pfuze_regulator pfuze3000_regulators[] = {
 	PFUZE100_FIXED_REG(PFUZE3000, VREFDDR, PFUZE100_VREFDDRCON, 750000),
 	PFUZE100_VGEN_REG(PFUZE3000, VLDO1, PFUZE100_VGEN1VOL, 1800000, 3300000, 100000),
 	PFUZE100_VGEN_REG(PFUZE3000, VLDO2, PFUZE100_VGEN2VOL, 800000, 1550000, 50000),
-	PFUZE3000_VCC_REG(PFUZE3000, VCCSD, PFUZE100_VGEN3VOL, 2850000, 3300000, 150000),
+	PFUZE300x_VCCSD_REG(PFUZE3000, VCCSD, PFUZE100_VGEN3VOL, pfuze300x_vccsd_voltages),
 	PFUZE3000_VCC_REG(PFUZE3000, V33, PFUZE100_VGEN4VOL, 2850000, 3300000, 150000),
 	PFUZE100_VGEN_REG(PFUZE3000, VLDO3, PFUZE100_VGEN5VOL, 1800000, 3300000, 100000),
 	PFUZE100_VGEN_REG(PFUZE3000, VLDO4, PFUZE100_VGEN6VOL, 1800000, 3300000, 100000),
@@ -426,7 +487,7 @@ static struct pfuze_regulator pfuze3001_regulators[] = {
 	PFUZE100_SWB_REG(PFUZE3001, VSNVS, PFUZE100_VSNVSVOL, 0x7, pfuze100_vsnvs),
 	PFUZE100_VGEN_REG(PFUZE3001, VLDO1, PFUZE100_VGEN1VOL, 1800000, 3300000, 100000),
 	PFUZE100_VGEN_REG(PFUZE3001, VLDO2, PFUZE100_VGEN2VOL, 800000, 1550000, 50000),
-	PFUZE3000_VCC_REG(PFUZE3001, VCCSD, PFUZE100_VGEN3VOL, 2850000, 3300000, 150000),
+	PFUZE300x_VCCSD_REG(PFUZE3001, VCCSD, PFUZE100_VGEN3VOL, pfuze300x_vccsd_voltages),
 	PFUZE3000_VCC_REG(PFUZE3001, V33, PFUZE100_VGEN4VOL, 2850000, 3300000, 150000),
 	PFUZE100_VGEN_REG(PFUZE3001, VLDO3, PFUZE100_VGEN5VOL, 1800000, 3300000, 100000),
 	PFUZE100_VGEN_REG(PFUZE3001, VLDO4, PFUZE100_VGEN6VOL, 1800000, 3300000, 100000),
