@@ -916,6 +916,7 @@ void mmc_set_clock(struct mmc_host *host, unsigned int hz)
 
 	host->ios.clock = hz;
 	mmc_set_ios(host);
+	pr_info("%s: %s: %u Hz\n", mmc_hostname(host), "mmc_set_clock", hz);
 }
 
 int mmc_execute_tuning(struct mmc_card *card)

@@ -495,16 +495,21 @@ int regulator_check_voltage(struct regulator_dev *rdev,
 			    int *min_uV, int *max_uV)
 {
 	BUG_ON(*min_uV > *max_uV);
+	//pr_info("%s: min_uV  = %d, max_uV = %d\n", __func__, *min_uV, *max_uV);
 
 	if (!regulator_ops_is_valid(rdev, REGULATOR_CHANGE_VOLTAGE)) {
 		rdev_err(rdev, "voltage operation not allowed\n");
 		return -EPERM;
 	}
 
-	if (*max_uV > rdev->constraints->max_uV)
+	if (*max_uV > rdev->constraints->max_uV) {
+		//pr_info("%s: fixing max_uV to %d\n", __func__, rdev->constraints->max_uV);
 		*max_uV = rdev->constraints->max_uV;
-	if (*min_uV < rdev->constraints->min_uV)
+	}
+	if (*min_uV < rdev->constraints->min_uV) {
+		//pr_info("%s: fixing min_uV to %d\n", __func__, rdev->constraints->min_uV);
 		*min_uV = rdev->constraints->min_uV;
+	}
 
 	if (*min_uV > *max_uV) {
 		rdev_err(rdev, "unsupportable voltage range: %d-%duV\n",
@@ -3425,16 +3430,21 @@ int regulator_is_supported_voltage(struct regulator *regulator,
 	/* If we can't change voltage check the current voltage */
 	if (!regulator_ops_is_valid(rdev, REGULATOR_CHANGE_VOLTAGE)) {
 		ret = regulator_get_voltage(regulator);
+		pr_info("%s: %s: FIXED_VOLTAGE: min_uV = %d, max_uV = %d, current_voltag = %d\n", __func__, rdev_get_name(rdev), min_uV, max_uV, ret);
 		if (ret >= 0)
 			return min_uV <= ret && ret <= max_uV;
 		else
 			return ret;
 	}
 
+	//pr_info("%s: min_uV = %d, max_uV = %d\n", __func__, min_uV, max_uV);
+
 	/* Any voltage within constrains range is fine? */
 	if (rdev->desc->continuous_voltage_range)
 		return min_uV >= rdev->constraints->min_uV &&
 				max_uV <= rdev->constraints->max_uV;
+
+	//pr_info("%s: looping mode\n", __func__);
 
 	ret = regulator_count_voltages(regulator);
 	if (ret < 0)
@@ -3444,10 +3454,16 @@ int regulator_is_supported_voltage(struct regulator *regulator,
 	for (i = 0; i < voltages; i++) {
 		ret = regulator_list_voltage(regulator, i);
 
-		if (ret >= min_uV && ret <= max_uV)
+		//pr_info("%s: loop: %d\n", __func__, ret);
+
+		if (ret >= min_uV && ret <= max_uV) {
+			pr_info("%s: %s: min_uV = %d, max_uV = %d -> YES\n", __func__, rdev_get_name(rdev), min_uV, max_uV);
 			return 1;
+		}
+
 	}
 
+	pr_info("%s: %s: min_uV = %d, max_uV = %d -> NO\n", __func__, rdev_get_name(rdev), min_uV, max_uV);
 	return 0;
 }
 EXPORT_SYMBOL_GPL(regulator_is_supported_voltage);
@@ -3748,22 +3764,28 @@ static int regulator_set_voltage_unlocked(struct regulator *regulator,
 	int old_min_uV, old_max_uV;
 	int current_uV;
 
+	//pr_info("%s: entering with %d - %d uV\n", __func__, min_uV, max_uV);
+
 	/* If we're setting the same range as last time the change
 	 * should be a noop (some cpufreq implementations use the same
 	 * voltage for multiple frequencies, for example).
 	 */
-	if (voltage->min_uV == min_uV && voltage->max_uV == max_uV)
+	if (voltage->min_uV == min_uV && voltage->max_uV == max_uV) {
+		pr_info("%s: %s: not switching voltage - already matching: %d - %d uV\n", __func__, rdev_get_name(rdev), min_uV, max_uV);
 		goto out;
+	}
 
 	/* If we're trying to set a range that overlaps the current voltage,
 	 * return successfully even though the regulator does not support
 	 * changing the voltage.
 	 */
 	if (!regulator_ops_is_valid(rdev, REGULATOR_CHANGE_VOLTAGE)) {
+		//pr_info("%s: overlapping\n", __func__);
 		current_uV = regulator_get_voltage_rdev(rdev);
 		if (min_uV <= current_uV && current_uV <= max_uV) {
 			voltage->min_uV = min_uV;
 			voltage->max_uV = max_uV;
+			//pr_info("%s: fixing up voltage\n", __func__);
 			goto out;
 		}
 	}
@@ -3772,13 +3794,18 @@ static int regulator_set_voltage_unlocked(struct regulator *regulator,
 	if (!rdev->desc->ops->set_voltage &&
 	    !rdev->desc->ops->set_voltage_sel) {
 		ret = -EINVAL;
+		pr_info("%s: sanity check failed\n", __func__);
 		goto out;
 	}
 
+	//pr_info("%s: pre regulator_check_voltage\n", __func__);
+
 	/* constraints check */
 	ret = regulator_check_voltage(rdev, &min_uV, &max_uV);
-	if (ret < 0)
+	if (ret < 0) {
+		pr_info("%s: after regulator_check_voltage -- error\n", __func__);
 		goto out;
+	}
 
 	/* restore original values in case of error */
 	old_min_uV = voltage->min_uV;
@@ -3791,6 +3818,9 @@ static int regulator_set_voltage_unlocked(struct regulator *regulator,
 	if (ret < 0) {
 		voltage->min_uV = old_min_uV;
 		voltage->max_uV = old_max_uV;
+	} else {
+		if (strcmp(rdev_get_name(rdev), "VCCSD") == 0)
+			pr_info("%s: %s: successfully set regulator voltage to %d - %d uV\n", __func__, rdev_get_name(rdev), min_uV, max_uV);
 	}
 
 out:
@@ -3951,6 +3981,8 @@ static int regulator_get_optimal_voltage(struct regulator_dev *rdev,
 						&tmp_max, state);
 		if (ret < 0)
 			return ret;
+
+		//pr_info("%s: regulator_check_voltage\n", __func__);
 
 		ret = regulator_check_voltage(c_rdevs[i], &tmp_min, &tmp_max);
 		if (ret < 0)
@@ -4393,34 +4425,46 @@ int regulator_sync_voltage(struct regulator *regulator)
 	struct regulator_voltage *voltage = &regulator->voltage[PM_SUSPEND_ON];
 	int ret, min_uV, max_uV;
 
-	if (!regulator_ops_is_valid(rdev, REGULATOR_CHANGE_VOLTAGE))
+	if (!regulator_ops_is_valid(rdev, REGULATOR_CHANGE_VOLTAGE)) {
+		pr_info("%s: skipping due to REGULATOR_CHANGE_VOLTAGE\n", __func__);
 		return 0;
+	}
 
 	regulator_lock(rdev);
 
 	if (!rdev->desc->ops->set_voltage &&
 	    !rdev->desc->ops->set_voltage_sel) {
 		ret = -EINVAL;
+		pr_info("%s: NO set_voltage CB\n", __func__);
 		goto out;
 	}
 
 	/* This is only going to work if we've had a voltage configured. */
 	if (!voltage->min_uV && !voltage->max_uV) {
 		ret = -EINVAL;
+		pr_info("%s: This is only going to work if we've had a voltage configured. FAILED\n", __func__);
 		goto out;
 	}
 
 	min_uV = voltage->min_uV;
 	max_uV = voltage->max_uV;
 
+	//pr_info("%s: pre regulator_check_voltage\n", __func__);
+
 	/* This should be a paranoia check... */
 	ret = regulator_check_voltage(rdev, &min_uV, &max_uV);
-	if (ret < 0)
+	if (ret < 0) {
+		pr_info("%s: regulator_check_voltage failed\n", __func__);
 		goto out;
+	}
+
+	//pr_info("%s: pre check_consumer\n", __func__);
 
 	ret = regulator_check_consumers(rdev, &min_uV, &max_uV, 0);
-	if (ret < 0)
+	if (ret < 0) {
+		pr_info("%s: regulator_check_consumers failed\n", __func__);
 		goto out;
+	}
 
 	/* balance only, if regulator is coupled */
 	if (rdev->coupling_desc.n_coupled > 1)

@@ -1467,8 +1467,12 @@ static int mmc_select_hs200(struct mmc_card *card)
 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_2V)
 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
 
+	pr_info("%s: %s progress1: error %d - expected since 1.2V\n", mmc_hostname(card->host), __func__, err);
+
 	if (err && card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200_1_8V)
 		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
+
+	pr_info("%s: %s progress2: %serror %d - cap for 1.8V %s set\n", mmc_hostname(card->host), __func__, err ? "" : "no ", err, err ? "was NOT" : "is now");
 
 	/* If fails try again during next card power cycle */
 	if (err)
@@ -1488,6 +1492,7 @@ static int mmc_select_hs200(struct mmc_card *card)
 				   EXT_CSD_HS_TIMING, val,
 				   card->ext_csd.generic_cmd6_time, 0,
 				   false, true, MMC_CMD_RETRIES);
+		pr_info("%s: %s progress3: error %d\n", mmc_hostname(card->host), __func__, err);
 		if (err)
 			goto err;
 
@@ -1500,7 +1505,10 @@ static int mmc_select_hs200(struct mmc_card *card)
 		old_timing = host->ios.timing;
 		old_clock = host->ios.clock;
 		mmc_set_timing(host, MMC_TIMING_MMC_HS200);
+		pr_info("%s: %s progress4: error %d\n", mmc_hostname(card->host), __func__, err);
+
 		mmc_set_clock(card->host, card->ext_csd.hs_max_dtr);
+		pr_info("%s: %s progress5: error %d\n", mmc_hostname(card->host), __func__, err);
 
 		/*
 		 * For HS200, CRC errors are not a reliable way to know the
@@ -1508,6 +1516,8 @@ static int mmc_select_hs200(struct mmc_card *card)
 		 * tuning will fail and the result ends up the same.
 		 */
 		err = mmc_switch_status(card, false);
+
+		pr_info("%s: %s mmc_switch_status failed: %d\n", mmc_hostname(card->host), __func__, err);
 
 		/*
 		 * mmc_select_timing() assumes timing has not changed if
@@ -1517,7 +1527,10 @@ static int mmc_select_hs200(struct mmc_card *card)
 			mmc_set_clock(host, old_clock);
 			mmc_set_timing(host, old_timing);
 		}
+	} else {
+		pr_info("%s: %s failed: error %d\n", mmc_hostname(card->host), "mmc_select_bus_width", err);
 	}
+
 err:
 	if (err) {
 		/* fall back to the old signal voltage, if fails report error */

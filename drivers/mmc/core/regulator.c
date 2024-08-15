@@ -150,16 +150,22 @@ static int mmc_regulator_set_voltage_if_supported(struct regulator *regulator,
 	 * Check if supported first to avoid errors since we may try several
 	 * signal levels during power up and don't want to show errors.
 	 */
-	if (!regulator_is_supported_voltage(regulator, min_uV, max_uV))
+	if (!regulator_is_supported_voltage(regulator, min_uV, max_uV)) {
+		pr_info("%s: regulator_is_supported_voltage failed for %d uV\n", __func__, target_uV);
 		return -EINVAL;
+	}
 
 	/*
 	 * The voltage is already set, no need to switch.
 	 * Return 1 to indicate that no switch happened.
 	 */
 	current_uV = regulator_get_voltage(regulator);
-	if (current_uV == target_uV)
+	if (current_uV == target_uV) {
+		pr_info("%s: current_uV == target_uV == %d\n", __func__, current_uV);
 		return 1;
+	}
+
+	//pr_info("%s: before regulator_set_voltage_triplet\n", __func__);
 
 	return regulator_set_voltage_triplet(regulator, min_uV, target_uV,
 					     max_uV);
@@ -215,11 +221,14 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
 			last_signal_voltage = ios->signal_voltage;
 		}
 
-		dev_dbg(dev, "%s: found vmmc voltage range of %d-%duV\n",
+		dev_info(dev, "%s: found vmmc voltage range of %d-%duV\n",
 			__func__, volt, max_uV);
 
 		min_uV = max(volt - 300000, 2700000);
 		max_uV = min(max_uV + 200000, 3600000);
+
+		dev_info(dev, "%s: checking range with %d-%duV\n",
+			__func__, min_uV, max_uV);
 
 		/*
 		 * Due to a limitation in the current implementation of

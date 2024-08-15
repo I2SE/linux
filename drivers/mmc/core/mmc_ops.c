@@ -430,14 +430,18 @@ int mmc_spi_set_crc(struct mmc_host *host, int use_crc)
 static int mmc_switch_status_error(struct mmc_host *host, u32 status)
 {
 	if (mmc_host_is_spi(host)) {
-		if (status & R1_SPI_ILLEGAL_COMMAND)
+		if (status & R1_SPI_ILLEGAL_COMMAND) {
+			pr_info("%s: %s: mmc_host_is_spi() == true and R1_SPI_ILLEGAL_COMMAND\n", mmc_hostname(host), __func__);
 			return -EBADMSG;
+		}
 	} else {
 		if (R1_STATUS(status))
 			pr_warn("%s: unexpected status %#x after switch\n",
 				mmc_hostname(host), status);
-		if (status & R1_SWITCH_ERROR)
+		if (status & R1_SWITCH_ERROR) {
+			pr_info("%s: %s: R1_SWITCH_ERROR\n", mmc_hostname(host), __func__);
 			return -EBADMSG;
+		}
 	}
 	return 0;
 }
@@ -617,7 +621,16 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
 		  set;
 
 	if (last_index != index) {
-		pr_info_ratelimited("%s: arg = 0x%08x\n", __func__, cmd.arg);
+		switch (index) {
+		case EXT_CSD_BUS_WIDTH:
+			pr_info_ratelimited("%s: arg = 0x%08x (EXT_CSD_BUS_WIDTH)\n", __func__, cmd.arg);
+			break;
+		case EXT_CSD_HS_TIMING:
+			pr_info_ratelimited("%s: arg = 0x%08x (EXT_CSD_HS_TIMING)\n", __func__, cmd.arg);
+			break;
+		default:
+			pr_info_ratelimited("%s: arg = 0x%08x\n", __func__, cmd.arg);
+		}
 		last_index = index;
 	}
 

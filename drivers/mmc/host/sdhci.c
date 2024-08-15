@@ -242,7 +242,7 @@ static bool sdhci_do_reset(struct sdhci_host *host, u8 mask)
 			return false;
 	}
 
-	pr_err("%s: %s: calling host->ops->reset()\n", __func__, mmc_hostname(host->mmc));
+	pr_err("%s: %s: calling host->ops->reset() --> most probably switched back to 3.3 V\n", __func__, mmc_hostname(host->mmc));
 
 	host->ops->reset(host, mask);
 
@@ -2657,7 +2657,7 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 	switch (ios->signal_voltage) {
 	case MMC_SIGNAL_VOLTAGE_330:
 		if (!(host->flags & SDHCI_SIGNALING_330)) {
-			pr_warn("%s: Switching to 3.3V prevented due to flags\n",
+			pr_warn("%s: Enabling of host controller signaling of 3.3V prevented due to flags\n",
 					mmc_hostname(mmc));
 			return -EINVAL;
 		}
@@ -2665,12 +2665,12 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 		ctrl &= ~SDHCI_CTRL_VDD_180;
 		sdhci_writew(host, ctrl, SDHCI_HOST_CONTROL2);
 
-		pr_warn("%s: Switched to 3.3V host controller signaling\n", mmc_hostname(mmc));
+		pr_warn("%s: Enabled 3.3V host controller signaling capability\n", mmc_hostname(mmc));
 
 		if (!IS_ERR(mmc->supply.vqmmc)) {
 			ret = mmc_regulator_set_vqmmc(mmc, ios);
 			if (ret < 0) {
-				pr_warn("%s: Switching to 3.3V signalling voltage failed\n",
+				pr_warn("%s: Switching Vqmmc regulator to 3.3V signalling voltage failed\n",
 					mmc_hostname(mmc));
 				return -EIO;
 			}
@@ -2689,14 +2689,14 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 		return -EAGAIN;
 	case MMC_SIGNAL_VOLTAGE_180:
 		if (!(host->flags & SDHCI_SIGNALING_180)) {
-			pr_warn("%s: Switching to 1.8V prevented due to flags\n",
+			pr_warn("%s: Enabling of host controller signaling of 1.8V prevented due to flags\n",
 					mmc_hostname(mmc));
 			return -EINVAL;
 		}
 		if (!IS_ERR(mmc->supply.vqmmc)) {
 			ret = mmc_regulator_set_vqmmc(mmc, ios);
 			if (ret < 0) {
-				pr_warn("%s: Switching to 1.8V signalling voltage failed\n",
+				pr_warn("%s: Switching Vqmmc regulator to 1.8V signalling voltage failed\n",
 					mmc_hostname(mmc));
 				return -EIO;
 			}
@@ -2713,7 +2713,7 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
 		if (host->ops->voltage_switch)
 			host->ops->voltage_switch(host);
 
-		pr_warn("%s: Switched to 1.8V host controller signaling\n", mmc_hostname(mmc));
+		pr_warn("%s: Enabled 1.8V host controller signaling capability\n", mmc_hostname(mmc));
 
 		/* 1.8V regulator output should be stable within 5 ms */
 		ctrl = sdhci_readw(host, SDHCI_HOST_CONTROL2);
