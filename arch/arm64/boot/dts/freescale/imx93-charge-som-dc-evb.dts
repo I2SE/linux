@@ -99,6 +99,7 @@
 		};
 	};
 
+	// Avoid conflict with Heartbeat LED on phyCore
 	/delete-node/ leds;
 };
 
@@ -151,6 +152,7 @@
 	};
 };
 
+// USB1 goes directly to the lower X17 port
 &usbotg1 {
 	vbus-supply = <&reg_usb_otg1_vbus>;
 	over-current-active-low;
@@ -158,6 +160,10 @@
 	status = "okay";
 };
 
+// USB2 is connected to a USB 2.0 4 port hub, which is connected to:
+//   - upper X17 port
+//   - X25 USB touch hub
+//   - X29 mini PCIe
 &usbotg2 {
 	vbus-supply = <&reg_usb_otg2_vbus>;
 	disable-over-current;
