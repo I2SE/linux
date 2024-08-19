@@ -653,6 +653,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+	bool vqmmc_changed = false;
 	u32 new_val = 0;
 
 	switch (reg) {
@@ -668,11 +669,17 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 		return;
 	case SDHCI_HOST_CONTROL2:
 		new_val = readl(host->ioaddr + ESDHC_VENDOR_SPEC);
-		if (val & SDHCI_CTRL_VDD_180)
+		if (val & SDHCI_CTRL_VDD_180) {
+			vqmmc_changed = !(new_val & ESDHC_VENDOR_SPEC_VSELECT);
 			new_val |= ESDHC_VENDOR_SPEC_VSELECT;
-		else
+		} else {
+			vqmmc_changed = new_val & ESDHC_VENDOR_SPEC_VSELECT;
 			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
+		}
 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
+		/* Vqmmc changed so give the rail a moment to stabilize */
+		if (vqmmc_changed)
+			mdelay(3);
 		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
 			u32 v = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
