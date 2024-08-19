@@ -155,6 +155,18 @@ static int tpm_tis_spi_write_bytes(struct tpm_tis_data *data, u32 addr,
 int tpm_tis_spi_init(struct spi_device *spi, struct tpm_tis_spi_phy *phy,
 		     int irq, const struct tpm_tis_phy_ops *phy_ops)
 {
+	int ret;
+
+	spi->mode &= ~SPI_MODE_X_MASK;
+	spi->mode |= SPI_MODE_0;
+
+	ret = spi_setup(spi);
+	if (ret < 0)
+		return ret;
+
+	dev_info(&spi->dev, "bits_per_word: %u, mode: %x, max_speed_hz: %u\n",
+		 spi->bits_per_word, spi->mode, spi->max_speed_hz);
+
 	phy->iobuf = devm_kmalloc(&spi->dev, MAX_SPI_FRAMESIZE, GFP_KERNEL);
 	if (!phy->iobuf)
 		return -ENOMEM;
