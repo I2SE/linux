@@ -20,10 +20,10 @@
 		#address-cells = <0x1>;
 		#size-cells = <0x0>;
 
-		sck-gpios = <&gpio1 13 0>;
-		miso-gpios = <&gpio1 14 0>;
-		mosi-gpios = <&gpio1 12 0>;
-		cs-gpios = <&gpio1 11 0>;
+		sck-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		miso-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+		mosi-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
 		num-chipselects = <1>;
 
 		tpm@0 {
