@@ -35,8 +35,6 @@
 
 #define MAX_DMA_BURST_LEN 5000
 
-#define SPI_INTR 0
-
 /*   Modules parameters     */
 #define QCASPI_CLK_SPEED_MIN 1000000
 #define QCASPI_CLK_SPEED_MAX 16000000
@@ -581,15 +579,18 @@ qcaspi_spi_thread(void *data)
 			continue;
 		}
 
-		if (!test_bit(SPI_INTR, &qca->intr) &&
+		if (!qca->flags &&
 		    !qca->txr.skb[qca->txr.head])
 			schedule();
 
 		set_current_state(TASK_RUNNING);
 
-		netdev_dbg(qca->net_dev, "have work to do. int: %lu, tx_skb: %p\n",
-			   qca->intr,
+		netdev_dbg(qca->net_dev, "have work to do. flags: %lu, tx_skb: %p\n",
+			   qca->flags,
 			   qca->txr.skb[qca->txr.head]);
+
+		if (test_and_clear_bit(QCASPI_USER_RESET, &qca->flags))
+			qca->sync = QCASPI_SYNC_UNKNOWN;
 
 		qcaspi_qca7k_sync(qca, QCASPI_EVENT_UPDATE);
 
@@ -602,7 +603,7 @@ qcaspi_spi_thread(void *data)
 			msleep(QCASPI_QCA7K_REBOOT_TIME_MS);
 		}
 
-		if (test_and_clear_bit(SPI_INTR, &qca->intr)) {
+		if (test_and_clear_bit(QCASPI_SPI_INTR, &qca->flags)) {
 			start_spi_intr_handling(qca, &intr_cause);
 
 			if (intr_cause & SPI_INT_CPU_ON) {
@@ -621,6 +622,7 @@ qcaspi_spi_thread(void *data)
 
 				netif_wake_queue(qca->net_dev);
 				netif_carrier_on(qca->net_dev);
+				complete(&qca->reset_done);
 			}
 
 			if (intr_cause & SPI_INT_RDBUF_ERR) {
@@ -664,7 +666,7 @@ qcaspi_intr_handler(int irq, void *data)
 {
 	struct qcaspi *qca = data;
 
-	set_bit(SPI_INTR, &qca->intr);
+	set_bit(QCASPI_SPI_INTR, &qca->flags);
 	if (qca->spi_thread)
 		wake_up_process(qca->spi_thread);
 
@@ -680,7 +682,7 @@ qcaspi_netdev_open(struct net_device *dev)
 	if (!qca)
 		return -EINVAL;
 
-	set_bit(SPI_INTR, &qca->intr);
+	set_bit(QCASPI_SPI_INTR, &qca->flags);
 	qca->sync = QCASPI_SYNC_UNKNOWN;
 	qcafrm_fsm_init_spi(&qca->frm_handle);
 
@@ -831,6 +833,9 @@ qcaspi_netdev_init(struct net_device *dev)
 		netdev_info(qca->net_dev, "Failed to allocate RX sk_buff.\n");
 		return -ENOBUFS;
 	}
+
+	mutex_init(&qca->user_lock);
+	init_completion(&qca->reset_done);
 
 	return 0;
 }
