@@ -103,12 +103,13 @@
 	/delete-node/ leds;
 };
 
-
+/* S2 Power */
 &bbnsm_pwrkey {
 	linux,keycode = <KEY_POWER>;
 	wakeup-source;
 };
 
+/* X16 CAN1 */
 &flexcan1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_flexcan1>;
@@ -116,6 +117,7 @@
 	status = "okay";
 };
 
+/* X13 RS485_2 */
 &lpuart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart5>;
@@ -124,6 +126,7 @@
 	status = "okay";
 };
 
+/* X15 RS485_1 */
 &lpuart4 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart4>;
@@ -155,7 +158,7 @@
 	};
 };
 
-// USB1 goes directly to the lower X17 port
+/* USB1 goes directly to the lower X17 port */
 &usbotg1 {
 	vbus-supply = <&reg_usb_otg1_vbus>;
 	over-current-active-low;
@@ -163,10 +166,11 @@
 	status = "okay";
 };
 
-// USB2 is connected to a USB 2.0 4 port hub, which is connected to:
-//   - upper X17 port
-//   - X25 USB touch hub
-//   - X29 mini PCIe
+/* USB2 is connected to a USB 2.0 4 port hub, which is connected to:
+ *   - upper X17 port
+ *   - X25 USB touch hub
+ *   - X29 mini PCIe
+ */
 &usbotg2 {
 	vbus-supply = <&reg_usb_otg2_vbus>;
 	disable-over-current;
@@ -224,6 +228,7 @@
 	status = "okay";
 };
 
+/* X27 microSD */
 &usdhc2 {
 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
 	pinctrl-0 = <&pinctrl_usdhc2_default>, <&pinctrl_usdhc2_cd>;
