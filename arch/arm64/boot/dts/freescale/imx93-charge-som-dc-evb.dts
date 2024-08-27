@@ -209,7 +209,7 @@
 	// 30 pins (0..29)
 	gpio-line-names = "USB1_ID", "", "RTC_nINT", "USB2_OC", "USB1_OC", "", "PCIe_N_RESET", "DL_REQ_INTR_SPI", "USB2_PWREN", "X11_GPIO4_9", \
 			  "", "WS2812B", "SAFETY_BOOTMODE_SET", "USB1_PWREN_GPIO", "", "DISPLAY_EN", "", "", "", "", \
-			  "", "", "", "", "", "", "CAN1_EN", "PMIC_IRQ_B", "nSAFETY_RESET_INT", "SPI_TPM_nINT0";
+			  "", "SOM_EEPROM_WP", "", "", "", "", "CAN1_EN", "PMIC_IRQ_B", "nSAFETY_RESET_INT", "SPI_TPM_nINT0";
 
 	PCIe_N_RESET {
 		gpio-hog;
