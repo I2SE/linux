@@ -476,6 +476,13 @@ qcaspi_flush_tx_ring(struct qcaspi *qca)
 	netif_tx_unlock_bh(qca->net_dev);
 }
 
+static void qcaspi_stop_tx(struct qcaspi *qca)
+{
+	netif_tx_disable(qca->net_dev);
+	netif_carrier_off(qca->net_dev);
+	qcaspi_flush_tx_ring(qca);
+}
+
 static void
 qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 {
@@ -569,9 +576,7 @@ qcaspi_spi_thread(void *data)
 	while (!kthread_should_stop()) {
 		set_current_state(TASK_INTERRUPTIBLE);
 		if (kthread_should_park()) {
-			netif_tx_disable(qca->net_dev);
-			netif_carrier_off(qca->net_dev);
-			qcaspi_flush_tx_ring(qca);
+			qcaspi_stop_tx(qca);
 			kthread_parkme();
 			if (qca->sync == QCASPI_SYNC_READY) {
 				netif_carrier_on(qca->net_dev);
@@ -598,9 +603,7 @@ qcaspi_spi_thread(void *data)
 		if (qca->sync != QCASPI_SYNC_READY) {
 			netdev_dbg(qca->net_dev, "sync: not ready %u, turn off carrier and flush\n",
 				   (unsigned int)qca->sync);
-			netif_stop_queue(qca->net_dev);
-			netif_carrier_off(qca->net_dev);
-			qcaspi_flush_tx_ring(qca);
+			qcaspi_stop_tx(qca);
 			msleep(QCASPI_QCA7K_REBOOT_TIME_MS);
 		}
 
