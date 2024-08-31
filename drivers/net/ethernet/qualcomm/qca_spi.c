@@ -501,6 +501,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			qcaspi_read_register(qca, SPI_REG_WRBUF_SPC_AVA,
 					     &wrbuf_space);
 			if (wrbuf_space != QCASPI_HW_BUF_LEN) {
+				qca->stats.buf_avail_err++;
 				netdev_dbg(qca->net_dev, "sync: got CPU on, but wrbuf not empty. reset!\n");
 				qca->sync = QCASPI_SYNC_UNKNOWN;
 			} else {
