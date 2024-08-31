@@ -517,6 +517,9 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 				return;
 			}
 		}
+	} else {
+		if (test_and_clear_bit(QCASPI_USER_RESET, &qca->flags))
+			qca->sync = QCASPI_SYNC_UNKNOWN;
 	}
 
 	switch (qca->sync) {
@@ -594,9 +597,6 @@ qcaspi_spi_thread(void *data)
 		netdev_dbg(qca->net_dev, "have work to do. flags: %lu, tx_skb: %p\n",
 			   qca->flags,
 			   qca->txr.skb[qca->txr.head]);
-
-		if (test_and_clear_bit(QCASPI_USER_RESET, &qca->flags))
-			qca->sync = QCASPI_SYNC_UNKNOWN;
 
 		qcaspi_qca7k_sync(qca, QCASPI_EVENT_UPDATE);
 
