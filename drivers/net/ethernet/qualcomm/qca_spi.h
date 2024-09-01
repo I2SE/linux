@@ -44,6 +44,7 @@
 /* flag numbers */
 #define QCASPI_SPI_INTR   0
 #define QCASPI_USER_RESET 1
+#define QCASPI_SPI_ERROR  2
 
 struct tx_ring {
 	struct sk_buff *skb[QCASPI_TX_RING_MAX_LEN];
