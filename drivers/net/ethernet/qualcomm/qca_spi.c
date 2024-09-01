@@ -509,10 +509,10 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 					     &wrbuf_space);
 			if (wrbuf_space != QCASPI_HW_BUF_LEN) {
 				qca->stats.buf_avail_err++;
-				netdev_dbg(qca->net_dev, "sync: got CPU on, but wrbuf not empty. reset!\n");
+				netdev_info(qca->net_dev, "sync: got CPU on, but wrbuf not empty. reset!\n");
 				qca->sync = QCASPI_SYNC_UNKNOWN;
 			} else {
-				netdev_dbg(qca->net_dev, "sync: got CPU on, now in sync\n");
+				netdev_info(qca->net_dev, "sync: got CPU on, now in sync\n");
 				qca->sync = QCASPI_SYNC_READY;
 				return;
 			}
@@ -532,7 +532,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		if (signature != QCASPI_GOOD_SIGNATURE) {
 			qca->sync = QCASPI_SYNC_UNKNOWN;
 			qca->stats.bad_signature++;
-			netdev_dbg(qca->net_dev, "sync: bad signature, restart\n");
+			netdev_info(qca->net_dev, "sync: bad signature, restart\n");
 			/* don't reset right away */
 			return;
 		}
@@ -546,7 +546,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		}
 
 		/* TODO: use GPIO to reset QCA7000 in legacy mode*/
-		netdev_dbg(qca->net_dev, "sync: resetting device.\n");
+		netdev_info(qca->net_dev, "sync: resetting device.\n");
 		qcaspi_read_register(qca, SPI_REG_SPI_CONFIG, &spi_config);
 		spi_config |= QCASPI_SLAVE_RESET_BIT;
 		qcaspi_write_register(qca, SPI_REG_SPI_CONFIG, spi_config, 0);
