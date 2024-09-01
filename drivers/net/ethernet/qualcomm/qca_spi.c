@@ -592,6 +592,8 @@ qcaspi_spi_thread(void *data)
 		    !qca->txr.skb[qca->txr.head])
 			schedule();
 
+		qca->stats.loop++;
+
 		set_current_state(TASK_RUNNING);
 
 		netdev_dbg(qca->net_dev, "have work to do. flags: %lu, tx_skb: %p\n",

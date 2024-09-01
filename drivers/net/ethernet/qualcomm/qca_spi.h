@@ -68,6 +68,9 @@ struct qcaspi_stats {
 	u64 write_verify_failed;
 	u64 buf_avail_err;
 	u64 bad_signature;
+	u64 read;
+	u64 write;
+	u64 loop;
 };
 
 struct qcaspi {
