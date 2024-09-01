@@ -45,6 +45,7 @@
 #define QCASPI_SPI_INTR   0
 #define QCASPI_USER_RESET 1
 #define QCASPI_SPI_ERROR  2
+#define QCASPI_SPI_POLL   3
 
 struct tx_ring {
 	struct sk_buff *skb[QCASPI_TX_RING_MAX_LEN];
@@ -93,6 +94,7 @@ struct qcaspi {
 	u16 reset_count;
 	struct mutex user_lock;
 	struct completion reset_done;
+	struct timer_list sync_timer;
 
 #ifdef CONFIG_DEBUG_FS
 	struct dentry *device_root;

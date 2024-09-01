@@ -522,6 +522,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			qca->sync = QCASPI_SYNC_UNKNOWN;
 		if (test_and_clear_bit(QCASPI_SPI_ERROR, &qca->flags))
 			qca->sync = QCASPI_SYNC_UNKNOWN;
+		clear_bit(QCASPI_SPI_POLL, &qca->flags);
 	}
 
 	switch (qca->sync) {
@@ -557,6 +558,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 		qca->sync = QCASPI_SYNC_RESET;
 		qca->stats.trig_reset++;
 		qca->reset_count = 0;
+		msleep(QCASPI_QCA7K_REBOOT_TIME_MS);
 		break;
 	case QCASPI_SYNC_RESET:
 		qca->reset_count++;
@@ -606,10 +608,12 @@ qcaspi_spi_thread(void *data)
 		qcaspi_qca7k_sync(qca, QCASPI_EVENT_UPDATE);
 
 		if (qca->sync != QCASPI_SYNC_READY) {
-			netdev_dbg(qca->net_dev, "sync: not ready %u, turn off carrier and flush\n",
-				   (unsigned int)qca->sync);
 			qcaspi_stop_tx(qca);
-			msleep(QCASPI_QCA7K_REBOOT_TIME_MS);
+
+			if (qca->sync == QCASPI_SYNC_UNKNOWN) {
+				mod_timer(&qca->sync_timer, jiffies + msecs_to_jiffies(QCASPI_QCA7K_REBOOT_TIME_MS));
+				continue;
+			}
 		}
 
 		if (test_and_clear_bit(QCASPI_SPI_INTR, &qca->flags)) {
@@ -626,8 +630,11 @@ qcaspi_spi_thread(void *data)
 				qca->stats.device_reset++;
 
 				/* not synced. */
-				if (qca->sync != QCASPI_SYNC_READY)
+				if (qca->sync != QCASPI_SYNC_READY) {
+					mod_timer(&qca->sync_timer, jiffies +
+						  msecs_to_jiffies(QCASPI_QCA7K_REBOOT_TIME_MS));
 					continue;
+				}
 
 				netif_wake_queue(qca->net_dev);
 				netif_carrier_on(qca->net_dev);
@@ -663,6 +670,8 @@ qcaspi_spi_thread(void *data)
 
 		if (qca->sync == QCASPI_SYNC_READY)
 			qcaspi_transmit(qca);
+		else
+			mod_timer(&qca->sync_timer, jiffies + msecs_to_jiffies(QCASPI_QCA7K_REBOOT_TIME_MS));
 	}
 	set_current_state(TASK_RUNNING);
 	netdev_info(qca->net_dev, "SPI thread exit\n");
@@ -816,6 +825,16 @@ qcaspi_netdev_tx_timeout(struct net_device *dev, unsigned int txqueue)
 		wake_up_process(qca->spi_thread);
 }
 
+static void
+qcaspi_sync_poll(struct timer_list *t)
+{
+	struct qcaspi *qca = from_timer(qca, t, sync_timer);
+
+	set_bit(QCASPI_SPI_POLL, &qca->flags);
+	if (qca->spi_thread)
+		wake_up_process(qca->spi_thread);
+}
+
 static int
 qcaspi_netdev_init(struct net_device *dev)
 {
@@ -845,6 +864,7 @@ qcaspi_netdev_init(struct net_device *dev)
 
 	mutex_init(&qca->user_lock);
 	init_completion(&qca->reset_done);
+	timer_setup(&qca->sync_timer, qcaspi_sync_poll, 0);
 
 	return 0;
 }
@@ -854,6 +874,7 @@ qcaspi_netdev_uninit(struct net_device *dev)
 {
 	struct qcaspi *qca = netdev_priv(dev);
 
+	timer_shutdown_sync(&qca->sync_timer);
 	kfree(qca->rx_buffer);
 	qca->buffer_size = 0;
 	dev_kfree_skb(qca->rx_skb);
