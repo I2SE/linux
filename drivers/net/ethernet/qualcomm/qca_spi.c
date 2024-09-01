@@ -500,7 +500,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			if (qca->sync == QCASPI_SYNC_READY)
 				qca->stats.bad_signature++;
 
-			set_bit(QCASPI_SPI_ERROR, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			netdev_dbg(qca->net_dev, "sync: got CPU on, but signature was invalid, restart\n");
 			return;
 		} else {
@@ -518,9 +518,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			}
 		}
 	} else {
-		if (test_and_clear_bit(QCASPI_USER_RESET, &qca->flags))
-			qca->sync = QCASPI_SYNC_UNKNOWN;
-		if (test_and_clear_bit(QCASPI_SPI_ERROR, &qca->flags))
+		if (test_and_clear_bit(QCASPI_SPI_RESET, &qca->flags))
 			qca->sync = QCASPI_SYNC_UNKNOWN;
 		clear_bit(QCASPI_SPI_POLL, &qca->flags);
 	}
@@ -534,7 +532,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 
 		if (signature != QCASPI_GOOD_SIGNATURE) {
 			qca->sync = QCASPI_SYNC_UNKNOWN;
-			set_bit(QCASPI_SPI_ERROR, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			qca->stats.bad_signature++;
 			netdev_info(qca->net_dev, "sync: bad signature, restart\n");
 			/* don't reset right away */
@@ -566,7 +564,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			   qca->reset_count);
 		if (qca->reset_count >= QCASPI_RESET_TIMEOUT) {
 			/* reset did not seem to take place, try again */
-			set_bit(QCASPI_SPI_ERROR, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			qca->stats.reset_timeout++;
 			netdev_dbg(qca->net_dev, "sync: reset timeout, restarting process.\n");
 		}
@@ -645,7 +643,7 @@ qcaspi_spi_thread(void *data)
 				/* restart sync */
 				netdev_dbg(qca->net_dev, "===> rdbuf error!\n");
 				qca->stats.read_buf_err++;
-				set_bit(QCASPI_SPI_ERROR, &qca->flags);
+				set_bit(QCASPI_SPI_RESET, &qca->flags);
 				continue;
 			}
 
@@ -653,7 +651,7 @@ qcaspi_spi_thread(void *data)
 				/* restart sync */
 				netdev_dbg(qca->net_dev, "===> wrbuf error!\n");
 				qca->stats.write_buf_err++;
-				set_bit(QCASPI_SPI_ERROR, &qca->flags);
+				set_bit(QCASPI_SPI_RESET, &qca->flags);
 				continue;
 			}
 
@@ -819,7 +817,7 @@ qcaspi_netdev_tx_timeout(struct net_device *dev, unsigned int txqueue)
 		    jiffies, jiffies - dev_trans_start(dev));
 	qca->net_dev->stats.tx_errors++;
 	/* Trigger tx queue flush and QCA7000 reset */
-	set_bit(QCASPI_SPI_ERROR, &qca->flags);
+	set_bit(QCASPI_SPI_RESET, &qca->flags);
 
 	if (qca->spi_thread)
 		wake_up_process(qca->spi_thread);

@@ -289,7 +289,7 @@ static int qcaspi_user_reset(struct net_device *dev, u32 *flags)
 		}
 
 		reinit_completion(&qca->reset_done);
-		set_bit(QCASPI_USER_RESET, &qca->flags);
+		set_bit(QCASPI_SPI_RESET, &qca->flags);
 
 		if (!qca->spi_thread) {
 			ret = -ENOTCONN;
