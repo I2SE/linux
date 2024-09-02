@@ -272,6 +272,44 @@ qcaspi_set_ringparam(struct net_device *dev, struct ethtool_ringparam *ring,
 	return 0;
 }
 
+static int qcaspi_user_reset(struct net_device *dev, u32 *flags)
+{
+	struct qcaspi *qca = netdev_priv(dev);
+
+	if (*flags == ETH_RESET_ALL) {
+		int ret = 0;
+
+		*flags = 0;
+		if (!mutex_trylock(&qca->user_lock))
+			return -EAGAIN;
+
+		if (qca->sync != QCASPI_SYNC_READY) {
+			ret = -EBUSY;
+			goto out;
+		}
+
+		reinit_completion(&qca->reset_done);
+		set_bit(QCASPI_SPI_RESET, &qca->flags);
+
+		if (!qca->spi_thread) {
+			ret = -ENOTCONN;
+			goto out;
+		}
+
+		wake_up_process(qca->spi_thread);
+
+		if (!wait_for_completion_timeout(&qca->reset_done, 2 * HZ))
+			ret = -ETIMEDOUT;
+
+out:
+		mutex_unlock(&qca->user_lock);
+
+		return ret;
+	}
+
+	return -EOPNOTSUPP;
+}
+
 static const struct ethtool_ops qcaspi_ethtool_ops = {
 	.get_drvinfo = qcaspi_get_drvinfo,
 	.get_link = ethtool_op_get_link,
@@ -283,6 +321,7 @@ static const struct ethtool_ops qcaspi_ethtool_ops = {
 	.get_ringparam = qcaspi_get_ringparam,
 	.set_ringparam = qcaspi_set_ringparam,
 	.get_link_ksettings = qcaspi_get_link_ksettings,
+	.reset = qcaspi_user_reset,
 };
 
 void qcaspi_set_ethtool_ops(struct net_device *dev)

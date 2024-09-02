@@ -35,9 +35,6 @@
 
 #define MAX_DMA_BURST_LEN 5000
 
-#define SPI_INTR   0
-#define SPI_RESET  1
-
 /*   Modules parameters     */
 #define QCASPI_CLK_SPEED_MIN 1000000
 #define QCASPI_CLK_SPEED_MAX 16000000
@@ -496,7 +493,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			if (qca->sync == QCASPI_SYNC_READY)
 				qca->stats.bad_signature++;
 
-			set_bit(SPI_RESET, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			netdev_dbg(qca->net_dev, "sync: got CPU on, but signature was invalid, restart\n");
 			return;
 		} else {
@@ -514,7 +511,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			}
 		}
 	} else {
-		if (test_and_clear_bit(SPI_RESET, &qca->flags))
+		if (test_and_clear_bit(QCASPI_SPI_RESET, &qca->flags))
 			qca->sync = QCASPI_SYNC_UNKNOWN;
 	}
 
@@ -526,7 +523,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			qcaspi_read_register(qca, SPI_REG_SIGNATURE, &signature);
 
 		if (signature != QCASPI_GOOD_SIGNATURE) {
-			set_bit(SPI_RESET, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			qca->stats.bad_signature++;
 			netdev_info(qca->net_dev, "sync: bad signature, restart\n");
 			/* don't reset right away */
@@ -557,7 +554,7 @@ qcaspi_qca7k_sync(struct qcaspi *qca, int event)
 			   qca->reset_count);
 		if (qca->reset_count >= QCASPI_RESET_TIMEOUT) {
 			/* reset did not seem to take place, try again */
-			set_bit(SPI_RESET, &qca->flags);
+			set_bit(QCASPI_SPI_RESET, &qca->flags);
 			qca->stats.reset_timeout++;
 			netdev_dbg(qca->net_dev, "sync: reset timeout, restarting process.\n");
 		}
@@ -609,7 +606,7 @@ qcaspi_spi_thread(void *data)
 			msleep(QCASPI_QCA7K_REBOOT_TIME_MS);
 		}
 
-		if (test_and_clear_bit(SPI_INTR, &qca->flags)) {
+		if (test_and_clear_bit(QCASPI_SPI_INTR, &qca->flags)) {
 			start_spi_intr_handling(qca, &intr_cause);
 
 			if (intr_cause & SPI_INT_CPU_ON) {
@@ -628,13 +625,14 @@ qcaspi_spi_thread(void *data)
 
 				netif_wake_queue(qca->net_dev);
 				netif_carrier_on(qca->net_dev);
+				complete(&qca->reset_done);
 			}
 
 			if (intr_cause & SPI_INT_RDBUF_ERR) {
 				/* restart sync */
 				netdev_dbg(qca->net_dev, "===> rdbuf error!\n");
 				qca->stats.read_buf_err++;
-				set_bit(SPI_RESET, &qca->flags);
+				set_bit(QCASPI_SPI_RESET, &qca->flags);
 				continue;
 			}
 
@@ -642,7 +640,7 @@ qcaspi_spi_thread(void *data)
 				/* restart sync */
 				netdev_dbg(qca->net_dev, "===> wrbuf error!\n");
 				qca->stats.write_buf_err++;
-				set_bit(SPI_RESET, &qca->flags);
+				set_bit(QCASPI_SPI_RESET, &qca->flags);
 				continue;
 			}
 
@@ -671,7 +669,7 @@ qcaspi_intr_handler(int irq, void *data)
 {
 	struct qcaspi *qca = data;
 
-	set_bit(SPI_INTR, &qca->flags);
+	set_bit(QCASPI_SPI_INTR, &qca->flags);
 	if (qca->spi_thread)
 		wake_up_process(qca->spi_thread);
 
@@ -687,7 +685,7 @@ qcaspi_netdev_open(struct net_device *dev)
 	if (!qca)
 		return -EINVAL;
 
-	set_bit(SPI_INTR, &qca->flags);
+	set_bit(QCASPI_SPI_INTR, &qca->flags);
 	qca->sync = QCASPI_SYNC_UNKNOWN;
 	qcafrm_fsm_init_spi(&qca->frm_handle);
 
@@ -806,7 +804,7 @@ qcaspi_netdev_tx_timeout(struct net_device *dev, unsigned int txqueue)
 		    jiffies, jiffies - dev_trans_start(dev));
 	qca->net_dev->stats.tx_errors++;
 	/* Trigger tx queue flush and QCA7000 reset */
-	set_bit(SPI_RESET, &qca->flags);
+	set_bit(QCASPI_SPI_RESET, &qca->flags);
 
 	if (qca->spi_thread)
 		wake_up_process(qca->spi_thread);
@@ -838,6 +836,9 @@ qcaspi_netdev_init(struct net_device *dev)
 		netdev_info(qca->net_dev, "Failed to allocate RX sk_buff.\n");
 		return -ENOBUFS;
 	}
+
+	mutex_init(&qca->user_lock);
+	init_completion(&qca->reset_done);
 
 	return 0;
 }

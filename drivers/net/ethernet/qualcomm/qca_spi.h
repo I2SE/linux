@@ -41,6 +41,10 @@
 #define QCASPI_EVENT_UPDATE 0
 #define QCASPI_EVENT_CPUON  1
 
+/* flag numbers */
+#define QCASPI_SPI_INTR   0
+#define QCASPI_SPI_RESET  1
+
 struct tx_ring {
 	struct sk_buff *skb[QCASPI_TX_RING_MAX_LEN];
 	u16 head;
@@ -86,6 +90,8 @@ struct qcaspi {
 
 	unsigned long flags;
 	u16 reset_count;
+	struct mutex user_lock;
+	struct completion reset_done;
 
 #ifdef CONFIG_DEBUG_FS
 	struct dentry *device_root;
