@@ -582,7 +582,8 @@ qcaspi_spi_thread(void *data)
 		}
 
 		if (!test_bit(SPI_INTR, &qca->intr) &&
-		    !qca->txr.skb[qca->txr.head])
+		    !qca->txr.skb[qca->txr.head] &&
+		    (qca->sync == QCASPI_SYNC_READY))
 			schedule();
 
 		set_current_state(TASK_RUNNING);
