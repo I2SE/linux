@@ -52,6 +52,9 @@ static const char qcaspi_gstrings_stats[][ETH_GSTRING_LEN] = {
 	"Write verify errors",
 	"Buffer available errors",
 	"Bad signature",
+	"Read",
+	"Write",
+	"Loop",
 };
 
 #ifdef CONFIG_DEBUG_FS

@@ -54,6 +54,7 @@ qcaspi_read_register(struct qcaspi *qca, u16 reg, u16 *result)
 	}
 	spi_message_add_tail(&transfer[1], &msg);
 	ret = spi_sync(qca->spi_dev, &msg);
+	qca->stats.read++;
 
 	if (!ret)
 		ret = msg.status;
@@ -93,6 +94,7 @@ __qcaspi_write_register(struct qcaspi *qca, u16 reg, u16 value)
 	}
 	spi_message_add_tail(&transfer[1], &msg);
 	ret = spi_sync(qca->spi_dev, &msg);
+	qca->stats.write++;
 
 	if (!ret)
 		ret = msg.status;
