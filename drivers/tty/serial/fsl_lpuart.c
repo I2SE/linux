@@ -1830,7 +1830,7 @@ static int lpuart_startup(struct uart_port *port)
 	sport->rxfifo_size = UARTFIFO_DEPTH((temp >> UARTPFIFO_RXSIZE_OFF) &
 					    UARTPFIFO_FIFOSIZE_MASK);
 
-	lpuart_request_dma(sport);
+	// lpuart_request_dma(sport);
 	lpuart_hw_setup(sport);
 
 	return 0;
@@ -1910,7 +1910,7 @@ static int lpuart32_startup(struct uart_port *port)
 		sport->port.fifosize = sport->txfifo_size;
 	}
 
-	lpuart_request_dma(sport);
+	// lpuart_request_dma(sport);
 	lpuart32_hw_setup(sport);
 
 	return 0;
