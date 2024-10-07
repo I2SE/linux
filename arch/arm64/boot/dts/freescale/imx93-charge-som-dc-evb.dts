@@ -93,9 +93,9 @@
 		
 		USER_RED {
 			color = <LED_COLOR_ID_RED>;
-			function = LED_FUNCTION_HEARTBEAT;
+			function = LED_FUNCTION_BOOT;
 			gpios = <&gpio2 24 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "heartbeat";
+			linux,default-trigger = "timer";
 		};
 	};
 
