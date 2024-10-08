@@ -1,0 +1,179 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (C) 2024 PHYTEC Messtechnik GmbH
+ * Author: Felix Siebel <f.siebel@phytec.de>
+ *
+ */
+
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "imx93-phycore-som.dtsi"
+
+/ {
+	compatible = "chargebyte,imx93-charge-som", "phytec,imx93-phycore-som", "fsl,imx93";
+
+	chosen {
+		stdout-path = &lpuart1;
+	};
+
+	spi {
+		compatible = "spi-gpio";
+		#address-cells = <0x1>;
+		#size-cells = <0x0>;
+
+		sck-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+		miso-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+		mosi-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+		cs-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
+		num-chipselects = <1>;
+
+		tpm@0 {
+			compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
+			reg = <0>;
+			spi-max-frequency = <1000000>;
+			interrupt-parent = <&gpio4>;
+			interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
+		};
+	};
+
+};
+
+&lpi2c2 {
+	clock-frequency = <400000>;
+	pinctrl-names = "default", "gpio";
+	pinctrl-0 = <&pinctrl_lpi2c2>;
+	pinctrl-1 = <&pinctrl_lpi2c2_gpio>;
+	scl-gpios = <&gpio1 02 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+	sda-gpios = <&gpio1 03 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	/* Note: MSE102x uses addresses 0xe4 and 0x94 */
+};
+
+&lpi2c3 {
+	pinctrl-names = "default", "gpio";
+	pinctrl-0 = <&pinctrl_lpi2c3>;
+	pinctrl-1 = <&pinctrl_lpi2c3_gpio>;
+	scl-gpios = <&gpio2 29 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+	sda-gpios = <&gpio2 28 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+};
+
+/* Console */
+&lpuart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+};
+
+/* Safety */
+&lpuart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "okay";
+};
+
+&lpspi6 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lpspi6>;
+	num-cs = <1>;
+	cs-gpios = <&gpio2 00 GPIO_ACTIVE_LOW>;
+	status = "okay";
+
+	ethernet@0 {
+		compatible = "vertexcom,mse1021";
+		reg = <0>;
+		interrupt-parent = <&gpio3>;
+		interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+		spi-cpha;
+		spi-cpol;
+		spi-max-frequency = <7142857>;
+	};
+};
+
+/* eMMC */
+&usdhc1 {
+	no-1-8-v;
+};
+
+/* USB */
+&usbphynop1 {
+	vcc-supply = <&buck4>;
+};
+
+&usbphynop2 {
+	vcc-supply = <&buck4>;
+};
+
+&iomuxc {
+
+	pinctrl_lpspi1: lpspi1grp {
+		fsl,pins = <
+			MX93_PAD_CCM_CLKO4__GPIO4_IO29		0x3fe // SPI_TPM_nINT0
+			MX93_PAD_SAI1_TXFS__GPIO1_IO11		0x3fe // SPI_TPM_nCS0
+			MX93_PAD_SAI1_TXC__LPSPI1_SIN 		0x3fe // GPIO1_IO12
+			MX93_PAD_SAI1_TXD0__LPSPI1_SCK		0x3fe // GPIO1_IO13
+			MX93_PAD_SAI1_RXD0__LPSPI1_SOUT		0x3fe // GPIO1_IO14
+		>;
+	};
+	
+	pinctrl_lpspi6: lpspi6grp {
+		fsl,pins = <
+			MX93_PAD_CCM_CLKO1__GPIO3_IO26		0x3fe // SPI_PLC_nINT0
+			MX93_PAD_GPIO_IO00__GPIO2_IO00		0x3fe // SPI_PLC_nCS0
+			MX93_PAD_GPIO_IO01__LPSPI6_SIN		0x3fe
+			MX93_PAD_GPIO_IO02__LPSPI6_SOUT		0x3fe
+			MX93_PAD_GPIO_IO03__LPSPI6_SCK		0x3fe
+		>;
+	};
+
+	pinctrl_lpi2c2: lpi2c2grp {
+		fsl,pins = <
+			MX93_PAD_I2C2_SCL__LPI2C2_SCL		0x40000b9e
+			MX93_PAD_I2C2_SDA__LPI2C2_SDA		0x40000b9e
+		>;
+	};
+
+	pinctrl_lpi2c2_gpio: lpi2c2gpiogrp {
+		fsl,pins = <
+			MX93_PAD_I2C2_SCL__GPIO1_IO02		0x40000b9e
+			MX93_PAD_I2C2_SDA__GPIO1_IO03		0x40000b9e
+		>;
+	};
+
+	pinctrl_lpi2c3_gpio: lpi2c3gpiogrp {
+		fsl,pins = <
+			MX93_PAD_GPIO_IO28__GPIO2_IO28		0x40000b9e
+			MX93_PAD_GPIO_IO29__GPIO2_IO29		0x40000b9e
+		>;
+	};
+
+	pinctrl_uart1: uart1grp {
+		fsl,pins = <
+			MX93_PAD_UART1_RXD__LPUART1_RX		0x31e
+			MX93_PAD_UART1_TXD__LPUART1_TX		0x30e
+		>;
+	};
+	
+	pinctrl_gpio3: gpio3grp {
+		fsl,pins = <
+			MX93_PAD_CCM_CLKO2__GPIO3_IO27		0x3fe // nPLC_RESET_INT
+		>;
+	};
+	
+	pinctrl_gpio4: gpio4grp {
+		fsl,pins = <
+			MX93_PAD_ENET1_TXC__GPIO4_IO07		0x3fe // DL_REQ_INTR_SPI
+			MX93_PAD_ENET1_RD2__GPIO4_IO12 		0x3fe // SAFETY_BOOTMODE_SET
+			MX93_PAD_CCM_CLKO3__GPIO4_IO28		0x3fe // nSAFETY_RESET_INT
+		>;
+	};
+	
+	pinctrl_uart3: uart3grp {
+		fsl,pins = <
+			MX93_PAD_ENET1_RD0__LPUART3_RX		0x31e
+			MX93_PAD_ENET1_TD0__LPUART3_TX 		0x30e
+		>;
+	};
+	
+};
