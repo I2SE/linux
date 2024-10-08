@@ -290,6 +290,7 @@ static int vf610_gpio_probe(struct platform_device *pdev)
 	struct vf610_gpio_port *port;
 	struct gpio_chip *gc;
 	struct gpio_irq_chip *girq;
+	u32 ngpios;
 	int i;
 	int ret;
 	bool dual_base;
@@ -367,8 +368,17 @@ static int vf610_gpio_probe(struct platform_device *pdev)
 	gc = &port->gc;
 	gc->parent = dev;
 	gc->label = dev_name(dev);
-	gc->ngpio = VF610_GPIO_PER_PORT;
 	gc->base = -1;
+
+	ret = device_property_read_u32(dev, "ngpios", &ngpios);
+	if (ret) {
+		gc->ngpio = VF610_GPIO_PER_PORT;
+	} else if (!ngpios || ngpios > VF610_GPIO_PER_PORT) {
+		dev_err(dev, "ngpios %u is out of range (1..32)\n", ngpios);
+		return -EINVAL;
+	} else {
+		gc->ngpio = (u16)ngpios;
+	}
 
 	gc->request = gpiochip_generic_request;
 	gc->free = gpiochip_generic_free;
