@@ -31,6 +31,7 @@ static int imx9_soc_device_register(struct device *dev)
 
 	err = of_property_read_string(of_root, "model", &attr->machine);
 	if (err) {
+		dev_err(dev, "Unable to get model\n");
 		err = -EINVAL;
 		goto attr;
 	}
@@ -46,6 +47,7 @@ static int imx9_soc_device_register(struct device *dev)
 	 */
 	arm_smccc_smc(IMX_SIP_GET_SOC_INFO, 0, 0, 0, 0, 0, 0, 0, &res);
 	if (res.a0 != SMCCC_RET_SUCCESS) {
+		dev_err(dev, "Unable to retrieve SoC info: %d\n", (int) res.a0);
 		err = -EINVAL;
 		goto family;
 	}
@@ -66,6 +68,7 @@ static int imx9_soc_device_register(struct device *dev)
 
 	sdev = soc_device_register(attr);
 	if (IS_ERR(sdev)) {
+		dev_err(dev, "failed to register SoC device: %ld\n", PTR_ERR(sdev));
 		err = -ENODEV;
 		goto soc_id;
 	}
@@ -85,13 +88,7 @@ attr:
 
 static int imx9_init_soc_probe(struct platform_device *pdev)
 {
-        int ret;
-
-	ret = imx9_soc_device_register(&pdev->dev);
-	if (ret)
-		return dev_err_probe(&pdev->dev, ret, "failed to register SoC device\n");
-
-        return ret;
+	return imx9_soc_device_register(&pdev->dev);
 }
 
 static const struct of_device_id imx9_soc_of_match[] = {
