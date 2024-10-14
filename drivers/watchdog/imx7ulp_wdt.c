@@ -40,7 +40,7 @@
 #define UNLOCK		((UNLOCK_SEQ1 << 16) | UNLOCK_SEQ0)
 
 #define DEFAULT_TIMEOUT	60	/* seconds */
-#define MAX_TIMEOUT	128	/* seconds */
+#define MAX_TIMEOUT	500	/* seconds */
 #define WDOG_CLOCK_RATE	1000
 #define WDOG_ULK_WAIT_TIMEOUT	1000
 #define WDOG_RCS_WAIT_TIMEOUT	10000
