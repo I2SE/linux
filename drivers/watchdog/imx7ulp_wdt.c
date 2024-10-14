@@ -48,6 +48,8 @@
 
 #define RETRY_MAX 5
 
+#define TOVAL_MAX	0xFFFF
+
 static bool nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0000);
 MODULE_PARM_DESC(nowayout, "Watchdog cannot be stopped once started (default="
@@ -192,6 +194,9 @@ static int imx7ulp_wdt_set_timeout(struct watchdog_device *wdog,
 	int ret;
 	u32 loop = RETRY_MAX;
 
+	if (toval > TOVAL_MAX)
+		return -EINVAL;
+
 	do {
 		ret = _imx7ulp_wdt_set_timeout(wdt, toval);
 		val = readl(wdt->base + WDOG_TOVAL);
@@ -285,6 +290,9 @@ static int imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt,
 	u32 cs, toval;
 	int ret;
 	u32 loop = RETRY_MAX;
+
+	if (timeout_clks > TOVAL_MAX)
+		return -EINVAL;
 
 	if (wdt->hw->prescaler_enable)
 		val |= WDOG_CS_PRES;
