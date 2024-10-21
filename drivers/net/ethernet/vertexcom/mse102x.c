@@ -51,6 +51,7 @@ struct mse102x_stats {
 	u64 invalid_rts;
 	u64 invalid_sof;
 	u64 tx_timeout;
+	u64 tx_skb_expanded;
 };
 
 static const char mse102x_gstrings_stats[][ETH_GSTRING_LEN] = {
@@ -62,6 +63,7 @@ static const char mse102x_gstrings_stats[][ETH_GSTRING_LEN] = {
 	"Invalid RTS",
 	"Invalid SOF",
 	"TX timeout",
+	"TX SKB expanded",
 };
 
 struct mse102x_net {
@@ -235,6 +237,7 @@ static int mse102x_tx_frame_spi(struct mse102x_net *mse, struct sk_buff **txp,
 		if (!tskb)
 			return -ENOMEM;
 
+		mse->stats.tx_skb_expanded++;
 		dev_kfree_skb(*txp);
 		*txp = tskb;
 	}
