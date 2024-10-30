@@ -446,7 +446,8 @@ static void mse102x_tx_work(struct work_struct *work)
 		if (ret) {
 			mse->ndev->stats.tx_dropped++;
 		} else {
-			mse->ndev->stats.tx_bytes += txb->len;
+			mse->ndev->stats.tx_bytes += max_t(unsigned, txb->len,
+							   ETH_ZLEN);
 			mse->ndev->stats.tx_packets++;
 		}
 
