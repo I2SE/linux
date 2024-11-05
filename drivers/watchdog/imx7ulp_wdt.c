@@ -39,8 +39,8 @@
 #define UNLOCK_SEQ1	0xD928
 #define UNLOCK		((UNLOCK_SEQ1 << 16) | UNLOCK_SEQ0)
 
-#define DEFAULT_TIMEOUT	60
-#define MAX_TIMEOUT	128
+#define DEFAULT_TIMEOUT	60	/* seconds */
+#define MAX_TIMEOUT	128	/* seconds */
 #define WDOG_CLOCK_RATE	1000
 #define WDOG_ULK_WAIT_TIMEOUT	1000
 #define WDOG_RCS_WAIT_TIMEOUT	10000
@@ -240,7 +240,8 @@ static const struct watchdog_info imx7ulp_wdt_info = {
 		    WDIOF_MAGICCLOSE,
 };
 
-static int _imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeout, unsigned int cs)
+static int _imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt,
+			     unsigned int timeout_ticks, unsigned int cs)
 {
 	u32 val;
 	int ret;
@@ -263,7 +264,7 @@ static int _imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeou
 		goto init_out;
 
 	/* set an initial timeout value in TOVAL */
-	writel(timeout, wdt->base + WDOG_TOVAL);
+	writel(timeout_ticks, wdt->base + WDOG_TOVAL);
 	writel(cs, wdt->base + WDOG_CS);
 	local_irq_enable();
 	ret = imx7ulp_wdt_wait_rcs(wdt);
@@ -275,7 +276,8 @@ init_out:
 	return ret;
 }
 
-static int imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeout)
+static int imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt,
+			    unsigned int timeout_ticks)
 {
 	/* enable 32bit command sequence and reconfigure */
 	u32 val = WDOG_CS_CMD32EN | WDOG_CS_CLK | WDOG_CS_UPDATE |
@@ -291,11 +293,11 @@ static int imx7ulp_wdt_init(struct imx7ulp_wdt_device *wdt, unsigned int timeout
 		val |= WDOG_CS_INT_EN;
 
 	do {
-		ret = _imx7ulp_wdt_init(wdt, timeout, val);
+		ret = _imx7ulp_wdt_init(wdt, timeout_ticks, val);
 		toval = readl(wdt->base + WDOG_TOVAL);
 		cs = readl(wdt->base + WDOG_CS);
 		cs &= ~(WDOG_CS_FLG | WDOG_CS_ULK | WDOG_CS_RCS);
-	} while (--loop > 0 && (cs != val || toval != timeout || ret));
+	} while (--loop > 0 && (cs != val || toval != timeout_ticks || ret));
 
 	if (loop == 0)
 		return -EBUSY;
