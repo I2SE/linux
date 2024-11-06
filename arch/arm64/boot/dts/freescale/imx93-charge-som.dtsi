@@ -108,6 +108,7 @@
 &iomuxc {
 
 	pinctrl_lpspi1: lpspi1grp {
+		/* drive strength: X6, slew rate: fast, pull up */
 		fsl,pins = <
 			MX93_PAD_CCM_CLKO4__GPIO4_IO29		0x3fe // SPI_TPM_nINT0
 			MX93_PAD_SAI1_TXFS__GPIO1_IO11		0x3fe // SPI_TPM_nCS0
@@ -118,6 +119,7 @@
 	};
 	
 	pinctrl_lpspi6: lpspi6grp {
+		/* drive strength: X6, slew rate: fast, pull up */
 		fsl,pins = <
 			MX93_PAD_CCM_CLKO1__GPIO3_IO26		0x3fe // SPI_PLC_nINT0
 			MX93_PAD_GPIO_IO00__GPIO2_IO00		0x3fe // SPI_PLC_nCS0
@@ -128,6 +130,7 @@
 	};
 
 	pinctrl_lpi2c2: lpi2c2grp {
+		/* sion, drive strength: X4, slew rate: fast, pull up, open drain */
 		fsl,pins = <
 			MX93_PAD_I2C2_SCL__LPI2C2_SCL		0x40000b9e
 			MX93_PAD_I2C2_SDA__LPI2C2_SDA		0x40000b9e
@@ -150,8 +153,8 @@
 
 	pinctrl_uart1: uart1grp {
 		fsl,pins = <
-			MX93_PAD_UART1_RXD__LPUART1_RX		0x31e
-			MX93_PAD_UART1_TXD__LPUART1_TX		0x30e
+			MX93_PAD_UART1_RXD__LPUART1_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
+			MX93_PAD_UART1_TXD__LPUART1_TX		0x30e // drive strength: X3, slew rate: slightly fast, pull up
 		>;
 	};
 	
@@ -171,8 +174,8 @@
 	
 	pinctrl_uart3: uart3grp {
 		fsl,pins = <
-			MX93_PAD_ENET1_RD0__LPUART3_RX		0x31e
-			MX93_PAD_ENET1_TD0__LPUART3_TX 		0x30e
+			MX93_PAD_ENET1_RD0__LPUART3_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
+			MX93_PAD_ENET1_TD0__LPUART3_TX 		0x30e // drive strength: X3, slew rate: slightly fast, pull up
 		>;
 	};
 	

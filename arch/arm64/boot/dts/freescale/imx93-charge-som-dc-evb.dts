@@ -299,6 +299,7 @@
 	};
 	
 	pinctrl_lpi2c1: lpi2c1grp {
+		/* sion, drive strength: X4, slew rate: fast, pull up, open drain */
 		fsl,pins = <
 			MX93_PAD_I2C1_SCL__LPI2C1_SCL		0x40000b9e
 			MX93_PAD_I2C1_SDA__LPI2C1_SDA		0x40000b9e
@@ -372,17 +373,17 @@
 	
 	pinctrl_uart4: uart4grp {
 		fsl,pins = <
-			MX93_PAD_GPIO_IO15__LPUART4_RX		0x31e
-			MX93_PAD_GPIO_IO14__LPUART4_TX		0x30e
-			MX93_PAD_GPIO_IO17__LPUART4_RTS_B	0x31e
+			MX93_PAD_GPIO_IO15__LPUART4_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
+			MX93_PAD_GPIO_IO14__LPUART4_TX		0x30e // drive strength: X3, slew rate: slightly fast, pull up
+			MX93_PAD_GPIO_IO17__LPUART4_RTS_B	0x31e // drive strength: X4, slew rate: slightly fast, pull up
 		>;
 	};
 	
 	pinctrl_uart5: uart5grp {
 		fsl,pins = <
-			MX93_PAD_DAP_TDI__LPUART5_RX		0x31e
-			MX93_PAD_DAP_TDO_TRACESWO__LPUART5_TX	0x30e
-			MX93_PAD_DAP_TMS_SWDIO__LPUART5_RTS_B	0x31e
+			MX93_PAD_DAP_TDI__LPUART5_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
+			MX93_PAD_DAP_TDO_TRACESWO__LPUART5_TX	0x30e // drive strength: X3, slew rate: slightly fast, pull up
+			MX93_PAD_DAP_TMS_SWDIO__LPUART5_RTS_B	0x31e // drive strength: X4, slew rate: slightly fast, pull up
 		>;
 	};
 
