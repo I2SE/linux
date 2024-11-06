@@ -48,6 +48,8 @@
 
 #define RETRY_MAX 5
 
+#define TOVAL_MAX	0xFFFF
+
 static bool nowayout = WATCHDOG_NOWAYOUT;
 module_param(nowayout, bool, 0000);
 MODULE_PARM_DESC(nowayout, "Watchdog cannot be stopped once started (default="
@@ -187,10 +189,15 @@ static int imx7ulp_wdt_set_timeout(struct watchdog_device *wdog,
 				   unsigned int timeout)
 {
 	struct imx7ulp_wdt_device *wdt = watchdog_get_drvdata(wdog);
-	u32 toval = wdt->hw->wdog_clock_rate * timeout;
+	u32 toval;
 	u32 val;
 	int ret;
 	u32 loop = RETRY_MAX;
+
+	if (timeout > TOVAL_MAX / wdt->hw->wdog_clock_rate)
+		toval = TOVAL_MAX;
+	else
+		toval = wdt->hw->wdog_clock_rate * timeout;
 
 	do {
 		ret = _imx7ulp_wdt_set_timeout(wdt, toval);
@@ -310,6 +317,7 @@ static int imx7ulp_wdt_probe(struct platform_device *pdev)
 	struct imx7ulp_wdt_device *imx7ulp_wdt;
 	struct device *dev = &pdev->dev;
 	struct watchdog_device *wdog;
+	u32 clock_rate;
 	int ret;
 
 	imx7ulp_wdt = devm_kzalloc(dev, sizeof(*imx7ulp_wdt), GFP_KERNEL);
@@ -348,20 +356,22 @@ static int imx7ulp_wdt_probe(struct platform_device *pdev)
 		dev_info(dev, "imx7ulp wdt probe\n");
 	}
 
+	clock_rate = imx7ulp_wdt->hw->wdog_clock_rate;
+
 	wdog = &imx7ulp_wdt->wdd;
 	wdog->info = &imx7ulp_wdt_info;
 	wdog->ops = &imx7ulp_wdt_ops;
 	wdog->min_timeout = 1;
-	wdog->max_timeout = MAX_TIMEOUT;
 	wdog->parent = dev;
 	wdog->timeout = DEFAULT_TIMEOUT;
+	wdog->max_hw_heartbeat_ms = TOVAL_MAX * 1000 / clock_rate;
 
 	watchdog_init_timeout(wdog, 0, dev);
 	watchdog_stop_on_reboot(wdog);
 	watchdog_stop_on_unregister(wdog);
 	watchdog_set_drvdata(wdog, imx7ulp_wdt);
 
-	ret = imx7ulp_wdt_init(imx7ulp_wdt, wdog->timeout * imx7ulp_wdt->hw->wdog_clock_rate);
+	ret = imx7ulp_wdt_init(imx7ulp_wdt, wdog->timeout * clock_rate);
 	if (ret)
 		return ret;
 
