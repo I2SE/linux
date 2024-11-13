@@ -57,6 +57,26 @@
 	pinctrl-1 = <&pinctrl_lpi2c3_gpio>;
 	scl-gpios = <&gpio2 29 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
 	sda-gpios = <&gpio2 28 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+
+	eeprom@50 {
+		nvmem-layout {
+			compatible = "fixed-layout";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			eth1_host_mac_address: base-mac-address@100 {
+				compatible = "mac-base";
+				reg = <0x100 0x6>;
+				#nvmem-cell-cells = <1>;
+			};
+
+			eth1_fw_mac_address: base-mac-address@108 {
+				compatible = "mac-base";
+				reg = <0x108 0x6>;
+				#nvmem-cell-cells = <1>;
+			};
+		};
+	};
 };
 
 /* Console */
@@ -88,6 +108,9 @@
 		spi-cpha;
 		spi-cpol;
 		spi-max-frequency = <7142857>;
+
+		nvmem-cells = <&eth1_host_mac_address 0>;
+		nvmem-cell-names = "mac-address";
 	};
 };
 
