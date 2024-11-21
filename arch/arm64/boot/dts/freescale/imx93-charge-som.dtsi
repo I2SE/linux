@@ -153,10 +153,10 @@
 	};
 
 	pinctrl_lpi2c2: lpi2c2grp {
-		/* sion, drive strength: X4, slew rate: fast, pull up, open drain */
+		/* sion, drive strength: X2, slew rate: fast, pull up, open drain */
 		fsl,pins = <
-			MX93_PAD_I2C2_SCL__LPI2C2_SCL		0x40000b9e
-			MX93_PAD_I2C2_SDA__LPI2C2_SDA		0x40000b9e
+			MX93_PAD_I2C2_SCL__LPI2C2_SCL		0x40000b86
+			MX93_PAD_I2C2_SDA__LPI2C2_SDA		0x40000b86
 		>;
 	};
 
