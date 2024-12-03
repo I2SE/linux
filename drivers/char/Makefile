@@ -11,6 +11,7 @@ obj-$(CONFIG_VIRTIO_CONSOLE)	+= virtio_console.o
 obj-$(CONFIG_MSPEC)		+= mspec.o
 obj-$(CONFIG_UV_MMTIMER)	+= uv_mmtimer.o
 obj-$(CONFIG_IBM_BSR)		+= bsr.o
+obj-$(CONFIG_MX28_OTP)		+= mx28_otp.o
 
 obj-$(CONFIG_PRINTER)		+= lp.o
 
