@@ -186,18 +186,18 @@
 
 &gpio2 {
 	// 30 pins (0..29)
-	gpio-line-names = "SPI_PLC_nCS0", "", "", "", "", "", "", "", "", "", \
+	gpio-line-names = "SPI_PLC_nCS0", "", "", "", "", "", "", "SPI_PLC_nINT0", "", "", \
 			  "", "", "", "", "", "", "", "", "BACKLIGHT_PWM", "", \
 			  "", "X11_I2C5_SDA", "X11_I2C5_SCL", "", "USER_RED", "", "", "", "", "";
 };
 
 &gpio3 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_gpio3>, <&pinctrl_hog3>;
+	pinctrl-0 = <&pinctrl_hog3>, <&pinctrl_x11>;
 	// 32 pins (0..31)
 	gpio-line-names = "SD2_nCD", "", "", "", "", "", "", "SD2_nRESET", "", "", \
 			  "", "", "", "", "", "", "", "", "", "", \
-			  "", "", "", "", "", "", "SPI_PLC_nINT0", "nPLC_RESET_INT", "", "", \
+			  "", "", "", "", "", "", "X11_GPIO3_26", "X11_GPIO3_27", "", "", \
 			  "PCIe_NW_DISABLE", "";
 
 	PCIe_NW_DISABLE {
@@ -209,9 +209,9 @@
 
 &gpio4 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_gpio4>, <&pinctrl_hog4>, <&pinctrl_ws2812b>, <&pinctrl_x11>;
+	pinctrl-0 = <&pinctrl_gpio4>, <&pinctrl_hog4>, <&pinctrl_ws2812b>;
 	// 30 pins (0..29)
-	gpio-line-names = "USB1_ID", "", "RTC_nINT", "USB2_OC", "USB1_OC", "", "PCIe_N_RESET", "DL_REQ_INTR_SPI", "USB2_PWREN", "X11_GPIO4_9", \
+	gpio-line-names = "USB1_ID", "", "RTC_nINT", "USB2_OC", "USB1_OC", "", "PCIe_N_RESET", "DL_REQ_INTR_SPI", "USB2_PWREN", "nPLC_RESET_INT", \
 			  "", "WS2812B", "SAFETY_BOOTMODE_SET", "USB1_PWREN_GPIO", "", "DISPLAY_EN", "", "", "", "", \
 			  "", "SOM_EEPROM_WP", "", "", "", "", "CAN1_EN", "PMIC_IRQ_B", "nSAFETY_RESET_INT", "SPI_TPM_nINT0";
 
@@ -395,7 +395,8 @@
 
 	pinctrl_x11: x11grp {
 		fsl,pins = <
-			MX93_PAD_ENET1_RXC__GPIO4_IO09		0x31e // X11_GPIO4_9
+			MX93_PAD_CCM_CLKO1__GPIO3_IO26		0x31e // X11_GPIO3_26
+			MX93_PAD_CCM_CLKO2__GPIO3_IO27		0x31e // X11_GPIO3_27
 		>;
 	};
 

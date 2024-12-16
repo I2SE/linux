@@ -14,27 +14,6 @@
 	chosen {
 		stdout-path = &lpuart1;
 	};
-
-	spi {
-		compatible = "spi-gpio";
-		#address-cells = <0x1>;
-		#size-cells = <0x0>;
-
-		sck-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
-		miso-gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
-		mosi-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
-		cs-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
-		num-chipselects = <1>;
-
-		tpm@0 {
-			compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
-			reg = <0>;
-			spi-max-frequency = <1000000>;
-			interrupt-parent = <&gpio4>;
-			interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
-		};
-	};
-
 };
 
 &lpi2c2 {
@@ -93,6 +72,22 @@
 	status = "okay";
 };
 
+&lpspi1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_lpspi1>;
+	num-cs = <1>;
+	cs-gpios = <&gpio1 11 GPIO_ACTIVE_LOW>;
+	status = "okay";
+	/* TPM */
+	tpm@0 {
+		compatible = "infineon,slb9670", "tcg,tpm_tis-spi";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <29 IRQ_TYPE_LEVEL_LOW>;
+	};
+};
+
 &lpspi6 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_lpspi6>;
@@ -103,8 +98,8 @@
 	ethernet@0 {
 		compatible = "vertexcom,mse1021";
 		reg = <0>;
-		interrupt-parent = <&gpio3>;
-		interrupts = <26 IRQ_TYPE_EDGE_RISING>;
+		interrupt-parent = <&gpio2>;
+		interrupts = <7 IRQ_TYPE_EDGE_RISING>;
 		spi-cpha;
 		spi-cpol;
 		spi-max-frequency = <7142857>;
@@ -135,16 +130,16 @@
 		fsl,pins = <
 			MX93_PAD_CCM_CLKO4__GPIO4_IO29		0x186 // SPI_TPM_nINT0
 			MX93_PAD_SAI1_TXFS__GPIO1_IO11		0x186 // SPI_TPM_nCS0
-			MX93_PAD_SAI1_TXC__LPSPI1_SIN 		0x186 // GPIO1_IO12
-			MX93_PAD_SAI1_TXD0__LPSPI1_SCK		0x186 // GPIO1_IO13
-			MX93_PAD_SAI1_RXD0__LPSPI1_SOUT		0x186 // GPIO1_IO14
+			MX93_PAD_SAI1_TXC__LPSPI1_SIN 		0x186
+			MX93_PAD_SAI1_TXD0__LPSPI1_SCK		0x186
+			MX93_PAD_SAI1_RXD0__LPSPI1_SOUT		0x186
 		>;
 	};
 	
 	pinctrl_lpspi6: lpspi6grp {
 		/* drive strength: X2, slew rate: fast, no pull */
 		fsl,pins = <
-			MX93_PAD_CCM_CLKO1__GPIO3_IO26		0x186 // SPI_PLC_nINT0
+			MX93_PAD_GPIO_IO07__GPIO2_IO07		0x186 // SPI_PLC_nINT0
 			MX93_PAD_GPIO_IO00__GPIO2_IO00		0x186 // SPI_PLC_nCS0
 			MX93_PAD_GPIO_IO01__LPSPI6_SIN		0x186
 			MX93_PAD_GPIO_IO02__LPSPI6_SOUT		0x186
@@ -178,12 +173,6 @@
 		fsl,pins = <
 			MX93_PAD_UART1_RXD__LPUART1_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
 			MX93_PAD_UART1_TXD__LPUART1_TX		0x30e // drive strength: X3, slew rate: slightly fast, pull up
-		>;
-	};
-	
-	pinctrl_gpio3: gpio3grp {
-		fsl,pins = <
-			MX93_PAD_CCM_CLKO2__GPIO3_IO27		0x3fe // nPLC_RESET_INT
 		>;
 	};
 	
