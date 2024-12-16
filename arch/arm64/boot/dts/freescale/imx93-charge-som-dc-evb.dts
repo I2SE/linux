@@ -12,8 +12,8 @@
 #include "imx93-charge-som.dtsi"
 
 / {
-	model = "chargebyte Charge SOM DC-ONE";
-	compatible = "chargebyte,imx93-charge-som-dc-evb", "chargebyte,imx93-charge-som", 
+	model = "chargebyte Charge SOM Evaluation Kit";
+	compatible = "chargebyte,imx93-charge-som-dc-evb", "chargebyte,imx93-charge-som",
 		     "phytec,imx93-phycore-som", "fsl,imx93";
 	
 	aliases {
