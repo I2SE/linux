@@ -308,30 +308,17 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 	__be16 rx = 0;
 	u16 cmd_resp;
 	u8 *rxpkt;
-	int ret;
 
 	mse102x_tx_cmd_spi(mse, CMD_CTR);
-	ret = mse102x_rx_cmd_spi(mse, (u8 *)&rx);
+	if (mse102x_rx_cmd_spi(mse, (u8 *)&rx))
+		return;
+
 	cmd_resp = be16_to_cpu(rx);
-
-	if (ret || ((cmd_resp & CMD_MASK) != CMD_RTS)) {
-		usleep_range(50, 100);
-
-		mse102x_tx_cmd_spi(mse, CMD_CTR);
-		ret = mse102x_rx_cmd_spi(mse, (u8 *)&rx);
-		if (ret)
-			return;
-
-		cmd_resp = be16_to_cpu(rx);
-		if ((cmd_resp & CMD_MASK) != CMD_RTS) {
-			net_dbg_ratelimited("%s: Unexpected response (0x%04x)\n",
-					    __func__, cmd_resp);
-			mse->stats.invalid_rts++;
-			return;
-		}
-
-		net_dbg_ratelimited("%s: Unexpected response to first CMD\n",
-				    __func__);
+	if ((cmd_resp & CMD_MASK) != CMD_RTS) {
+		net_dbg_ratelimited("%s: Unexpected response (0x%04x)\n",
+				    __func__, cmd_resp);
+		mse->stats.invalid_rts++;
+		return;
 	}
 
 	rxlen = cmd_resp & LEN_MASK;
