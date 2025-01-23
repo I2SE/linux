@@ -44,7 +44,6 @@
 
 struct mse102x_stats {
 	u64 xfer_err;
-	u64 invalid_cmd;
 	u64 invalid_ctr;
 	u64 invalid_dft;
 	u64 invalid_len;
@@ -55,7 +54,6 @@ struct mse102x_stats {
 
 static const char mse102x_gstrings_stats[][ETH_GSTRING_LEN] = {
 	"SPI transfer errors",
-	"Invalid command",
 	"Invalid CTR",
 	"Invalid DFT",
 	"Invalid frame length",
@@ -194,7 +192,6 @@ static int mse102x_rx_cmd_spi(struct mse102x_net *mse, u8 *rxb)
 	} else if (*cmd != cpu_to_be16(DET_CMD)) {
 		net_dbg_ratelimited("%s: Unexpected response (0x%04x)\n",
 				    __func__, *cmd);
-		mse->stats.invalid_cmd++;
 		ret = -EIO;
 	} else {
 		memcpy(rxb, trx + 2, 2);
