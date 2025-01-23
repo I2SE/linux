@@ -512,7 +512,7 @@ static int mse102x_net_open(struct net_device *ndev)
 	int ret;
 
 	if (irqd_get_trigger_type(irq_get_irq_data(ndev->irq)) == IRQ_TYPE_NONE)
-		flags |= IRQ_TYPE_EDGE_RISING;
+		flags |= IRQ_TYPE_LEVEL_HIGH;
 
 	ret = request_threaded_irq(ndev->irq, NULL, mse102x_irq, flags,
 				   ndev->name, mse);
