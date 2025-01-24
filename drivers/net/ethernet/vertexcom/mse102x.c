@@ -499,8 +499,17 @@ static int mse102x_net_open(struct net_device *ndev)
 	unsigned long flags = IRQF_ONESHOT;
 	int ret;
 
-	if (irqd_get_trigger_type(irq_get_irq_data(ndev->irq)) == IRQ_TYPE_NONE)
+	switch (irqd_get_trigger_type(irq_get_irq_data(ndev->irq))) {
+	case IRQ_TYPE_LEVEL_HIGH:
+	case IRQ_TYPE_LEVEL_LOW:
+		break;
+	case IRQ_TYPE_NONE:
 		flags |= IRQ_TYPE_LEVEL_HIGH;
+		break;
+	default:
+		netdev_warn_once(ndev, "Only IRQ type level recommended, please update your DT.\n");
+		break;
+	}
 
 	ret = request_threaded_irq(ndev->irq, NULL, mse102x_irq, flags,
 				   ndev->name, mse);
