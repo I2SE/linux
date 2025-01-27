@@ -98,8 +98,7 @@
 	ethernet@0 {
 		compatible = "vertexcom,mse1021";
 		reg = <0>;
-		interrupt-parent = <&gpio2>;
-		interrupts = <7 IRQ_TYPE_EDGE_RISING>;
+		int-gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
 		spi-cpha;
 		spi-cpol;
 		spi-max-frequency = <7142857>;
