@@ -1240,7 +1240,7 @@ static struct dma_chan *fsl_edma3_xlate(struct of_phandle_args *dma_spec,
 		if (srcid_used) {
 			dev_err(&fsl_chan->pdev->dev, "The srcid %d has been used. Please check srcid config!\n",
 				dma_spec->args[0]);
-			return NULL;
+			goto err;
 		}
 
 		if (fsl_edma3->drvdata->dmamuxs == 0 &&
@@ -1266,6 +1266,7 @@ static struct dma_chan *fsl_edma3_xlate(struct of_phandle_args *dma_spec,
 			return chan;
 		}
 	}
+err:
 	mutex_unlock(&fsl_edma3->fsl_edma3_mutex);
 	return NULL;
 }
