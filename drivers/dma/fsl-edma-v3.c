@@ -329,7 +329,7 @@ static bool is_srcid_in_use(struct fsl_edma3_engine *fsl_edma3, u32 srcid)
 		fsl_chan = &fsl_edma3->chans[i];
 
 		if (fsl_chan->srcid && srcid == fsl_chan->srcid) {
-			dev_err(&fsl_chan->pdev->dev, "The srcid is using! Can't use repeatly.");
+			dev_err(&fsl_chan->pdev->dev, "The srcid is using! Can't use repeatly.\n");
 			return true;
 		}
 	}
@@ -1238,7 +1238,7 @@ static struct dma_chan *fsl_edma3_xlate(struct of_phandle_args *dma_spec,
 		fsl_chan = to_fsl_edma3_chan(chan);
 		srcid_used = is_srcid_in_use(fsl_edma3, dma_spec->args[0]);
 		if (srcid_used) {
-			dev_err(&fsl_chan->pdev->dev, "The srcid %d has been used. Please check srcid config!",
+			dev_err(&fsl_chan->pdev->dev, "The srcid %d has been used. Please check srcid config!\n",
 				dma_spec->args[0]);
 			return NULL;
 		}
