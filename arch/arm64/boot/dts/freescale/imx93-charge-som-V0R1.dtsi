@@ -87,9 +87,9 @@
 };
 
 /* Safety */
-&lpuart3 {
+&lpuart2 {
 	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_uart3>;
+	pinctrl-0 = <&pinctrl_uart2>;
 	status = "okay";
 };
 
@@ -195,10 +195,10 @@
 		>;
 	};
 	
-	pinctrl_uart3: uart3grp {
+	pinctrl_uart2: uart2grp {
 		fsl,pins = <
-			MX93_PAD_ENET1_RD0__LPUART3_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
-			MX93_PAD_ENET1_TD0__LPUART3_TX 		0x30e // drive strength: X3, slew rate: slightly fast, pull up
+			MX93_PAD_UART2_RXD__LPUART2_RX		0x31e // drive strength: X4, slew rate: slightly fast, pull up
+			MX93_PAD_UART2_TXD__LPUART2_TX 		0x30e // drive strength: X3, slew rate: slightly fast, pull up
 		>;
 	};
 	
