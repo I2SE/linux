@@ -12,7 +12,7 @@
 #include "imx93-charge-som-V0R1.dtsi"
 
 / {
-	model = "chargebyte Charge SOM Evaluation Kit";
+	model = "chargebyte Charge SOM Evaluation Kit V0R1";
 	compatible = "chargebyte,imx93-charge-som-dc-evb", "chargebyte,imx93-charge-som",
 		     "phytec,imx93-phycore-som", "fsl,imx93";
 	
