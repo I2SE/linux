@@ -321,7 +321,7 @@ static void mse102x_rx_pkt_spi(struct mse102x_net *mse)
 	cmd_resp = be16_to_cpu(rx);
 	if ((cmd_resp & CMD_MASK) == CMD_RTS) {
 		rxlen = cmd_resp & LEN_MASK;
-		if (rxlen < ETH_ZLEN) {
+		if (rxlen < ETH_ZLEN || rxlen > VLAN_ETH_FRAME_LEN) {
 			net_dbg_ratelimited("%s: Invalid frame length: %d\n",
 					    __func__, rxlen);
 			mse->stats.invalid_len++;
